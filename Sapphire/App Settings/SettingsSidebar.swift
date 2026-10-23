@@ -64,7 +64,7 @@ struct SettingsSidebarView: View {
             ClearableSearchField(placeholder: "Search settings", text: $searchText)
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
-            .background(Color.white.opacity(0.06))
+            .background(Color.primary.opacity(0.06))
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             .padding(.horizontal, 12)
             .padding(.bottom, 12)
@@ -138,7 +138,7 @@ struct SettingsSidebarView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                     Text("Quit")
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.primary)
                 }
                 .padding(.vertical, 3)
                 .padding(.leading, 12)
@@ -182,22 +182,22 @@ struct SidebarAccountCardView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(subscriptionManager.userDisplayName)
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.primary)
                         .lineLimit(1)
                     Text(subscriptionManager.tierLabel)
                         .font(.system(size: 11))
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundStyle(.secondary)
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.white.opacity(0.3))
+                    .foregroundStyle(.tertiary)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
-            .background(isSelected ? Color.white.opacity(0.06) : Color.clear)
+            .background(isSelected ? Color.primary.opacity(0.06) : Color.clear)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -221,7 +221,7 @@ fileprivate struct SidebarRowView: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: section.systemImage).font(.system(size: 11, weight: .bold)).foregroundStyle(.white).frame(width: 22, height: 22).background(LinearGradient(colors: section.iconGradientColors, startPoint: .topLeading, endPoint: .bottomTrailing).opacity(0.8)).clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-            Text(section.label).font(.system(size: 13, weight: .medium)).foregroundStyle(.white)
+            Text(section.label).font(.system(size: 13, weight: .medium)).foregroundStyle(.primary)
             if section.isBeta {
                 Text("BETA")
                     .font(.system(size: 8, weight: .bold))

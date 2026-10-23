@@ -94,7 +94,7 @@ struct PlaneEditorView: View {
                     }
                 }
                 .padding()
-                .background(Color.black.opacity(0.15))
+                .background(Color(nsColor: .controlBackgroundColor))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             } else {
                 Text("Select a valid layout to assign apps.")

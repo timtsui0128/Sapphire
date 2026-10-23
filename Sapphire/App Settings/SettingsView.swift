@@ -45,7 +45,7 @@ struct SettingsView: View {
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: NotchConfiguration.settingsWindowCornerRadius, style: .continuous))
         .ignoresSafeArea(.container, edges: .top)
-        .preferredColorScheme(.dark)
+        .appAppearance()
         .onReceive(NotificationCenter.default.publisher(for: .sapphireOpenAccountPane)) { _ in
             withAnimation(.easeInOut(duration: 0.15)) {
                 showAccountPane = true

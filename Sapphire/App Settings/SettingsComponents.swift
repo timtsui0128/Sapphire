@@ -22,7 +22,7 @@ struct InfoContainer: View {
 
             Text(text)
                 .font(.system(size: 13))
-                .foregroundStyle(.white.opacity(0.8))
+                .foregroundStyle(.primary)
                 .lineSpacing(4)
         }
         .padding()
@@ -80,7 +80,7 @@ struct ReorderHandle: View {
     var body: some View {
         Image(systemName: "line.3.horizontal")
             .font(.system(size: 16, weight: .medium))
-            .foregroundStyle(.white.opacity(0.6))
+            .foregroundStyle(.secondary)
             .padding(.leading, 8)
     }
 }
@@ -144,7 +144,7 @@ struct IconToggleRow: View {
 
             Text(title)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
 
             Spacer()
 
@@ -212,7 +212,7 @@ struct WidgetRowView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(widgetType.displayName)
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.primary)
                     if isAtCapacity {
                         Text("Not enough notch space on this display.")
                             .font(.caption2)
@@ -413,7 +413,7 @@ struct SystemAppRowView: View {
 
             Text(app.name)
                 .font(.system(size: 13))
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
 
             Spacer()
 
@@ -490,7 +490,7 @@ struct AppTogglesListView: View {
             if showSearch {
                 ClearableSearchField(placeholder: "Search installed apps", text: $query)
                 .padding(10)
-                .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 .padding(.horizontal)
             }
 
@@ -581,7 +581,7 @@ struct ReorderableVStack<Item: Identifiable & Equatable, Content: View>: View {
 
                 if index != items.count - 1 {
                     Rectangle()
-                        .fill(Color.white.opacity(0.2))
+                        .fill(Color(nsColor: .separatorColor))
                         .frame(height: 1)
                 }
             }
@@ -810,7 +810,7 @@ struct DeferredValueEditor<Content: View>: View {
 struct SettingsContainerModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .roundedCard(fill: Color.black.opacity(0.15), cornerRadius: 24, stroke: Color.white.opacity(0.1))
+            .roundedCard(fill: Color.primary.opacity(0.04), cornerRadius: 24, stroke: Color.primary.opacity(0.1))
     }
 }
 
