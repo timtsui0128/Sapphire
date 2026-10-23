@@ -112,6 +112,7 @@ final class FocusSessionShortcutMonitor {
     }
 
     private func handleHotKey() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         guard SettingsModel.shared.settings.isShortcutEnabled(ShortcutIdentifier.focusStart) else { return }
         let manager = FocusSessionManager.shared
         if manager.isSessionActive {

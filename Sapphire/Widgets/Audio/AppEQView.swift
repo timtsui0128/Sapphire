@@ -188,7 +188,7 @@ fileprivate struct ModernGlassSlider: View {
             .padding(.horizontal, 16)
 
             ZStack(alignment: .leading) {
-                Capsule().fill(Color.black.opacity(0.15))
+                Capsule().fill(Color.primary.opacity(0.06))
 
                 textView.foregroundColor(.primary.opacity(0.6))
 
@@ -204,7 +204,7 @@ fileprivate struct ModernGlassSlider: View {
                 )
             }
             .clipShape(Capsule())
-            .overlay(Capsule().stroke(Color.white.opacity(0.1), lineWidth: 1))
+            .overlay(Capsule().stroke(Color.primary.opacity(0.1), lineWidth: 1))
             .contentShape(Capsule())
             .gesture(
                 DragGesture(minimumDistance: 0)

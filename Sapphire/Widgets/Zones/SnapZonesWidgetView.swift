@@ -285,7 +285,7 @@ fileprivate struct SnapLayoutItemView: View {
         VStack(spacing: 6) {
             ZStack {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(Color.white.opacity(0.05))
+                    .fill(Color.primary.opacity(0.05))
                     .shadow(color: .black.opacity(0.2), radius: 3, y: 1)
 
                 ForEach(layout.zones) { zone in
@@ -317,7 +317,7 @@ fileprivate struct SnapZoneItemView: View {
 
     var body: some View {
         RoundedRectangle(cornerRadius: 4, style: .continuous)
-            .fill(isActive ? Color.accentColor.opacity(0.7) : Color.white.opacity(0.1))
+            .fill(isActive ? Color.accentColor.opacity(0.7) : Color.primary.opacity(0.1))
             .overlay(
                 RoundedRectangle(cornerRadius: 4, style: .continuous)
                     .stroke(isActive ? Color.white.opacity(0.8) : Color.clear, lineWidth: 1.5)

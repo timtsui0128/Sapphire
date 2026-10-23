@@ -1019,14 +1019,14 @@ struct Settings: Codable, Equatable {
 
     var useCustomNotchConfiguration: Bool = false
     var customNotchConfiguration: CustomizableNotchConfiguration = .init()
-    var lockScreenShowInfoWidget: Bool = true
+    var lockScreenShowInfoWidget: Bool = false
     var lockScreenWidgets: [LockScreenWidgetType] = [.weather, .bluetooth]
     var lockScreenHideInactiveInfoWidgets: Bool = true
     var lockScreenShowMainWidget: Bool = false
     var lockScreenMainWidgets: [LockScreenMainWidgetType] = [.weather]
-    var lockScreenShowMiniWidgets: Bool = true
+    var lockScreenShowMiniWidgets: Bool = false
     var lockScreenMiniWidgets: [LockScreenMiniWidgetType] = []
-    var lockScreenShowNotch: Bool = true
+    var lockScreenShowNotch: Bool = false
     var lockScreenCustomWallpaperEnabled: Bool = false
     var lockScreenCustomWallpaperPath: String? = nil
     var lockScreenKeepWallpaperAfterUnlock: Bool = false
@@ -1038,11 +1038,11 @@ struct Settings: Codable, Equatable {
     var liveWallpaperPauseOnBattery: Bool = false
     var lockScreenLiveWallpaperShowsClock: Bool = false
     var lockScreenLiveWallpaperIdleDelay: Double = 8
-    var lockScreenLiveActivityEnabled: Bool = true
+    var lockScreenLiveActivityEnabled: Bool = false
     var lockScreenLiquidGlassLook: Bool = true
     var lockScreenGlass: LiquidGlassOptions = .lockScreenDefault
     var lockScreenShowInfoWidgetBackgrounds: Bool = true
-    var lockScreenShowMusicWhenPaused: Bool = true
+    var lockScreenShowMusicWhenPaused: Bool = false
     var lockScreenWeatherInfo: [WeatherInfoType] = [.temperature]
     var lockScreenBatteryInfo: [BatteryInfoType] = [.batteryIcon, .percentage, .statusText]
     var notchWidgetAppearance: NotchAppearanceSettings = .init()
@@ -1616,7 +1616,19 @@ struct Settings: Codable, Equatable {
         hasSameNormalizedCollections(as: other) && customSnapLayouts == other.customSnapLayouts
     }
 
+    /// Lock-screen overlays are no longer available. Keep wallpaper files and
+    /// widget choices intact while retiring saved switches from older builds.
+    mutating func enforceLockScreenPrivacy() {
+        lockScreenShowInfoWidget = false
+        lockScreenShowMainWidget = false
+        lockScreenShowMiniWidgets = false
+        lockScreenShowNotch = false
+        lockScreenLiveActivityEnabled = false
+        lockScreenShowMusicWhenPaused = false
+    }
+
     mutating func normalizeCollectionOrders() {
+        migrateBluetoothConnectionSoundPreference()
         let availableLayouts = LayoutTemplate.allTemplates + customSnapLayouts
         let validLayoutIDs = Set(availableLayouts.map(\.id))
         var seenTargets = Set<String>()
@@ -1846,7 +1858,17 @@ struct Settings: Codable, Equatable {
     var enableBiweeklyCalibration: Bool = false
     var magSafeGreenAtLimit: Bool = true
     var bluetoothNotifyLowBattery: Bool = true
-    var bluetoothNotifySound: Bool = true
+    var bluetoothNotifySound: Bool = false
+    var bluetoothSoundPreferenceVersion: Int = 0
+
+    mutating func migrateBluetoothConnectionSoundPreference() {
+        // The old default enabled sounds without an explicit opt-in. Persist the
+        // migration with the setting so later user choices survive every load.
+        guard bluetoothSoundPreferenceVersion < 1 else { return }
+        bluetoothNotifySound = false
+        bluetoothSoundPreferenceVersion = 1
+    }
+
     var showBluetoothDeviceName: Bool = false
     var bluetoothLiveActivityEnabled: Bool = true
     var showBluetoothContinuityDevices: Bool = true
@@ -2958,6 +2980,7 @@ final class SettingsModel: ObservableObject {
             defaults.set(true, forKey: "notchlessFloatingIslandV5")
         }
 
+        loaded.enforceLockScreenPrivacy()
         loaded.normalizeCollectionOrders()
         let migrated = loaded != asDecoded
 
@@ -3174,6 +3197,7 @@ final class SettingsModel: ObservableObject {
             if case .loaded(let presets) = DockLayoutPresetFile.load() {
                 presetsInFile = presets
             }
+            decoded.enforceLockScreenPrivacy()
             decoded.dockLayoutsPresets = DockLayoutPresetFile.merged(file: presetsInFile, payload: decoded.dockLayoutsPresets)
             self.lastWrittenPayload = payload
             self.presetsInFile = presetsInFile
@@ -3214,13 +3238,16 @@ final class SettingsModel: ObservableObject {
         let data = try Data(contentsOf: url)
         let importedPayload = try SettingsBackupDocument.decodePayload(from: data)
         var importedSettings = importedPayload.settings
+        importedSettings.enforceLockScreenPrivacy()
         importedSettings.normalizeCollectionOrders()
         settings = importedSettings
         lastNotchNavigationStack = importedSettings.lastNotchNavigationStack
     }
 
     func resetAllSettings() {
-        settings = Settings()
+        var resetSettings = Settings()
+        resetSettings.normalizeCollectionOrders()
+        settings = resetSettings
         lastNotchNavigationStack = nil
     }
 
@@ -3874,7 +3901,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .appActivities: "Live activities and controls for Zoom, Google Meet, Teams, Slack, Discord, FaceTime, recorders and more."
         case .fileProgress: "Download, copy and AirDrop progress per app — Safari, Chrome, Edge, Firefox, Finder and others."
         case .appearance: "Tune the notch look, materials, colors, and layout styling."
-        case .lockScreen: "Configure Sapphire content and behavior while your Mac is locked."
+        case .lockScreen: "Sapphire stays hidden and unavailable while your Mac is locked."
         case .bluetoothUnlock: "Set up proximity-based authentication and trusted device behavior."
         case .shortcuts: "Manage quick actions and shortcut surfaces shown in Sapphire."
         case .keyboardShortcuts: "Reference page listing every keyboard shortcut in Sapphire — global hotkeys, snap zones, and in-app shortcuts."
@@ -3936,7 +3963,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .notifications: ["notifications", "alerts", "imessage", "facetime", "airdrop"]
         case .nearbyShare: ["nearby", "share", "drop", "transfer"]
         case .continuity: ["android", "continuity", "phone", "kde connect", "handoff", "universal clipboard", "instant hotspot", "notification mirroring", "phone link"]
-        case .fileShelf: ["file", "shelf", "drag", "drop", "storage", "remove"]
+        case .fileShelf: ["file", "shelf", "drag", "drop", "storage", "remove", "screenshot", "screenshots", "capture", "retention"]
         case .notes: ["notes", "note", "memo", "quick note"]
         case .clipboard: ["clipboard", "pasteboard", "history", "copy", "paste"]
         case .emoji: ["emoji", "emoticon", "shortcut", "shortcode", "slack", "rocket", "smiley", "smile", "gif", "picker", "skin tone", "colon", "symbols", "kaomoji"]
@@ -3953,7 +3980,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .focusSession: ["focus", "session", "timer", "pomodoro", "block", "distraction", "website", "app", "blocking", "shortcut", "history", "stopwatch", "streak"]
         case .appLock: ["lock", "app lock", "protect", "touch id", "password", "privacy", "overlay", "idle", "sleep", "panic", "auto-close", "secure"]
         case .intelligence: ["intelligence", "blip", "facet", "nova", "octo", "claw", "connected", "accounts", "gmail", "github", "outlook", "findmy", "gemini", "ai", "assistant", "agent", "automation", "task", "voice", "live", "computer", "control", "accessibility", "memory", "skills", "personalization", "profiling", "monitoring", "privacy", "learning", "behavior", "screenshots", "calendar", "notes", "spotify", "clipboard", "settings", "data", "tracking", "circle", "search", "lasso"]
-        case .sports: ["sports", "score", "game", "nfl", "nba", "mlb", "nhl", "team"]
+        case .sports: ["sports", "score", "game", "football", "soccer", "f1", "formula 1", "racing", "team", "premier league", "champions league"]
         case .finance: ["finance", "stocks", "market", "ticker", "portfolio", "aapl"]
         case .dockLayouts: ["dock", "layout", "preset", "preset switch", "hotkey", "apps"]
         case .mediaOptimizer: ["image", "video", "audio", "compress", "shrink", "optimize", "ocr", "clipboard", "file shelf"]

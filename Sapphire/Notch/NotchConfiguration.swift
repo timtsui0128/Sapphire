@@ -211,6 +211,25 @@ extension EnvironmentValues {
 // MARK: - Expanded Sizing
 
 enum NotchSizing {
+    static func maximumExpandedSize(screenFrame: CGRect, visibleFrame: CGRect, topOffset: CGFloat) -> CGSize {
+        CGSize(
+            width: max(1, screenFrame.width - 32),
+            height: max(1, screenFrame.maxY - max(0, topOffset) - visibleFrame.minY - 12)
+        )
+    }
+
+    static func fittedSize(_ size: CGSize, minimumSize: CGSize, maximumSize: CGSize, scale: CGFloat) -> CGSize {
+        let snapped = NotchDisplayMetrics.snappedSize(
+            atLeast: expandedContentSize(contentSize: size, minimumSize: minimumSize),
+            scale: scale
+        )
+        let pixelScale = max(1, scale)
+        return CGSize(
+            width: min(snapped.width, floor(maximumSize.width * pixelScale) / pixelScale),
+            height: min(snapped.height, floor(maximumSize.height * pixelScale) / pixelScale)
+        )
+    }
+
     static func expandedContentSize(
         contentSize: CGSize,
         minimumSize: CGSize,

@@ -38,7 +38,7 @@ class LaunchpadGestureManager: ObservableObject {
     }
 
     func startMonitoring(for window: NSWindow) {
-        guard eventMonitor == nil else { return }
+        guard eventMonitor == nil, !SessionPrivacyState.shouldSuppressUI() else { return }
         print("[GestureManager] Starting event monitoring.")
         eventMonitor = NSEvent.addLocalMonitorForEvents(
             matching: [.mouseMoved, .leftMouseDown, .leftMouseUp, .leftMouseDragged, .scrollWheel, .flagsChanged]
@@ -69,7 +69,7 @@ class LaunchpadGestureManager: ObservableObject {
     }
 
     private func activateDragMode(location: CGPoint) {
-        guard !isDraggingItem else { return }
+        guard !isDraggingItem, !SessionPrivacyState.shouldSuppressUI() else { return }
         isDraggingItem = true
         longPressTimer = nil
         longPressOccurred.send(location)
@@ -84,6 +84,10 @@ class LaunchpadGestureManager: ObservableObject {
     }
 
     private func handle(event: NSEvent, in window: NSWindow) -> Bool {
+        guard !SessionPrivacyState.isSuppressedSnapshot else {
+            cancelItemDrag()
+            return false
+        }
         let locationInWindow: CGPoint
         if let contentView = window.contentView {
             let converted = contentView.convert(event.locationInWindow, from: nil)

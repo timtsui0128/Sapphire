@@ -10,7 +10,7 @@ struct ProgressRingView: View {
     var progress: Double
     var lineWidth: CGFloat
     var trackLineWidth: CGFloat?
-    var track: AnyShapeStyle = AnyShapeStyle(Color.white.opacity(0.18))
+    var track: AnyShapeStyle = AnyShapeStyle(Color.primary.opacity(0.18))
     var active: AnyShapeStyle
     var lineCap: CGLineCap = .round
     var rotation: Angle = .degrees(-90)
@@ -21,7 +21,7 @@ struct ProgressRingView: View {
         progress: Double,
         lineWidth: CGFloat,
         trackLineWidth: CGFloat? = nil,
-        track: AnyShapeStyle = AnyShapeStyle(Color.white.opacity(0.18)),
+        track: AnyShapeStyle = AnyShapeStyle(Color.primary.opacity(0.18)),
         active: some ShapeStyle,
         lineCap: CGLineCap = .round,
         rotation: Angle = .degrees(-90),

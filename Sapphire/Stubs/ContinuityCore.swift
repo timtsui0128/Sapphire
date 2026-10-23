@@ -8,6 +8,7 @@
 import AppKit
 import Combine
 import SwiftUI
+import UserNotifications
 
 enum ContinuityDeviceType: String, Codable, Sendable {
     case phone, tablet, mac, unknown
@@ -41,6 +42,15 @@ enum ContinuityNetworkKind: String, Codable {
 struct ContinuityConnectivitySnapshot: Equatable {
     enum Severity: Equatable {
         case noDevice, healthy, degraded, offline
+
+        var tint: Color {
+            switch self {
+            case .noDevice: .secondary
+            case .healthy: .green
+            case .degraded: .orange
+            case .offline: .red
+            }
+        }
     }
 
     var severity: Severity = .noDevice
@@ -153,6 +163,7 @@ struct ContinuityExternalActivity: Codable, Equatable, Identifiable {
     var left: ContinuityActivitySlot
     var right: ContinuityActivitySlot
     var progress: ContinuityActivityProgress?
+    var shortText: String? = nil
 
     var id: String { key }
 }
@@ -201,6 +212,26 @@ final class ContinuityHandoffBridge {
 }
 
 @MainActor
+final class ContinuityFocusModeManager {
+    // The public build has no remote focus transport, so local triggers stay unsuppressed.
+    var isApplyingRemoteFocus: Bool { false }
+}
+
+@MainActor
+final class ContinuityMessagesBridge {
+    func handleNotificationResponse(_ response: UNNotificationResponse) {
+        // SMS transport is unavailable in the public build.
+    }
+}
+
+@MainActor
+final class ContinuityCallsBridge {
+    func handleNotificationResponse(_ response: UNNotificationResponse) {
+        // Phone-call transport is unavailable in the public build.
+    }
+}
+
+@MainActor
 @Observable
 final class ContinuityManager {
     static let shared = ContinuityManager()
@@ -214,6 +245,9 @@ final class ContinuityManager {
     let liveActivityBridge = ContinuityExternalActivityBridge()
     let mediaBridge = ContinuityMediaBridge()
     let handoffBridge = ContinuityHandoffBridge()
+    let focusModeManager = ContinuityFocusModeManager()
+    let messagesBridge = ContinuityMessagesBridge()
+    let callsBridge = ContinuityCallsBridge()
 
     private init() {}
 
@@ -225,6 +259,7 @@ final class ContinuityManager {
     func invokeNotificationAction(peerID: String, key: String, actionId: String, replyText: String?) {}
     func takePhoto() {}
     func scanDocument() {}
+    func openWidgets(focus: Int? = nil) {}
     func setActivePeer(id: String) {}
     func unpair(peerID: String) {}
 }

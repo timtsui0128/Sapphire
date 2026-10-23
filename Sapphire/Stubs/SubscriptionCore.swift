@@ -58,7 +58,12 @@ public enum SubscriptionFeatureCatalog {
 }
 
 public enum SubscriptionAccess {
-    public static func hasAccess(to feature: AppFeature) -> Bool { false }
+    // These features are implemented by this fork's public Sports and Finance modules.
+    // No unavailable private implementation is enabled by this allowlist.
+    public static func hasAccess(to feature: AppFeature) -> Bool {
+        feature == .sportsWidget || feature == .liveSports
+            || feature == .financeWidget || feature == .financeLiveActivity
+    }
     public static func resolvedTier() -> SubscriptionTier { .free }
     public static func intelligenceDailyRunLimit() -> Int { 8 }
 }
@@ -96,6 +101,7 @@ public final class FeatureGate {
 
     @discardableResult
     public func require(_ feature: AppFeature, message: String) -> Bool {
+        if SubscriptionAccess.hasAccess(to: feature) { return true }
         let post = {
             NotificationCenter.default.post(
                 name: .subscriptionPaywallRequested,

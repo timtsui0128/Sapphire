@@ -255,11 +255,20 @@ public class LockScreenManager {
     }
 
     public func delegateWindow(_ window: NSWindow) {
+        guard !hideForSuppressedSession(window) else { return }
         _ = SLSSpaceAddWindowsAndRemoveFromSpaces(connection, space, [window.windowNumber] as CFArray, 7)
     }
 
     public func delegateWallpaperWindow(_ window: NSWindow) {
+        guard !hideForSuppressedSession(window) else { return }
         _ = SLSSpaceAddWindowsAndRemoveFromSpaces(connection, wallpaperSpace, [window.windowNumber] as CFArray, 7)
+    }
+
+    private func hideForSuppressedSession(_ window: NSWindow) -> Bool {
+        guard SessionPrivacyState.shouldSuppressUI() else { return false }
+        window.ignoresMouseEvents = true
+        window.orderOut(nil)
+        return true
     }
 
     public func removeWindow(_ window: NSWindow) {
@@ -272,18 +281,19 @@ public class LockScreenManager {
 
     public func setupAndShowWindows(configs: [LockScreenWidgetConfig], on screen: NSScreen) {
         hideAndDestroyWindows(animated: false)
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         let gen = generation
 
         for (index, config) in configs.enumerated() {
             DispatchQueue.main.asyncAfter(deadline: .now() + (Double(index) * 0.03)) {
-                guard gen == self.generation else { return }
+                guard gen == self.generation, !SessionPrivacyState.shouldSuppressUI() else { return }
                 let initialFrame = config.positioner(config.initialSize, screen)
                 config.show(self, initialFrame, screen)
             }
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
-            guard gen == self.generation else { return }
+            guard gen == self.generation, !SessionPrivacyState.shouldSuppressUI() else { return }
             self.repositionMainIfPossible()
         }
     }
@@ -365,6 +375,10 @@ public class LockScreenManager {
                                             windowIgnoresMouseEvents: Bool = false,
                                             on screen: NSScreen) {
         assert(Thread.isMainThread, "LockScreenManager window creation must run on the main thread")
+        guard !SessionPrivacyState.shouldSuppressUI() else {
+            hideAndDestroyWindows(animated: false)
+            return
+        }
 
         let gen = generation
         let controller: NSWindowController
@@ -403,7 +417,8 @@ public class LockScreenManager {
             fitsContent: id != FULLSCREEN_MUSIC_ID,
             scale: scale
         ) { [weak self, weak controller] newSize in
-            guard let self, gen == self.generation, let window = controller?.window else { return }
+            guard let self, gen == self.generation, let window = controller?.window,
+                  !self.hideForSuppressedSession(window) else { return }
             self.handleWidgetSizeChange(newSize, id: id, window: window, screen: screen, positioner: positioner)
         }
 
@@ -420,8 +435,10 @@ public class LockScreenManager {
         windowShownAt[id] = CACurrentMediaTime()
 
         RemoteViewCrashGuardRunBlock {
+            guard !self.hideForSuppressedSession(window) else { return }
             window.orderFrontRegardless()
         }
+        guard !hideForSuppressedSession(window) else { return }
         let isFullscreenMusic = id == FULLSCREEN_MUSIC_ID
         NSAnimationContext.runAnimationGroup { context in
             context.duration = isFullscreenMusic ? 0.28 : 0.32
@@ -455,7 +472,7 @@ public class LockScreenManager {
 
             if coverSize != newSize {
                 let settle = DispatchWorkItem { [weak self, weak window] in
-                    guard let self, let window else { return }
+                    guard let self, let window, !self.hideForSuppressedSession(window) else { return }
                     self.pendingSettle[id] = nil
                     guard let size = self.lastMeasuredSizes[id] else { return }
                     self.setFrameIfNeeded(window, positioner(size, screen), animated: false)
@@ -472,6 +489,7 @@ public class LockScreenManager {
     }
 
     private func setFrameIfNeeded(_ window: NSWindow, _ frame: NSRect, animated: Bool) {
+        guard !hideForSuppressedSession(window) else { return }
         let current = window.frame
         let delta = abs(current.minX - frame.minX) + abs(current.minY - frame.minY)
             + abs(current.width - frame.width) + abs(current.height - frame.height)
@@ -513,6 +531,10 @@ public class LockScreenManager {
     }
 
     func setWidgetWindowsCovered(_ covered: Bool) {
+        guard !SessionPrivacyState.shouldSuppressUI() else {
+            hideAndDestroyWindows(animated: false)
+            return
+        }
         let widgets = windows.filter { $0.key != FULLSCREEN_MUSIC_ID }.compactMap { $0.value.window }
         pendingCoverChange?.cancel()
         pendingCoverChange = nil
@@ -522,7 +544,10 @@ public class LockScreenManager {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.45, execute: work)
         } else {
             for window in widgets where window.contentViewController != nil && !window.isVisible {
-                RemoteViewCrashGuardRunBlock { window.orderFrontRegardless() }
+                RemoteViewCrashGuardRunBlock {
+                    guard !self.hideForSuppressedSession(window) else { return }
+                    window.orderFrontRegardless()
+                }
             }
         }
     }
@@ -569,7 +594,7 @@ public class LockScreenManager {
             }
         }
 
-        guard animated, !visibleWindows.isEmpty else {
+        guard animated, !SessionPrivacyState.shouldSuppressUI(), !visibleWindows.isEmpty else {
             teardown()
             return
         }

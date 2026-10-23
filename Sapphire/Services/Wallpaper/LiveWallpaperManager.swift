@@ -93,6 +93,7 @@ final class LiveWallpaperManager {
     private var optimizationTasks: [OptimizationKey: Task<Void, Never>] = [:]
     private var failedOptimizations: Set<OptimizationKey> = []
     private var isStarted = false
+    private var sessionSuppressed = false
     private var isLocked = false
     private var isCoveredByMusicPane = false
 
@@ -106,6 +107,7 @@ final class LiveWallpaperManager {
     }
 
     func start() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         guard !isStarted else { return }
         isStarted = true
         isLocked = Self.isSessionLocked
@@ -136,18 +138,12 @@ final class LiveWallpaperManager {
     }
 
     func screenDidLock() {
-        guard isStarted, !isLocked else { return }
-        isLocked = true
-        nativeLockScreen.screenDidLock()
-        refresh()
-        applyPlaybackPolicy()
+        setSessionSuppressed(true)
     }
 
     func screenDidUnlock() {
-        guard isStarted, isLocked else { return }
-        isLocked = false
-        applyPlaybackPolicy()
-        refresh()
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
+        setSessionSuppressed(false)
     }
 
     func shutdown() {
@@ -171,8 +167,26 @@ final class LiveWallpaperManager {
         isLocked = false
     }
 
-    private func refresh() {
+    func setSessionSuppressed(_ suppressed: Bool) {
+        sessionSuppressed = suppressed
         guard isStarted else { return }
+        if suppressed {
+            stillTask?.cancel()
+            stillTask = nil
+            desktop.tearDown()
+            lockScreen.hide(animated: false)
+            nativeLockScreen.shutdown()
+            LiveWallpaperVideoSource.setSuspended(true)
+        } else {
+            isLocked = false
+            LiveWallpaperVideoSource.setSuspended(false)
+            refresh()
+            applyPlaybackPolicy()
+        }
+    }
+
+    private func refresh() {
+        guard isStarted, !sessionSuppressed, !SessionPrivacyState.shouldSuppressUI() else { return }
         let desktopMedia = WallpaperMedia(path: configuration.desktopPath)
         let lockMedia = WallpaperMedia(path: configuration.lockScreenPath)
         let plan = LiveWallpaperPlan.resolve(
@@ -181,11 +195,7 @@ final class LiveWallpaperManager {
             isLocked: isLocked,
             playbackMode: configuration.playbackMode
         )
-        let lockSurface = lockMedia ?? desktopMedia
-        let nativeLockMedia = configuration.playbackMode != .never && lockSurface?.isVideo == true
-            ? lockSurface
-            : nil
-        nativeLockScreen.configure(media: nativeLockMedia)
+        nativeLockScreen.configure(media: nil)
 
         policy.pauseOnLowPower = configuration.playbackMode == .adaptive && configuration.pauseOnLowPower
         policy.pauseOnBattery = configuration.playbackMode == .adaptive && configuration.pauseOnBattery
@@ -288,7 +298,8 @@ final class LiveWallpaperManager {
             let stillURL = await Task.detached(priority: .userInitiated) {
                 await WallpaperAssetStore.stillImageURL(for: request.media)
             }.value
-            guard !Task.isCancelled, let self, self.requestedStill == request else { return }
+            guard !Task.isCancelled, let self, self.requestedStill == request,
+                  !self.sessionSuppressed, !SessionPrivacyState.shouldSuppressUI() else { return }
             if let stillURL {
                 SystemWallpaperOverride.shared.apply(stillURL, scaling: request.scaling)
             }
@@ -309,7 +320,7 @@ final class LiveWallpaperManager {
     private func applyPlaybackPolicy(
         _ reasons: Set<LiveWallpaperPlaybackPolicy.Reason>? = nil
     ) {
-        let suspended = isCoveredByMusicPane || Self.shouldSuspendPlayback(
+        let suspended = sessionSuppressed || SessionPrivacyState.shouldSuppressUI() || isCoveredByMusicPane || Self.shouldSuspendPlayback(
             for: reasons ?? policy.reasons,
             isLocked: isLocked,
             mode: configuration.playbackMode

@@ -24,9 +24,23 @@ private struct LockScreenPaneWindowPresence: NSViewRepresentable {
             guard let window = nsView.window else { return }
             coordinator.pendingOrderOut?.cancel()
             coordinator.pendingOrderOut = nil
+            guard !SessionPrivacyState.shouldSuppressUI() else {
+                window.ignoresMouseEvents = true
+                window.orderOut(nil)
+                return
+            }
             window.ignoresMouseEvents = !presented
             if presented {
-                if !window.isVisible { RemoteViewCrashGuardRunBlock { window.orderFrontRegardless() } }
+                if !window.isVisible {
+                    RemoteViewCrashGuardRunBlock {
+                        guard !SessionPrivacyState.shouldSuppressUI() else {
+                            window.ignoresMouseEvents = true
+                            window.orderOut(nil)
+                            return
+                        }
+                        window.orderFrontRegardless()
+                    }
+                }
             } else if window.isVisible {
                 let orderOut = DispatchWorkItem { [weak window] in window?.orderOut(nil) }
                 coordinator.pendingOrderOut = orderOut
@@ -84,6 +98,10 @@ final class LockScreenMusicPaneController: ObservableObject {
     @Published var isLyricsView = false
     private init() {}
     func open() {
+        guard !SessionPrivacyState.shouldSuppressUI() else {
+            reset()
+            return
+        }
         withAnimation(.spring(response: 0.5, dampingFraction: 0.82)) { isPresented = true; selectedTab = .nowPlaying; overlay = nil; isLyricsView = false }
         LockScreenManager.shared.setWidgetWindowsCovered(true)
         LiveWallpaperManager.shared.setCoveredByLockScreenMusicPane(true)
@@ -100,7 +118,10 @@ final class LockScreenMusicPaneController: ObservableObject {
             isLyricsView = (tab == .lyrics)
         }
     }
-    func present(_ destination: LockScreenMusicPaneOverlay) { withAnimation { overlay = destination } }
+    func present(_ destination: LockScreenMusicPaneOverlay) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
+        withAnimation { overlay = destination }
+    }
     func dismissOverlay() { withAnimation { overlay = nil } }
     func reset() {
         isPresented = false; selectedTab = .nowPlaying; overlay = nil; isLyricsView = false

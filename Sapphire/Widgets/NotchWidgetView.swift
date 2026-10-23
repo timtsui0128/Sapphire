@@ -343,7 +343,7 @@ private struct NotchDefaultWidgetsView: View {
                 if widgetType != widgets.last && settings.settings.showDividersBetweenWidgets {
                     Divider()
                         .frame(height: 60)
-                        .background(Color.white.opacity(0.3))
+                        .background(Color.primary.opacity(0.12))
                 }
             }
         }

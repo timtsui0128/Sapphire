@@ -75,6 +75,7 @@ final class MenuBarSearchPanelController: ObservableObject {
     }
 
     func open() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { close(); return }
         guard AccessibilityTrustMonitor.isCurrentlyTrusted() else {
             AccessibilityPermission.request()
             return
@@ -146,6 +147,7 @@ final class MenuBarSearchPanelController: ObservableObject {
     }
 
     func activate(_ entry: Entry) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { close(); return }
         close()
         noteRecent(entry)
         let controller = (NSApp.delegate as? AppDelegate)?.statusBarController
@@ -154,6 +156,7 @@ final class MenuBarSearchPanelController: ObservableObject {
                 guard let item = items.first(where: { $0.id == entry.id }) else { return }
                 let element = item.element
                 DispatchQueue.global(qos: .userInitiated).async {
+                    guard !SessionPrivacyState.shouldSuppressUI() else { return }
                     _ = AX.perform(kAXPressAction as String, on: element)
                 }
             }

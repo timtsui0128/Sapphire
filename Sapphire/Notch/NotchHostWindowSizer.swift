@@ -260,18 +260,18 @@ final class NotchHostWindowSizer {
         visibleFrame: CGRect,
         scale: CGFloat = 2
     ) -> CGSize {
-        let width = NotchDisplayMetrics.snapToEvenPixels(ceil(screenFrame.width) + 0.5 / max(scale, 1), scale: max(scale, 1))
+        let width = floor(screenFrame.width * max(scale, 1)) / max(scale, 1)
         var fullExtent = extent
         fullExtent.isFull = true
         var fittedExtent = extent
         fittedExtent.isFull = false
-        let full = frame(for: fullExtent, screenFrame: screenFrame, visibleFrame: visibleFrame)
-        let fitted = frame(for: fittedExtent, screenFrame: screenFrame, visibleFrame: visibleFrame)
+        let full = frame(for: fullExtent, screenFrame: screenFrame, visibleFrame: visibleFrame, scale: scale)
+        let fitted = frame(for: fittedExtent, screenFrame: screenFrame, visibleFrame: visibleFrame, scale: scale)
         var height = max(full.height, fitted.height, ceil(windowSize.height))
         if let current, abs(current.width - width) <= 0.5 {
             height = max(height, current.height)
         }
-        return CGSize(width: width, height: height)
+        return CGSize(width: width, height: min(height, screenFrame.height))
     }
 
     static func frame(for extent: NotchHostWindowExtent, on screen: NSScreen) -> NSRect {
@@ -296,11 +296,13 @@ final class NotchHostWindowSizer {
         let margin = max(0, extent.margin)
         var width = ceil(extent.notchSize.width + 2 * margin)
         if width.truncatingRemainder(dividingBy: 2) != 0 { width += 1 }
-        let height = ceil(max(0, extent.notchTopOffset) + extent.notchSize.height + margin)
+        let height = min(ceil(max(0, extent.notchTopOffset) + extent.notchSize.height + margin), screenFrame.height)
         return centered(width: min(width, ceil(screenFrame.width)), height: height, screenFrame: screenFrame, scale: scale)
     }
 
     static func centered(width: CGFloat, height: CGFloat, screenFrame: CGRect, scale: CGFloat) -> NSRect {
+        let width = min(width, screenFrame.width)
+        let height = min(height, screenFrame.height)
         if width >= ceil(screenFrame.width) {
             return NSRect(x: screenFrame.minX, y: screenFrame.maxY - height, width: ceil(screenFrame.width), height: height)
         }

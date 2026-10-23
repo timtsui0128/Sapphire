@@ -39,6 +39,8 @@ private struct NotchRuntimeSettings: Equatable {
 }
 
 struct NotchController: View {
+    @ObservedObject private var appAppearance = AppAppearance.shared
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let notchWindow: NSWindow?
     private let notchWidget: NotchWidgetView
     private let timerManager: TimerManager
@@ -72,9 +74,11 @@ struct NotchController: View {
     private var dragState: DragStateManager { .shared }
     // MARK: - State Properties
     @State private var config: ResolvedNotchConfiguration?
+    @State private var displayInput: NotchDisplayMetrics.Input?
     @State private var notchState: NotchState = .initial
     @State private var isHovered: Bool = false
     @State private var isPinned = false
+    @State private var screenshotShelfOwnsKeyboardFocus = false
     @State private var animatedWidth: CGFloat = 0
     @State private var animatedHeight: CGFloat = 0
     @State private var animatedCornerRadius: CGFloat = 0
@@ -297,6 +301,18 @@ struct NotchController: View {
             return DisplaySettingsKey.value(in: settings.settings.perDisplayNotchLiveActivityAppearance, for: displayKey)
                 ?? settings.settings.notchLiveActivityAppearance
         }
+    }
+
+    private var expandedPanelColorScheme: ColorScheme {
+        var glassScheme: ColorScheme?
+        if activeAppearanceSettings.mode == .liquidGlass {
+            switch activeAppearanceSettings.liquidGlassAppearance {
+            case .light: glassScheme = .light
+            case .dark: glassScheme = .dark
+            case .auto: break
+            }
+        }
+        return appAppearance.panelColorScheme(matchingGlass: glassScheme)
     }
 
     private var isExpandedLiveActivity: Bool {
@@ -729,7 +745,11 @@ struct NotchController: View {
             isManuallyHidden: isManuallyHidden,
             surfaceShadowOpacity: surfaceShadowOpacity,
             radialEndRadius: appearance.backgroundStyle == .radial ? animatedWidth / 2 : 0,
-            systemGlassAvailable: Self.systemGlassAvailable
+            systemGlassAvailable: Self.systemGlassAvailable,
+            expandedColorScheme: expandedPanelColorScheme,
+            surfaceHeight: targetSize.height,
+            expandedPanelSurface: appAppearance.expandedPanelSurface,
+            reduceTransparency: reduceTransparency
         ))
 
         var content = NotchStageContent(layout: layout, surface: surface)
@@ -976,6 +996,16 @@ struct NotchController: View {
     private func applyNotchSettingsHandlers<V: View>(to view: V) -> some View {
         view
             .onChange(of: showLyrics, perform: handleShowLyricsChange)
+            .onChange(of: isPinned) { _, pinned in
+                scratch.collapseTask?.cancel()
+                scratch.collapseTask = nil
+                scratch.isCollapseTimerActive = false
+                if !pinned { evaluateCollapseIfCursorOutsideHoverZone() }
+                reevaluatePointerInteraction()
+            }
+            .onChange(of: settings.settings.pinEnabled) { _, enabled in
+                if !enabled { isPinned = false }
+            }
             .onChange(of: isInteractive) { _, isNowInteractive in
                 updateMouseEventHandling(isInteractive: isNowInteractive)
                 if let runtimeStateSource {
@@ -1113,7 +1143,7 @@ struct NotchController: View {
     }
 
     private func updateSpacePlayPauseTap() {
-        let wantsTap = (notchState == .hoverExpanded || notchState == .clickExpanded)
+        let wantsTap = isHovered && (notchState == .hoverExpanded || notchState == .clickExpanded)
             && MusicManager.shared.title?.isEmpty == false
         if scratch.spacePlayPauseTapToken == nil {
             guard wantsTap else { return }
@@ -1156,11 +1186,13 @@ struct NotchController: View {
     private func startSnapZoneEscapeMonitoring() {
         guard scratch.snapZoneEscapeMonitorToken == nil else { return }
         scratch.snapZoneEscapeMonitorToken = EventMonitorHub.shared.register(for: .keyDown) { event in
-            guard event.keyCode == CGKeyCode(kVK_Escape),
-                  windowDrag.isDragging,
-                  navigationStack.last == .snapZones else { return }
-            windowDrag.dismissSnapZonesForCurrentDrag()
-            dismissActiveSnapZones()
+            guard event.keyCode == CGKeyCode(kVK_Escape) else { return }
+            if windowDrag.isDragging, navigationStack.last == .snapZones {
+                windowDrag.dismissSnapZonesForCurrentDrag()
+                dismissActiveSnapZones()
+            } else {
+                _ = closePinnedPanel()
+            }
         }
     }
 
@@ -1168,6 +1200,20 @@ struct NotchController: View {
         guard let snapZoneEscapeMonitorToken = scratch.snapZoneEscapeMonitorToken else { return }
         EventMonitorHub.shared.unregister(token: snapZoneEscapeMonitorToken, for: .keyDown)
         self.scratch.snapZoneEscapeMonitorToken = nil
+    }
+
+    @discardableResult
+    private func closePinnedPanel() -> Bool {
+        guard isPinned, notchState == .clickExpanded else { return false }
+        isPinned = false
+        cancelWidgetSwitchProtection()
+        scratch.collapseTask?.cancel()
+        scratch.collapseTask = nil
+        scratch.isCollapseTimerActive = false
+        notchState = isLiveActivityActive ? .autoExpanded : .initial
+        (NSApp.delegate as? AppDelegate)?.revertNotchWindowFocus(notchWindow)
+        reevaluatePointerInteraction()
+        return true
     }
 
     private func dismissActiveSnapZones() {
@@ -1229,11 +1275,33 @@ struct NotchController: View {
             widgetPlane.setDisplay(of: window)
         }
         guard let targetScreen = assignedScreen else { return }
+        let input = NotchDisplayMetrics.Input(screen: targetScreen)
+        let geometryChanged = input != displayInput
+        displayInput = input
         let newConfig = ResolvedNotchConfiguration(from: settings.settings.value, screen: targetScreen)
         if newConfig != config {
             self.config = newConfig
             self.expansionAnimation = newConfig.expandAnimation
             handleStateChange(from: notchState, to: notchState)
+        }
+        if geometryChanged {
+            // The same configuration can resolve on displays with different widths.
+            // Discard external-display measurements even when newConfig == config.
+            scratch.expandedSizeByMode.removeAll()
+            measuredClickContentSize = .zero
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                let size = snappedNotchTarget(width: animatedWidth, height: animatedHeight, config: newConfig)
+                animatedWidth = size.width
+                animatedHeight = size.height
+                if notchState == .clickExpanded { setClickContentLayoutSize(size) }
+            }
+            morphEngine.setTargets(.size, animatedWidth, animatedHeight, animation: nil)
+            if widgetPlane.isConfigured {
+                widgetPlane.update(inputs: widgetPlaneInputs(config: newConfig))
+                widgetPlane.didPresent()
+            }
         }
         syncHostWindowExtent()
         evaluateInactiveNotchVisibility()
@@ -1273,7 +1341,8 @@ struct NotchController: View {
     }
 
     private func widgetPlaneInputs(config: ResolvedNotchConfiguration) -> NotchWidgetPlaneInputs {
-        NotchWidgetPlaneInputs(
+        let maximum = maximumNotchSize(config: config)
+        return NotchWidgetPlaneInputs(
             fileDragMode: displayedFileDragMode,
             padding: EdgeInsets(
                 top: config.contentTopPadding + expandedTopReserve(config: config),
@@ -1282,7 +1351,14 @@ struct NotchController: View {
                 trailing: config.contentHorizontalPadding
             ),
             notchBandHeight: config.initialSize.height,
-            displayScale: notchWindow?.backingScaleFactor ?? 2
+            displayScale: config.displayScale,
+            notchDisplayWidth: displayInput?.frame.width ?? assignedScreen?.frame.width ?? 0,
+            maximumContentSize: CGSize(
+                width: max(1, maximum.width - 2 * config.contentHorizontalPadding),
+                height: max(1, maximum.height - config.contentTopPadding - expandedTopReserve(config: config)
+                    - config.contentBottomPadding - expandedBottomReserve(config: config))
+            ),
+            panelColorScheme: expandedPanelColorScheme
         )
     }
 
@@ -1312,6 +1388,7 @@ struct NotchController: View {
                     notchWidget
                         .environmentObject(fileShelfState)
                         .environmentObject(dragState)
+                        .environment(\.screenshotShelfKeyboardFocus, setScreenshotShelfKeyboardFocus)
                         .environment(\.onActiveSnapZoneChange, { activeSnapZone = $0 })
                         .environment(\.onDropZoneFramesChange, plane.dropZoneFramesHandler(handleDropZoneFramesChange))
                         .environment(\.onSnapZoneHitRegionsChange, plane.snapRegionsHandler { snapZoneHitRegions = $0 })
@@ -1354,7 +1431,10 @@ struct NotchController: View {
         var pieces = NotchExpandedChrome.pieces(context)
         for (slot, piece) in pieces {
             var wrapped = piece
-            wrapped.view = widgetEnvironment(piece.view)
+            wrapped.view = AnyView(widgetEnvironment(piece.view).appPanelAppearance(appAppearance)
+                .environment(\.expandedNotchColorScheme, expandedPanelColorScheme))
+            wrapped.key?.tags.append(appAppearance.expandedPanelSurface.rawValue)
+            wrapped.key?.flags.append(expandedPanelColorScheme == .dark)
             pieces[slot] = wrapped
         }
         return pieces
@@ -1424,6 +1504,7 @@ struct NotchController: View {
     }
 
     private func teardownMonitors() {
+        setScreenshotShelfKeyboardFocus(false)
         if let window = notchWindow as? DynamicFocusWindow {
             guard !window.monitorsTornDown else { return }
             window.monitorsTornDown = true
@@ -1664,7 +1745,14 @@ struct NotchController: View {
             }
             if activityType == .music, settings.settings.musicOpenOnClick { initiateWidgetView(.musicPlayer); return }
             if activityType == .weather || activityType == .persistentWeather, settings.settings.weatherOpenOnClick { initiateWidgetView(.weatherPlayer); return }
-            if activityType == .sports, settings.settings.sportsOpenOnClick, PremiumGate.hasAccess(.sportsWidget) { initiateWidgetView(.sportsPlayer); return }
+            if activityType == .sports, settings.settings.sportsOpenOnClick, PremiumGate.hasAccess(.sportsWidget) {
+                if F1LiveTimingStore.shared.isNotchEnabled,
+                   let race = F1LiveTimingStore.shared.snapshot, race.isLive, !race.isStale {
+                    CommunitySportsStore.shared.selectedLeague = .f1
+                }
+                initiateWidgetView(.sportsPlayer)
+                return
+            }
             if activityType == .finance, settings.settings.financeOpenOnClick, PremiumGate.hasAccess(.financeWidget) { initiateWidgetView(.financePlayer); return }
             if activityType == .calendar, settings.settings.calendarOpenOnClick { initiateWidgetView(.calendarPlayer); return }
             if activityType == .fileShelf, settings.settings.clickToOpenFileShelf { initiateWidgetView(.fileShelf); return }
@@ -1684,7 +1772,8 @@ struct NotchController: View {
             self.expansionAnimation = config.expandAnimation
             measuredClickContentSize = .zero
             var targetStack: [NotchWidgetMode]
-            if settings.settings.clickToOpenFileShelf && !FileShelfManager.shared.files.isEmpty {
+            if settings.settings.clickToOpenFileShelf &&
+                (!FileShelfManager.shared.files.isEmpty || !ScreenshotShelfManager.shared.items.isEmpty) {
                 targetStack = [.fileShelf]
             } else if settings.settings.rememberLastMenu, let savedStack = settings.lastNotchNavigationStack, !savedStack.isEmpty {
                 targetStack = savedStack.map { $0.toNotchWidgetMode() }
@@ -1725,6 +1814,7 @@ struct NotchController: View {
         guard !isManuallyHidden else { return }
         guard let config = config else { return }
         self.isHovered = hovering
+        updateSpacePlayPauseTap()
 
         if let runtimeStateSource {
             TrackpadGestureHandler.shared.setActive(hovering, for: runtimeStateSource)
@@ -1759,7 +1849,8 @@ struct NotchController: View {
                 if notchState != .clickExpanded {
                     self.expansionAnimation = config.expandAnimation
                     var targetStack: [NotchWidgetMode]
-                    if settings.settings.hoverToOpenFileShelf && !FileShelfManager.shared.files.isEmpty {
+                    if settings.settings.hoverToOpenFileShelf &&
+                        (!FileShelfManager.shared.files.isEmpty || !ScreenshotShelfManager.shared.items.isEmpty) {
                         targetStack = [.fileShelf]
                     } else if settings.settings.rememberLastMenu, let savedStack = settings.lastNotchNavigationStack, !savedStack.isEmpty {
                         targetStack = savedStack.map { $0.toNotchWidgetMode() }
@@ -1862,6 +1953,9 @@ struct NotchController: View {
     }
 
     private func handleStateChange(from oldState: NotchState, to newState: NotchState, refreshSize: Bool = true) {
+        if newState != .clickExpanded {
+            setScreenshotShelfKeyboardFocus(false)
+        }
         guard let config = config else { return }
         if isManuallyHidden {
             animatedWidth = 0
@@ -1998,6 +2092,7 @@ struct NotchController: View {
             if followsMorph { planeMorphDetached = false }
 
             if followsMorph, let size = scratch.expandedSizeByMode[currentMode] {
+                let size = snappedNotchTarget(width: size.width, height: size.height, config: config)
                 setClickContentLayoutSize(size)
                 withAnimation(self.expansionAnimation) {
                     animatedWidth = size.width
@@ -2129,10 +2224,41 @@ struct NotchController: View {
     }
 
     private func snappedNotchTarget(width: CGFloat, height: CGFloat, config: ResolvedNotchConfiguration) -> CGSize {
-        NotchDisplayMetrics.snappedSize(
-            atLeast: CGSize(width: max(width, config.initialSize.width), height: max(height, config.initialSize.height)),
+        NotchSizing.fittedSize(
+            CGSize(width: width, height: height),
+            minimumSize: config.initialSize,
+            maximumSize: maximumNotchSize(config: config),
             scale: config.displayScale
         )
+    }
+
+    private func maximumNotchSize(config: ResolvedNotchConfiguration) -> CGSize {
+        guard let screen = assignedScreen else { return config.initialSize }
+        return NotchSizing.maximumExpandedSize(
+            screenFrame: screen.frame,
+            visibleFrame: screen.visibleFrame,
+            topOffset: config.topInset - config.topBuffer
+        )
+    }
+
+    private func setScreenshotShelfKeyboardFocus(_ focused: Bool) {
+        guard let appDelegate = NSApp.delegate as? AppDelegate,
+              let window = notchWindow as? DynamicFocusWindow else { return }
+        if focused {
+            // A passive hover may open the shelf, but only a click inside it
+            // should direct keyboard commands away from the user's other app.
+            guard notchState == .clickExpanded, currentMode == .fileShelf else { return }
+            screenshotShelfOwnsKeyboardFocus = true
+            appDelegate.makeNotchWindowFocusable(window)
+        } else {
+            guard screenshotShelfOwnsKeyboardFocus else { return }
+            screenshotShelfOwnsKeyboardFocus = false
+            let shouldRestoreApplication = NSApp.isActive && NSApp.keyWindow === window
+            appDelegate.revertNotchWindowFocus(
+                window,
+                restorePreviousApplication: shouldRestoreApplication
+            )
+        }
     }
 
     private func handlePreviewItemChange(newItem: ShelfItem?) {
@@ -2146,6 +2272,9 @@ struct NotchController: View {
     }
 
     private func handleNavigationStackChange(oldStack: [NotchWidgetMode], newStack: [NotchWidgetMode]) {
+        if newStack.last != .fileShelf {
+            setScreenshotShelfKeyboardFocus(false)
+        }
         guard let config = config else { return }
         if oldStack.contains(.circleToSearch) && !newStack.contains(.circleToSearch) {
             CircleToSearchManager.shared.endResultsPresentation()
@@ -2441,10 +2570,9 @@ struct NotchController: View {
 
     private func applyNotchIconsWidthFloor() {
         guard notchState == .clickExpanded, currentMode == .defaultWidgets else { return }
-        let scale = config?.displayScale ?? 2
-        let targetWidth = NotchDisplayMetrics.snappedSize(
-            atLeast: CGSize(width: max(animatedWidth, notchBarMinimumWidth), height: 0),
-            scale: scale
+        guard let config else { return }
+        let targetWidth = snappedNotchTarget(
+            width: max(animatedWidth, notchBarMinimumWidth), height: animatedHeight, config: config
         ).width
         if clickContentLayoutSize.height > 1, targetWidth > clickContentLayoutSize.width {
             setClickContentLayoutSize(CGSize(width: targetWidth, height: clickContentLayoutSize.height))
@@ -2516,6 +2644,7 @@ struct NotchController: View {
             }
 
             let allowsMenuSwitch = settings.settings.swipeToSwitchWidgets
+                && !widgetPlane.hasHorizontalOverflow
                 && navigationStack.count <= 1
                 && (currentMode == .defaultWidgets || currentMode == .fileShelf)
 
@@ -2829,7 +2958,12 @@ struct NotchController: View {
     // MARK: - Helper Methods
     private func startNotchInteractionMonitoring() {
         guard let window = notchWindow else { return }
+        (window as? DynamicFocusWindow)?.mouseInputGate.containsPoint = { [weak coordinator = stage, weak window] point in
+            guard let window else { return false }
+            return coordinator?.containsMousePoint(point, in: window) ?? false
+        }
         (window as? DynamicFocusWindow)?.onMouseUp = { reevaluatePointerInteraction() }
+        (window as? DynamicFocusWindow)?.onEscape = { closePinnedPanel() }
 
         let monitor = hoverMonitor ?? NotchHoverMonitor()
         hoverMonitor = monitor
@@ -2864,6 +2998,9 @@ struct NotchController: View {
         hoverMonitor?.stop()
         hoverMonitor = nil
         (notchWindow as? DynamicFocusWindow)?.onMouseUp = nil
+        (notchWindow as? DynamicFocusWindow)?.onEscape = nil
+        (notchWindow as? DynamicFocusWindow)?.setMouseEventHandlingEnabled(false)
+        (notchWindow as? DynamicFocusWindow)?.mouseInputGate.containsPoint = nil
         activeSnapZone = nil
         activeDropZone = nil
         notchDragLocationState.update(nil)
@@ -3238,14 +3375,12 @@ struct NotchController: View {
     private func updateAutoContentSize() {
         guard let config = config, notchState == .autoExpanded || (notchState == .hoverExpanded && isLiveActivityActive) else { return }
         let scale = activeScaleFactor
-        let targetSize = NotchDisplayMetrics.snappedSize(
-            atLeast: NotchSizing.expandedContentSize(
+        let contentSize = NotchSizing.expandedContentSize(
                 contentSize: measuredAutoContentSize,
                 minimumSize: config.initialSize,
                 scale: scale
-            ),
-            scale: config.displayScale
         )
+        let targetSize = snappedNotchTarget(width: contentSize.width, height: contentSize.height, config: config)
         let targetWidth = targetSize.width
         let targetHeight = targetSize.height
         let epsilon: CGFloat = 0.5

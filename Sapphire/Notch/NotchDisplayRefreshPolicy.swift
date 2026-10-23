@@ -5,6 +5,7 @@
 //  Created by Shariq Charolia on 2026-10-08
 
 import CoreGraphics
+import Foundation
 
 enum NotchDisplayRefreshPolicy {
     struct Snapshot: Equatable {
@@ -14,6 +15,11 @@ enum NotchDisplayRefreshPolicy {
         struct Display: Equatable {
             var id: CGDirectDisplayID
             var frame: CGRect
+            var visibleFrame: CGRect = .zero
+            var scale: CGFloat = 1
+            var safeAreaTop: CGFloat = 0
+            var leftArea: CGRect? = nil
+            var rightArea: CGRect? = nil
         }
 
         init(displays: [Display], targets: [CGDirectDisplayID]) {

@@ -40,7 +40,7 @@ struct TimerWidgetView: View {
         .buttonStyle(.plain)
         .frame(height: 32)
         .fixedSize()
-        .foregroundColor(.white)
+        .foregroundColor(.primary)
         .contentShape(Rectangle())
         .help("Open Timers")
     }

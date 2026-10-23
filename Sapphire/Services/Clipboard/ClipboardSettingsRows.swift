@@ -37,7 +37,7 @@ struct PlainTextPasteShortcutRow: View {
                     .font(.caption.monospaced())
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Color.white.opacity(0.07))
+                    .background(Color.primary.opacity(0.07))
                     .clipShape(Capsule())
             }
             Button(isRecording ? "Cancel" : "Record…") {

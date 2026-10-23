@@ -81,7 +81,7 @@ private struct SettingsAssistantCard: View {
                         .font(.callout)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 7)
-                        .background(Color.white.opacity(0.08), in: Capsule())
+                        .background(Color.primary.opacity(0.08), in: Capsule())
                         .disabled(assistant.unavailableReason != nil)
                 }
             }
@@ -117,7 +117,7 @@ private struct SettingsAssistantCard: View {
                 .focused($isInputFocused)
                 .onSubmit(send)
                 .padding(10)
-                .background(Color.black.opacity(0.2), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             Button(action: send) {
                 Image(systemName: "arrow.up.circle.fill").font(.system(size: 22))
             }
@@ -167,7 +167,7 @@ private struct MessageView: View {
                             if entry != message.suggestions.last { Divider().padding(.leading, 12) }
                         }
                     }
-                    .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

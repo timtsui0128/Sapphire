@@ -565,8 +565,9 @@ struct SportsPayload: Equatable, Hashable {
     let league_logo: String?
     let homeLogoURL: URL?
     let awayLogoURL: URL?
+    let f1: F1NotchPayload?
 
-    init(league: String, homeTeam: String, awayTeam: String, homeScore: Int, awayScore: Int, status: String, time: String, league_logo: String? = nil, homeLogoURL: URL? = nil, awayLogoURL: URL? = nil) {
+    init(league: String, homeTeam: String, awayTeam: String, homeScore: Int, awayScore: Int, status: String, time: String, league_logo: String? = nil, homeLogoURL: URL? = nil, awayLogoURL: URL? = nil, f1: F1NotchPayload? = nil) {
         self.league = league
         self.homeTeam = homeTeam
         self.awayTeam = awayTeam
@@ -577,6 +578,20 @@ struct SportsPayload: Equatable, Hashable {
         self.league_logo = league_logo
         self.homeLogoURL = homeLogoURL
         self.awayLogoURL = awayLogoURL
+        self.f1 = f1
+    }
+}
+
+struct F1NotchPayload: Equatable, Hashable {
+    let title: String
+    let lap: Int?
+    let totalLaps: Int?
+    let driver: String
+    let position: Int?
+
+    var lapText: String {
+        let current = lap.map(String.init) ?? "—"
+        return totalLaps.map { "L\(current)/\($0)" } ?? "Lap \(current)"
     }
 }
 

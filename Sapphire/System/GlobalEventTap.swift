@@ -367,6 +367,10 @@ final class GlobalEventTap: @unchecked Sendable {
             return Unmanaged.passUnretained(event)
         }
 
+        guard !SessionPrivacyState.isSuppressedSnapshot else {
+            return Unmanaged.passUnretained(event)
+        }
+
         guard AccessibilityTrustMonitor.isCurrentlyTrusted() else {
             return Unmanaged.passUnretained(event)
         }

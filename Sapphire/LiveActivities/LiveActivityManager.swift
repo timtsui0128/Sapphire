@@ -468,6 +468,7 @@ class LiveActivityManager {
         guard !hasStarted else { return }
         hasStarted = true
         setupSubscriptions()
+        if F1LiveTimingStore.shared.isNotchEnabled { F1LiveTimingStore.shared.startPolling() }
         syncCapsLockMonitoring()
         updateSportsFinanceWatchTimer()
         lastEvalTime = 0
@@ -511,6 +512,7 @@ class LiveActivityManager {
     func stop() {
         guard hasStarted else { return }
         hasStarted = false
+        F1LiveTimingStore.shared.stopPolling()
 
         cancellables.removeAll()
         dismissalTimer?.invalidate()
@@ -645,6 +647,8 @@ class LiveActivityManager {
             .store(in: &cancellables)
 
         FileShelfManager.shared.$files
+            .map { _ in () }
+            .merge(with: ScreenshotShelfManager.shared.$items.map { _ in () })
             .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
@@ -915,6 +919,38 @@ class LiveActivityManager {
                 self.updateSportsFinanceWatchTimer()
                 self.lastEvalTime = 0
                 self.evaluateAndDisplayActivity()
+            }
+            .store(in: &cancellables)
+
+        F1LiveTimingStore.shared.$isNotchEnabled
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] enabled in
+                guard let self, self.hasStarted else { return }
+                if enabled { F1LiveTimingStore.shared.startPolling() }
+                else { F1LiveTimingStore.shared.stopPolling() }
+                self.lastEvalTime = 0
+                self.evaluateAndDisplayActivity()
+            }
+            .store(in: &cancellables)
+
+        F1LiveTimingStore.shared.$snapshot
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.lastEvalTime = 0
+                self?.evaluateAndDisplayActivity()
+            }
+            .store(in: &cancellables)
+
+        CommunityFinanceStore.shared.$quotes
+            .map { _ in () }
+            .merge(with: CommunityFinanceStore.shared.$selectedSymbol.map { _ in () })
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.lastEvalTime = 0
+                self?.evaluateAndDisplayActivity()
             }
             .store(in: &cancellables)
     }
@@ -2176,11 +2212,10 @@ class LiveActivityManager {
     }
 
     private func checkForFileShelf() -> (ActivityType, LiveActivityContent, TimeInterval?)? {
-        let files = FileShelfManager.shared.files
-        guard settingsModel.current.fileShelfLiveActivityEnabled, !files.isEmpty else {
+        let count = FileShelfManager.shared.files.count + ScreenshotShelfManager.shared.items.count
+        guard settingsModel.current.fileShelfLiveActivityEnabled, count > 0 else {
             return nil
         }
-        let count = files.count
         return (
             .fileShelf,
             .standard(
@@ -2485,6 +2520,28 @@ class LiveActivityManager {
     }
 
     private func checkForSports() -> (ActivityType, LiveActivityContent, TimeInterval?)? {
+        let timing = F1LiveTimingStore.shared
+        if timing.isNotchEnabled, let race = timing.snapshot, race.isLive,
+           !race.isStale, Date().timeIntervalSince(race.fetchedAt) < 60 {
+            let focusedID = UserDefaults.standard.string(forKey: "F1NotchFocusedDriverID")
+            let driver = race.drivers.first { $0.id == focusedID }
+                ?? race.drivers.first { timing.favoriteDriverIDs.contains($0.id) }
+                ?? race.drivers.first { timing.isFavorite(driver: $0) }
+                ?? race.drivers.first
+            let detail = F1NotchPayload(
+                title: race.title, lap: race.lap, totalLaps: race.totalLaps,
+                driver: driver?.abbreviation ?? "F1", position: driver?.position
+            )
+            let payload = SportsPayload(
+                league: "Formula 1", homeTeam: detail.driver, awayTeam: "F1",
+                homeScore: 0, awayScore: 0, status: "Live", time: detail.lapText, f1: detail
+            )
+            let content = LiveActivityContent.standard(
+                data: .sports(payload: payload, bottom: .none),
+                id: "f1_\(race.id)_\(detail.lapText)_\(detail.driver)_\(detail.position ?? -1)"
+            )
+            return (.sports, content, nil)
+        }
         guard settingsModel.current.sportsLiveActivityEnabled,
               SubscriptionManager.shared.hasAccess(to: .liveSports) else {
             return nil
@@ -2494,33 +2551,18 @@ class LiveActivityManager {
         guard !teams.isEmpty else { return nil }
 
         let whenLiveOnly = settingsModel.current.sportsLiveActivityWhenLiveOnly
-        let liveTeamIndex = teams.firstIndex(where: { team in
-            SportsAPIService.shared.cachedLiveEvent(for: team)?.isLive == true
-        })
-
-        if whenLiveOnly, liveTeamIndex == nil {
-            return nil
+        let available = teams.enumerated().compactMap { index, team -> (Int, LiveSportsEvent)? in
+            guard let event = SportsAPIService.shared.cachedLiveEvent(for: team),
+                  !whenLiveOnly || event.isLive else { return nil }
+            return (index, event)
         }
-
-        if let liveIndex = liveTeamIndex {
-            sportsActivityTeamIndex = liveIndex
-        } else {
-            sportsActivityTeamIndex = max(0, min(sportsActivityTeamIndex, teams.count - 1))
-        }
-
-        let teamOrLeague = teams[sportsActivityTeamIndex]
-
-        let liveEvent = SportsAPIService.shared.cachedLiveEvent(for: teamOrLeague)
-        if whenLiveOnly, liveEvent?.isLive != true {
-            return nil
-        }
-
-        let payload: SportsPayload
-        if let live = liveEvent {
-            payload = SportsFinanceContentProvider.makeSportsPayload(from: live)
-        } else {
-            payload = SportsFinanceContentProvider.makeSportsPayload(for: teamOrLeague, index: sportsActivityTeamIndex)
-        }
+        guard !available.isEmpty else { return nil }
+        let live = available.filter { $0.1.isLive }
+        let eligible = live.isEmpty ? available : live
+        let selected = eligible.first { $0.0 == sportsActivityTeamIndex } ?? eligible[0]
+        sportsActivityTeamIndex = selected.0
+        let liveEvent: LiveSportsEvent? = selected.1
+        let payload = SportsFinanceContentProvider.makeSportsPayload(from: selected.1)
 
         var bottomContent: SportsBottomContentType = .none
         if settingsModel.current.sportsCommentaryInLiveActivity,
@@ -2554,7 +2596,16 @@ class LiveActivityManager {
     func cycleSportsActivity() -> Bool {
         let teams = settingsModel.current.sportsFavoriteTeams
         guard currentActivity == .sports, teams.count > 1 else { return false }
-        sportsActivityTeamIndex = (sportsActivityTeamIndex + 1) % teams.count
+        let available = teams.indices.filter {
+            SportsAPIService.shared.cachedLiveEvent(for: teams[$0]) != nil
+        }
+        let live = available.filter {
+            SportsAPIService.shared.cachedLiveEvent(for: teams[$0])?.isLive == true
+        }
+        let eligible = live.isEmpty && !settingsModel.current.sportsLiveActivityWhenLiveOnly ? available : live
+        guard eligible.count > 1 else { return false }
+        let current = eligible.firstIndex(of: sportsActivityTeamIndex) ?? -1
+        sportsActivityTeamIndex = eligible[(current + 1) % eligible.count]
         evaluateAndDisplayActivity()
         return true
     }
@@ -2565,12 +2616,11 @@ class LiveActivityManager {
             return nil
         }
 
-        guard let symbol = settingsModel.settings.currentFinanceFavoriteSymbol() else {
-            return nil
-        }
-
-        let index = settingsModel.current.financeFavoriteSymbolIndex
-        let quote = FinanceAPIService.shared.cachedQuote(symbol: symbol)
+        let store = CommunityFinanceStore.shared
+        let symbol = store.selectedSymbol
+        guard store.watchlist.contains(symbol),
+              let quote = FinanceAPIService.shared.cachedQuote(symbol: symbol) else { return nil }
+        let index = store.watchlist.firstIndex(of: symbol) ?? 0
         let payload = FinanceAPIService.shared.makePayload(symbol: symbol, index: index, quote: quote)
 
         if settingsModel.current.financeLiveActivityActiveHoursOnly, payload.isAfterHours {
@@ -2766,7 +2816,7 @@ class LiveActivityManager {
                     }
                     self.tickerFetchTick += 1
                     if self.tickerFetchTick % Self.tickerNetworkRefreshTicks == 0 {
-                        Task { await self.refreshSportsFinanceData(forceRefresh: true) }
+                        Task { await self.refreshSportsFinanceData() }
                     }
                     self.refreshActiveActivityContent()
                 }
@@ -2794,12 +2844,12 @@ class LiveActivityManager {
                 Task { @MainActor [weak self] in
                     guard let self else { return }
                     guard self.currentActivity != .finance, self.currentActivity != .sports else { return }
-                    await self.refreshSportsFinanceData(forceRefresh: true)
+                    await self.refreshSportsFinanceData()
                     self.lastEvalTime = 0
                     self.evaluateAndDisplayActivity()
                 }
             }
-            Task { await refreshSportsFinanceData(forceRefresh: true) }
+            Task { await refreshSportsFinanceData() }
         } else {
             sportsFinanceWatchTimer?.invalidate()
             sportsFinanceWatchTimer = nil
@@ -2815,9 +2865,7 @@ class LiveActivityManager {
             }
         }
         if settingsModel.current.financeLiveActivityEnabled, SubscriptionManager.shared.hasAccess(to: .financeLiveActivity) {
-            for symbol in settingsModel.current.financeFavoriteSymbols.prefix(6) {
-                _ = await FinanceAPIService.shared.fetchQuote(symbol: symbol)
-            }
+            await CommunityFinanceStore.shared.refresh(force: forceRefresh)
         }
     }
 }

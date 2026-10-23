@@ -37,6 +37,12 @@ enum NotchIslandBar {
         }
         items = tidySeparators(items)
         for button in dropOrder where width(of: items) > maxWidth {
+            if button == .pin {
+                // Home still navigates out of details; keep Unpin reachable.
+                items.removeAll { $0 == .back }
+                items = tidySeparators(items)
+                if width(of: items) <= maxWidth { break }
+            }
             items.removeAll { $0 == .button(button) }
             items = tidySeparators(items)
         }
@@ -99,8 +105,8 @@ enum NotchIslandBar {
     }
 
     private static let dropOrder: [NotchButtonType] = [
-        .pin, .caffeine, .battery, .continuity, .settings, .intelligence,
-        .multiAudio, .focusSession, .clipboard, .notes, .fileShelf,
+        .caffeine, .battery, .continuity, .settings, .intelligence,
+        .multiAudio, .focusSession, .clipboard, .notes, .fileShelf, .pin,
     ]
 
     private static func tidySeparators(_ items: [Item]) -> [Item] {
@@ -152,12 +158,16 @@ struct NotchIslandBarView: View {
                     )
                 }
                 .padding(.horizontal, 14)
+                .padding(.vertical, 6)
+                .background(.black, in: Capsule())
+                .environment(\.colorScheme, .dark)
                 .transition(.opacity)
             }
         }
         .animation(.easeInOut(duration: 0.15), value: hud == nil)
         .padding(.horizontal, NotchIslandBar.padding)
         .frame(width: size.width, height: size.height)
+        .appPanelAppearance()
     }
 
     @ViewBuilder
@@ -165,7 +175,7 @@ struct NotchIslandBarView: View {
         switch item {
         case .separator:
             Capsule()
-                .fill(Color.white.opacity(0.14))
+                .fill(Color.primary.opacity(0.14))
                 .frame(width: 1, height: 16)
                 .frame(width: NotchIslandBar.separatorWidth)
         case .back:
@@ -204,7 +214,7 @@ struct NotchIslandBarButton<Label: View>: View {
 
     private var foreground: Color {
         if let activeTint { return activeTint }
-        return Color.white.opacity(isSelected ? 1 : (isHovering ? 0.95 : 0.62))
+        return Color.primary.opacity(isSelected ? 1 : (isHovering ? 0.95 : 0.62))
     }
 
     var body: some View {
@@ -214,7 +224,7 @@ struct NotchIslandBarButton<Label: View>: View {
                 .frame(width: NotchIslandBar.itemWidth - 4, height: NotchIslandBar.height - 8)
                 .background(
                     Capsule(style: .continuous)
-                        .fill(Color.white.opacity(isSelected ? 0.16 : (isHovering ? 0.07 : 0)))
+                        .fill(Color.primary.opacity(isSelected ? 0.12 : (isHovering ? 0.06 : 0)))
                 )
                 .frame(width: NotchIslandBar.itemWidth, height: NotchIslandBar.height)
                 .contentShape(Rectangle())
@@ -279,15 +289,7 @@ private struct NotchIslandBarTypeButton: View {
             }
             .contextMenu { NotchCaffeinateMenu(caffeineManager: caffeineManager) }
         case .pin:
-            NotchIslandBarButton(
-                systemName: context.isPinned.wrappedValue ? "pin.fill" : "pin",
-                isSelected: false,
-                activeTint: context.isPinned.wrappedValue ? Color.white : nil,
-                help: context.isPinned.wrappedValue ? "Unpin" : "Pin Open"
-            ) {
-                context.isPinned.wrappedValue.toggle()
-                context.onPin(context.isPinned.wrappedValue)
-            }
+            NotchPinButton(isPinned: context.isPinned, isFloatingIsland: true, onPin: context.onPin)
         case .battery:
             NotchIslandBarButton(systemName: batterySymbol, isSelected: isSelected, help: batteryHelp) {
                 open(.battery)

@@ -104,7 +104,7 @@ private struct FocusSessionActivityClockView: View {
                 motion: .focusBlock(focusManager, minimum: 0.001),
                 lineWidth: 2.5,
                 trackLineWidth: 5,
-                trackColor: Color.white.opacity(0.22),
+                trackColor: Color.primary.opacity(0.22),
                 colors: ringColors,
                 catchUpDuration: 0.5
             )
@@ -121,7 +121,7 @@ private struct FocusSessionActivityClockView: View {
     }
 
     private var subLabelColor: Color {
-        if mode.isActive { return .white.opacity(0.85) }
+        if mode.isActive { return .primary.opacity(0.85) }
         return focusManager.isFocusBlock ? Color.indigo : Color.orange
     }
 }

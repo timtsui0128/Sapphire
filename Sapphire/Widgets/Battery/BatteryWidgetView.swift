@@ -50,13 +50,13 @@ struct BatteryWidgetView: View {
                     color: power.statusColor
                 )
                 HStack(alignment: .lastTextBaseline, spacing: 4) {
-                    LayerNumericText(text: wattsText, font: Self.wattsFont, color: .white)
+                    LayerNumericText(text: wattsText, font: Self.wattsFont, color: .labelColor)
                         .textBaseline()
                         .accessibilityLabel(Text(wattsText))
                     if power.heroWatts > 0 {
                         Text("W")
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(.primary.opacity(0.7))
                     }
                     Spacer(minLength: 0)
                     Image(systemName: power.adapterConnected ? "powerplug.fill" : "battery.100")
@@ -76,8 +76,7 @@ struct BatteryWidgetView: View {
         .buttonStyle(.plain)
         .frame(minWidth: 210, minHeight: 90)
         .fixedSize()
-        .foregroundColor(.white)
-        .preferredColorScheme(.dark)
+        .foregroundColor(.primary)
         .contentShape(Rectangle())
         .help("Click for the full battery & power overview")
         .onAppear {

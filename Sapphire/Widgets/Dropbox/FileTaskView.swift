@@ -59,7 +59,7 @@ private struct SwipeToDismissWrapper<Content: View>: View {
                         .overlay(
                             Image(systemName: leading.systemImage)
                                 .font(.title3.weight(.semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(.primary)
                                 .opacity(min(1, offset / 40.0))
                                 .animation(.easeIn(duration: 0.15), value: offset)
                         )
@@ -72,7 +72,7 @@ private struct SwipeToDismissWrapper<Content: View>: View {
                         .overlay(
                             Image(systemName: trailing.systemImage)
                                 .font(.title3.weight(.semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(.primary)
                                 .opacity(min(1, -offset / 40))
                                 .animation(.easeIn(duration: 0.15), value: offset)
                         )
@@ -236,7 +236,7 @@ struct FileTaskView: View {
         .frame(width: 600)
         .frame(maxHeight: 300)
         .fixedSize(horizontal: false, vertical: true)
-        .background(Color(red: 0.1, green: 0.1, blue: 0.1), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .background(Color(nsColor: .windowBackgroundColor), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
         .environment(liveActivityManager)
         .scaleEffect(isShowing ? 1 : 0.98)
         .opacity(isShowing ? 1 : 0)
@@ -402,7 +402,7 @@ private struct HeaderView: View {
             .foregroundColor(.secondary)
         }
         .padding(16)
-        .background(.black.opacity(0.3))
+        .background(Color.primary.opacity(0.08))
     }
 }
 
@@ -503,7 +503,7 @@ private struct UniversalTransferRowView: View {
             }
         }
         .padding(10)
-        .background(Color.black.opacity(0.1))
+        .background(Color.primary.opacity(0.04))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
@@ -545,7 +545,7 @@ private struct LocalFileRowView: View {
             }
         }
         .padding(10)
-        .background(Color.black.opacity(isHovering ? 0.2 : 0.1))
+        .background(Color.primary.opacity(isHovering ? 0.08 : 0.04))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .onDrag {
             DragStateManager.shared.beginShelfDrag(item: item)
@@ -574,7 +574,7 @@ private struct AirDropRowView: View {
             }
         }
         .padding(10)
-        .background(Color.black.opacity(0.1))
+        .background(Color.primary.opacity(0.04))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
@@ -602,7 +602,7 @@ private struct ConversionRowView: View {
             }
         }
         .padding(10)
-        .background(Color.black.opacity(0.1))
+        .background(Color.primary.opacity(0.04))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
@@ -637,7 +637,7 @@ private struct ModernTransferRowView: View {
                 .animation(.spring(response: 0.3, dampingFraction: 0.8), value: transfer.state)
         }
         .padding(10)
-        .background(Color.black.opacity(isHovering ? 0.2 : 0.1))
+        .background(Color.primary.opacity(isHovering ? 0.08 : 0.04))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .onHover { hovering in
             withAnimation(.easeInOut) { isHovering = hovering }

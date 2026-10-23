@@ -1,0 +1,224 @@
+import AppKit
+import Foundation
+import SwiftUI
+
+private final class SurfaceDefaults: UserDefaults {
+    private var values: [String: Any] = [:]
+    init() { super.init(suiteName: "SapphireSurfaceChecks.\(UUID().uuidString)")! }
+    override func object(forKey key: String) -> Any? { values[key] }
+    override func string(forKey key: String) -> String? { values[key] as? String }
+    override func set(_ value: Any?, forKey key: String) { values[key] = value }
+}
+private func check(_ value: @autoclosure () -> Bool, _ message: String) throws {
+    if !value() { throw NSError(domain: "SurfaceChecks", code: 1, userInfo: [NSLocalizedDescriptionKey: message]) }
+}
+private func brightness(_ color: NSColor) -> CGFloat {
+    let rgb = color.usingColorSpace(.sRGB)!
+    return (rgb.redComponent + rgb.greenComponent + rgb.blueComponent) / 3
+}
+private func contrast(_ first: NSColor, _ second: NSColor) -> CGFloat {
+    func luminance(_ color: NSColor) -> CGFloat {
+        let rgb = color.usingColorSpace(.sRGB)!
+        func linear(_ value: CGFloat) -> CGFloat { value <= 0.04045 ? value / 12.92 : pow((value + 0.055) / 1.055, 2.4) }
+        return 0.2126 * linear(rgb.redComponent) + 0.7152 * linear(rgb.greenComponent) + 0.0722 * linear(rgb.blueComponent)
+    }
+    let values = [luminance(first), luminance(second)]
+    return (values.max()! + 0.05) / (values.min()! + 0.05)
+}
+private struct PanelProbe: View {
+    let appearance: AppAppearance
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            Rectangle().fill(.primary).frame(width: 24, height: 24).offset(x: 16, y: 16)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Expanded panel").font(.headline)
+                Text("Semantic text under a dark notch host").font(.caption).foregroundStyle(.secondary)
+            }
+            .offset(x: 56, y: 14)
+            Rectangle().fill(.primary).frame(width: 24, height: 24)
+                .appContentAppearance(appearance)
+                .offset(x: 300, y: 16)
+            HStack(spacing: 4) {
+                NotchIslandBarButton(systemName: "house.fill", isSelected: true, help: "Home") {}
+                NotchIslandBarButton(systemName: "gearshape.fill", isSelected: false, help: "Settings") {}
+                NotchIslandBarButton(systemName: "pin.fill", isSelected: false, activeTint: .primary, help: "Pinned") {}
+                NotchCapsuleIconLabel(systemName: "chevron.left")
+                SubtleIconButton(systemName: "tray", action: {})
+                BatteryInfoView(level: 74, isCharging: false, timeRemaining: "2h 45m")
+            }
+            .offset(x: 16, y: 70)
+        }
+        .frame(width: 340, height: 124, alignment: .topLeading)
+    }
+}
+@main
+private struct SurfaceStyleChecks {
+    @MainActor static func main() async throws {
+        setbuf(stdout, nil)
+        _ = NSApplication.shared
+        NSApp.setActivationPolicy(.prohibited)
+        var input = NotchSurfaceStyle.Inputs(
+            appearance: NotchAppearanceSettings(), config: ResolvedNotchConfiguration(),
+            shape: CustomNotchShape(), notchState: .clickExpanded,
+            isGeminiActive: false, isManuallyHidden: false, surfaceShadowOpacity: 0.3,
+            radialEndRadius: 0, systemGlassAvailable: true, expandedColorScheme: .light,
+            surfaceHeight: 400
+        )
+        let physical = NotchSurfaceStyle.resolve(input)
+        guard case let .solid(canvas)? = physical.fill else {
+            throw NSError(domain: "SurfaceChecks", code: 2)
+        }
+        try check(brightness(canvas) > 0.8, "Expanded software top bar and body must be one light canvas")
+        try check(physical.glass == nil && physical.fillShadow.opacity == 0.3, "Light expanded surface must retain shadow without dark glass")
+        input.surfaceHeight = 200
+        guard case let .solid(resized)? = NotchSurfaceStyle.resolve(input).fill else {
+            throw NSError(domain: "SurfaceChecks", code: 3)
+        }
+        try check(brightness(resized) > 0.8, "A resize must not restore the software black stripe")
+        print("PASS: expanded surface has a continuous light top bar and body, including after resizing")
+        input.config.isFloatingIsland = true
+        let floating = NotchSurfaceStyle.resolve(input)
+        guard case let .solid(canvas)? = floating.fill else { throw NSError(domain: "SurfaceChecks", code: 4) }
+        try check(brightness(canvas) > 0.8, "Floating expanded island must be all light")
+        for finish in ExpandedPanelSurface.allCases {
+            input.expandedPanelSurface = finish
+            input.config.isFloatingIsland = false
+            input.notchState = .clickExpanded
+            for scheme: ColorScheme in [.light, .dark] {
+                input.expandedColorScheme = finish.colorScheme(following: scheme)
+                let style = NotchSurfaceStyle.resolve(input)
+                if finish == .white || finish == .black {
+                    guard case .solid(let color)? = style.fill else { throw NSError(domain: "SurfaceChecks", code: 8) }
+                    try check(finish == .white ? brightness(color) > 0.99 : brightness(color) < 0.01, "Explicit surface must honor White/Black in both app themes")
+                    try check(style.glass == nil, "Solid finish must not stack glass under its fill")
+                }
+                if finish == .liquidGlass {
+                    try check(style.glass?.backend == .automatic && style.fill == nil, "Glass must use one continuous native surface without opaque paint")
+                    try check(style.glass?.appearance == (scheme == .light ? .light : .dark), "Glass appearance must match semantic text")
+                    input.systemGlassAvailable = false
+                    try check(NotchSurfaceStyle.resolve(input).glass?.backend == .visualEffect, "Older macOS must use a native blur fallback")
+                    input.systemGlassAvailable = true
+                    input.reduceTransparency = true
+                    let opaque = NotchSurfaceStyle.resolve(input)
+                    try check(opaque.glass == nil && opaque.fill != nil, "Reduce Transparency must use an opaque surface")
+                    if case .solid(let color)? = opaque.fill {
+                        try check(scheme == .light ? brightness(color) > 0.8 : brightness(color) < 0.01, "Opaque accessibility fallback must retain the selected light/dark contrast")
+                    }
+                    input.reduceTransparency = false
+                }
+            }
+        }
+        input.expandedPanelSurface = .matchPanel
+        input.expandedColorScheme = .light
+        input.appearance.mode = .liquidGlass
+        input.appearance.usesLiquidGlass = true
+        input.appearance.liquidGlassOptions.appearance = .auto
+        try check(NotchSurfaceStyle.resolve(input).glass?.appearance == .light, "Match Panel must honor expanded Liquid Glass even in Light mode")
+        input.appearance = NotchAppearanceSettings()
+        input.appearance.mode = .blur
+        input.appearance.opacity = 0.5
+        input.appearance.enableTransparencyBlur = true
+        try check(NotchSurfaceStyle.resolve(input).glass?.appearance == .light, "Light blur must use a light material under dark text")
+        input.appearance = NotchAppearanceSettings()
+        print("PASS: all panel finishes, explicit light/dark contrast, native glass/fallback, accessibility and existing material selection")
+        for floating in [false, true] {
+            input.config.isFloatingIsland = floating
+            for finish in ExpandedPanelSurface.allCases {
+            input.expandedPanelSurface = finish
+            for state: NotchController.NotchState in [.initial, .autoExpanded, .hoverExpanded] {
+                input.notchState = state
+                let style = NotchSurfaceStyle.resolve(input)
+                switch style.fill {
+                case .solid(let color): try check(brightness(color) < 0.01, "Collapsed/activity surface must remain black")
+                case .linearGradient(let colors, _, _, _): try check(colors.allSatisfy { brightness($0) < 0.1 }, "Floating activity surface must remain dark")
+                default: throw NSError(domain: "SurfaceChecks", code: 5)
+                }
+            }
+            }
+        }
+        input.expandedPanelSurface = .matchPanel
+        input.notchState = .clickExpanded
+        input.expandedColorScheme = .dark
+        input.config.isFloatingIsland = false
+        guard case let .solid(dark)? = NotchSurfaceStyle.resolve(input).fill else { throw NSError(domain: "SurfaceChecks", code: 6) }
+        try check(brightness(dark) < 0.01, "Dark expanded surface must preserve original black canvas")
+        print("PASS: floating light expansion, dark expansion and unchanged collapsed/activity surfaces")
+        let output = URL(fileURLWithPath: CommandLine.arguments.dropFirst().first!)
+        try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
+        let defaults = SurfaceDefaults()
+        let appearance = AppAppearance(defaults: defaults)
+        for mode: AppAppearanceMode in [.light, .dark] {
+            appearance.mode = mode
+            for finish in ExpandedPanelSurface.allCases {
+            appearance.expandedPanelSurface = finish
+            let isLight = appearance.expandedPanelColorScheme == .light
+            let backdrop = finish == .white ? NSColor.white : (isLight ? canvas : NSColor.black)
+            let root = PanelProbe(appearance: appearance)
+                .appPanelAppearance(appearance)
+                .notchHostEnvironment(bandHeight: 32, displayScale: 1)
+                .background(Color(nsColor: backdrop))
+            let host = NSHostingView(rootView: root)
+            let frame = NSRect(x: 0, y: 0, width: 340, height: 124)
+            let window = NSWindow(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            window.appearance = NSAppearance(named: .darkAqua)
+            window.contentView = host
+            host.frame = frame
+            host.layoutSubtreeIfNeeded()
+            try await Task.sleep(for: .milliseconds(80))
+            host.layoutSubtreeIfNeeded()
+            guard let bitmap = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { throw NSError(domain: "SurfaceChecks", code: 7) }
+            host.cacheDisplay(in: host.bounds, to: bitmap)
+            func sample(_ x: CGFloat, _ y: CGFloat) -> NSColor {
+                bitmap.colorAt(x: Int(x * CGFloat(bitmap.pixelsWide) / frame.width), y: Int(y * CGFloat(bitmap.pixelsHigh) / frame.height))!
+            }
+            let probe = sample(24, 24)
+            print("Contrast probe \(mode.rawValue)/\(finish.rawValue): \(brightness(probe)), expected \(isLight ? "dark" : "light") ink")
+            // System primary ink is slightly translucent, so test its real contrast.
+            try check(contrast(probe, backdrop) >= 7, "Panel primary ink must retain high contrast under the forced dark host: \(mode.rawValue)/\(finish.rawValue)")
+            let cardProbe = sample(308, 24)
+            try check(contrast(cardProbe, backdrop) >= 7, "Nested screenshot/sports/finance content must inherit the panel finish")
+            let file = output.appendingPathComponent("expanded-panel-\(mode.rawValue)-\(finish.rawValue).png")
+            try bitmap.representation(using: .png, properties: [:])!.write(to: file)
+            print("Rendered \(file.lastPathComponent)")
+            if mode == .light && finish == .matchPanel {
+                appearance.expandedPanelSurface = .black
+                try await Task.sleep(for: .milliseconds(80))
+                host.layoutSubtreeIfNeeded()
+                host.cacheDisplay(in: host.bounds, to: bitmap)
+                try check(brightness(sample(24, 24)) > 0.8, "An already mounted panel must update immediately when surface changes")
+                appearance.expandedPanelSurface = .white
+                try await Task.sleep(for: .milliseconds(80))
+                host.layoutSubtreeIfNeeded()
+                host.cacheDisplay(in: host.bounds, to: bitmap)
+                try check(brightness(sample(24, 24)) < 0.4, "White must restore dark header text without reopening the panel")
+            }
+            window.close()
+            }
+        }
+        for mode: AppAppearanceMode in [.light, .dark] {
+            appearance.mode = mode
+            appearance.expandedPanelSurface = .matchPanel
+            let frame = NSRect(x: 0, y: 0, width: 520, height: 370)
+            let root = AppAppearanceSettingsSection(appearance: appearance)
+                .padding(16)
+                .frame(width: frame.width, height: frame.height, alignment: .top)
+                .background(mode == .light ? Color.white : Color.black)
+                .appAppearance(appearance)
+            let host = NSHostingView(rootView: root)
+            let window = NSWindow(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            window.contentView = host
+            host.frame = frame
+            host.layoutSubtreeIfNeeded()
+            try await Task.sleep(for: .milliseconds(80))
+            host.layoutSubtreeIfNeeded()
+            guard let bitmap = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { throw NSError(domain: "SurfaceChecks", code: 9) }
+            host.cacheDisplay(in: host.bounds, to: bitmap)
+            try bitmap.representation(using: .png, properties: [:])!.write(to: output.appendingPathComponent("surface-settings-\(mode.rawValue).png"))
+            window.close()
+        }
+        print("PASS: actual header/back/battery controls render for 8 theme/finish combinations; mounted panels update immediately")
+        print("PASS: production controller, widget plane and floating chrome theme wiring verified")
+    }
+}

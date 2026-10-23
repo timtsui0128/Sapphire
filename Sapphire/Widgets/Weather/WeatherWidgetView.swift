@@ -15,15 +15,15 @@ struct WeatherWidgetView: View {
         ZStack {
             HStack(alignment: .center, spacing: 10) {
                 primaryInfo.layoutPriority(1)
-                secondaryInfo
+                secondaryInfo.fixedSize(horizontal: true, vertical: true)
             }
             .padding(.horizontal, 10)
         }
         .padding(.top, 0)
-        .frame(minWidth: 200, minHeight: 90)
-        .fixedSize()
-        .foregroundColor(.white)
-        .preferredColorScheme(.dark)
+        .frame(width: 260)
+        .frame(minHeight: 90)
+        .fixedSize(horizontal: false, vertical: true)
+        .foregroundColor(.primary)
         .contentShape(Rectangle())
         .onTapGesture {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
@@ -55,7 +55,9 @@ struct WeatherWidgetView: View {
                     .transition(.opacity)
 
                 Text(viewModel.conditionDescription)
-                    .font(.subheadline).opacity(0.8).lineLimit(1).minimumScaleFactor(0.7)
+                    .font(.caption).opacity(0.8).lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .help(viewModel.conditionDescription)
                     .id(viewModel.conditionDescription)
                     .transition(.opacity)
             }

@@ -1402,13 +1402,7 @@ struct TimerActivityView {
 
     private static let clockFont = NSFont.monospacedSystemFont(ofSize: 13, weight: .semibold)
 
-    static let primaryTextColor: NSColor = {
-        var color = NSColor.white
-        NSAppearance(named: .darkAqua)?.performAsCurrentDrawingAppearance {
-            color = NSColor.labelColor.usingColorSpace(.sRGB) ?? .white
-        }
-        return color
-    }()
+    static let primaryTextColor = NSColor.labelColor
 }
 
 struct TimerFinishedActivityView: View {

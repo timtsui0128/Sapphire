@@ -16,12 +16,12 @@ struct RoundedPillSwitcher<Item: Hashable>: View {
             ForEach(items, id: \.self) { item in
                 Text(title(item))
                     .font(.system(size: 9, weight: .bold, design: .rounded))
-                    .foregroundStyle(selection == item ? .white : .white.opacity(0.42))
+                    .foregroundStyle(selection == item ? Color.primary : Color.primary.opacity(0.42))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                     .background(
                         Capsule()
-                            .fill(selection == item ? Color.white.opacity(0.2) : Color.clear)
+                            .fill(selection == item ? Color.primary.opacity(0.2) : Color.clear)
                     )
                     .contentShape(Capsule())
                     .onTapGesture {
@@ -31,7 +31,7 @@ struct RoundedPillSwitcher<Item: Hashable>: View {
                     }
             }
         }
-        .background(Color.white.opacity(0.07))
+        .background(Color.primary.opacity(0.07))
         .clipShape(Capsule())
     }
 }

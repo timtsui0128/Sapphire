@@ -339,6 +339,7 @@ struct VisualEffectView: NSViewRepresentable {
 
     func makeNSView(context: Context) -> NSVisualEffectView {
         let view = NSVisualEffectView()
+        view.appearance = NSAppearance(named: context.environment.colorScheme == .dark ? .darkAqua : .aqua)
         view.material = material
         view.blendingMode = blendingMode
         view.isEmphasized = isEmphasized
@@ -347,6 +348,7 @@ struct VisualEffectView: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
+        nsView.appearance = NSAppearance(named: context.environment.colorScheme == .dark ? .darkAqua : .aqua)
         if nsView.material != material { nsView.material = material }
         if nsView.blendingMode != blendingMode { nsView.blendingMode = blendingMode }
         if nsView.isEmphasized != isEmphasized { nsView.isEmphasized = isEmphasized }

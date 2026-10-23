@@ -30,14 +30,14 @@ struct DevWidgetView: View {
                         row(symbol: card.symbol, tint: card.tint, title: card.title) {
                             Text(card.compactValue)
                                 .font(.system(size: 10, weight: .semibold, design: .rounded))
-                                .foregroundStyle(.white.opacity(0.75))
+                                .foregroundStyle(.primary.opacity(0.75))
                         }
                     }
                 }
             } else {
                 Text("Nothing running")
                     .font(.system(size: 10, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.45))
+                    .foregroundStyle(.primary.opacity(0.45))
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             }
         }
@@ -63,10 +63,10 @@ struct DevWidgetView: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text("Dev")
                     .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                 Text(statusLine)
                     .font(.system(size: 9.5, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.5))
+                    .foregroundStyle(.primary.opacity(0.5))
                     .lineLimit(1)
             }
             Spacer(minLength: 0)
@@ -95,13 +95,13 @@ struct DevWidgetView: View {
                 .background(Circle().fill(tint.opacity(0.18)))
             Text(title)
                 .font(.system(size: 10.5, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white.opacity(0.9))
+                .foregroundStyle(.primary.opacity(0.9))
                 .lineLimit(1)
             Spacer(minLength: 4)
             trailing()
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 3)
-        .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.white.opacity(0.06)))
+        .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.primary.opacity(0.06)))
     }
 }

@@ -446,11 +446,51 @@ struct ShelfItem: Identifiable, Codable, Equatable, Hashable {
 
 // MARK: - Main Shelf View (RESTORED)
 
+private struct ScreenshotShelfKeyboardFocusKey: EnvironmentKey {
+    static let defaultValue: (Bool) -> Void = { _ in }
+}
+
+extension EnvironmentValues {
+    var screenshotShelfKeyboardFocus: (Bool) -> Void {
+        get { self[ScreenshotShelfKeyboardFocusKey.self] }
+        set { self[ScreenshotShelfKeyboardFocusKey.self] = newValue }
+    }
+}
+
 struct FileShelfView: View {
     @StateObject private var manager = FileShelfManager.shared
+    @ObservedObject private var screenshots = ScreenshotShelfManager.shared
+    @AppStorage("ScreenshotShelfSelectedTab") private var selectedTab = "screenshots"
+    @Environment(\.screenshotShelfKeyboardFocus) private var setScreenshotKeyboardFocus
 
     var body: some View {
-        ShelfContentView(files: manager.files)
+        VStack(spacing: 0) {
+            Picker("Shelf", selection: $selectedTab) {
+                Text("Screenshots (\(screenshots.items.count))").tag("screenshots")
+                Text("Files (\(manager.files.count))").tag("files")
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+
+            if selectedTab == "files" {
+                ShelfContentView(files: manager.files)
+            } else {
+                ScreenshotShelfView(onDragStateChanged: { dragging in
+                    // Screenshot drags are copies and must never use the legacy
+                    // shelf's remove-after-mouse-up behavior.
+                    DragStateManager.shared.isDraggingFromShelf = dragging
+                })
+                .contentShape(Rectangle())
+                .simultaneousGesture(TapGesture().onEnded {
+                    setScreenshotKeyboardFocus(true)
+                })
+                .onDisappear {
+                    setScreenshotKeyboardFocus(false)
+                }
+            }
+        }
+        .frame(width: 680)
     }
 }
 

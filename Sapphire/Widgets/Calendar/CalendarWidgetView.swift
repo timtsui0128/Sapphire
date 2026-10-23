@@ -78,7 +78,7 @@ struct CalendarWidgetView: View {
         }
         .padding(.top, 10)
         .frame(width: 240, height: 100)
-        .foregroundColor(.white)
+        .foregroundColor(.primary)
         .environmentObject(viewModel)
         .onChange(of: viewModel.selectedDate) {
             calendarService.fetchEvents(for: viewModel.selectedDate)
@@ -223,13 +223,14 @@ struct DynamicDayView: View {
     let containerWidth: CGFloat
 
     @EnvironmentObject private var viewModel: InteractiveCalendarViewModel
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         let isSelected = date.isSameDay(as: viewModel.selectedDate)
         let dayName = date.format(as: isSelected ? "EEE" : "EEEEE").uppercased()
-        let numberBase = Self.opaque(date.isWeekend ? Color.red.opacity(0.8) : Color.white.opacity(0.8))
-        let letterBase = Self.opaque(.gray)
-        let focus = Self.opaque(.blue)
+        let numberBase = opaque(date.isWeekend ? Color.red.opacity(0.8) : Color.primary.opacity(0.8))
+        let letterBase = opaque(.gray)
+        let focus = opaque(.blue)
         let centerX = containerWidth / 2
 
         VStack(spacing: 3) {
@@ -266,8 +267,10 @@ struct DynamicDayView: View {
             }
     }
 
-    private static func opaque(_ color: Color) -> Color {
-        let resolved = color.resolve(in: EnvironmentValues())
+    private func opaque(_ color: Color) -> Color {
+        var environment = EnvironmentValues()
+        environment.colorScheme = colorScheme
+        let resolved = color.resolve(in: environment)
         return Color(red: Double(resolved.red), green: Double(resolved.green), blue: Double(resolved.blue))
     }
 

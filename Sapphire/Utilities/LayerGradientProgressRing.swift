@@ -19,11 +19,9 @@ extension LinearProgressMotion {
 
 extension NSColor {
     static func notchResolved(_ color: Color) -> NSColor {
-        var resolved = NSColor(color)
-        NSAppearance(named: .darkAqua)?.performAsCurrentDrawingAppearance {
-            resolved = NSColor(color).usingColorSpace(.sRGB) ?? resolved
-        }
-        return resolved
+        // Keep semantic colors dynamic until the receiving view resolves them
+        // with its own appearance; collapsed and expanded hosts can differ.
+        NSColor(color)
     }
 }
 
@@ -31,7 +29,7 @@ struct LayerGradientProgressRing: NSViewRepresentable {
     var motion: LinearProgressMotion
     var lineWidth: CGFloat
     var trackLineWidth: CGFloat? = nil
-    var trackColor: Color = Color.white.opacity(0.18)
+    var trackColor: Color = Color.primary.opacity(0.18)
     var colors: [Color]
     var shadowColor: Color = .clear
     var shadowRadius: CGFloat = 0
@@ -40,12 +38,14 @@ struct LayerGradientProgressRing: NSViewRepresentable {
 
     func makeNSView(context: Context) -> LayerGradientProgressRingView {
         let view = LayerGradientProgressRingView()
+        view.appearance = NSAppearance(named: context.environment.colorScheme == .dark ? .darkAqua : .aqua)
         view.configure(self)
         view.apply(motion, catchUp: 0)
         return view
     }
 
     func updateNSView(_ nsView: LayerGradientProgressRingView, context: Context) {
+        nsView.appearance = NSAppearance(named: context.environment.colorScheme == .dark ? .darkAqua : .aqua)
         nsView.configure(self)
         nsView.apply(motion, catchUp: catchUpDuration)
     }
@@ -115,7 +115,7 @@ final class LayerGradientProgressRingView: NSView {
             lineWidth: ring.lineWidth,
             trackLineWidth: ring.trackLineWidth ?? ring.lineWidth,
             trackColor: ring.trackColor,
-            colors: ring.colors.isEmpty ? [.white] : ring.colors,
+            colors: ring.colors.isEmpty ? [.primary] : ring.colors,
             shadowColor: ring.shadowColor,
             shadowRadius: ring.shadowRadius,
             shadowIncludesTrack: ring.shadowIncludesTrack

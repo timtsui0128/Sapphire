@@ -84,7 +84,7 @@ struct CalendarDetailView: View {
                 .opacity(isMonthlyView ? 0 : 1)
         }
         .frame(width: 580, height: 320)
-        .foregroundColor(.white)
+        .foregroundColor(.primary)
         .onAppear {
             viewModel.updateStartOfWeek(settings.settings.calendarStartOfWeek)
             calendarService.fetchEvents(for: viewModel.selectedDate)
@@ -153,7 +153,7 @@ struct CalendarDetailView: View {
                 }
             }
             .padding(.vertical, 6)
-            .background(Color.black.opacity(0.2))
+            .background(Color.primary.opacity(0.08))
             .clipShape(Capsule())
             .buttonStyle(.plain)
         }
@@ -243,7 +243,7 @@ struct CalendarDetailView: View {
                         .foregroundColor(.green)
                     VStack {
                         Text("All Clear").font(.title3.weight(.bold))
-                        Text("You have no events or reminders scheduled.").foregroundColor(.white.opacity(0.6))
+                        Text("You have no events or reminders scheduled.").foregroundColor(.primary.opacity(0.6))
                     }
                     Spacer()
                 }
@@ -287,7 +287,7 @@ struct DetailedScheduleItemRow: View {
             }
         }
         .padding(10)
-        .background(Color.black.opacity(0.25))
+        .background(Color.primary.opacity(0.08))
         .cornerRadius(8)
     }
 }

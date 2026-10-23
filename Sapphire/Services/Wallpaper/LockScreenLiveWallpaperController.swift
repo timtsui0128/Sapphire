@@ -28,6 +28,10 @@ final class LockScreenLiveWallpaperController {
     var isShowing: Bool { !windows.isEmpty }
 
     func prepare(_ newMedia: WallpaperMedia?) {
+        guard !SessionPrivacyState.shouldSuppressUI() else {
+            hide(animated: false)
+            return
+        }
         guard windows.isEmpty else { return }
         generation &+= 1
         let newMedia = newMedia?.isVideo == true ? newMedia : nil
@@ -54,6 +58,10 @@ final class LockScreenLiveWallpaperController {
     }
 
     func show(_ newMedia: WallpaperMedia, options newOptions: Options) {
+        guard !SessionPrivacyState.shouldSuppressUI() else {
+            hide(animated: false)
+            return
+        }
         let mediaChanged = newMedia != media
         guard mediaChanged || newOptions != options || windows.isEmpty else { return }
 
@@ -74,6 +82,10 @@ final class LockScreenLiveWallpaperController {
         }
 
         rebuildWindows()
+        guard !SessionPrivacyState.shouldSuppressUI(), !windows.isEmpty else {
+            hide(animated: false)
+            return
+        }
         startObservingScreens()
         if !isSuspended {
             beginActivity()
@@ -109,7 +121,7 @@ final class LockScreenLiveWallpaperController {
             }
         }
 
-        guard animated, closing.contains(where: { $0.isVisible && $0.alphaValue > 0.01 }) else {
+        guard animated, !SessionPrivacyState.shouldSuppressUI(), closing.contains(where: { $0.isVisible && $0.alphaValue > 0.01 }) else {
             finish()
             return
         }
@@ -125,6 +137,10 @@ final class LockScreenLiveWallpaperController {
     }
 
     func setSuspended(_ suspended: Bool) {
+        guard !SessionPrivacyState.shouldSuppressUI() else {
+            hide(animated: false)
+            return
+        }
         guard suspended != isSuspended else { return }
         isSuspended = suspended
         if suspended {
@@ -138,6 +154,10 @@ final class LockScreenLiveWallpaperController {
     // MARK: - Windows
 
     private func rebuildWindows() {
+        guard !SessionPrivacyState.shouldSuppressUI() else {
+            hide(animated: false)
+            return
+        }
         guard let source else { return }
         let screens = NSScreen.screens
 
@@ -147,6 +167,10 @@ final class LockScreenLiveWallpaperController {
                 let window = LiveWallpaperWindow(frame: screen.frame, level: Self.windowLevel)
                 LockScreenManager.shared.delegateWallpaperWindow(window)
                 windows.append(window)
+                guard !SessionPrivacyState.shouldSuppressUI() else {
+                    hide(animated: false)
+                    return
+                }
                 window.orderFrontRegardless()
             }
         }
@@ -171,6 +195,10 @@ final class LockScreenLiveWallpaperController {
     }
 
     private func updatePlayback() {
+        guard !SessionPrivacyState.shouldSuppressUI() else {
+            hide(animated: false)
+            return
+        }
         source?.setWantsPlayback(!isSuspended && !windows.isEmpty, client: self)
     }
 
@@ -184,7 +212,7 @@ final class LockScreenLiveWallpaperController {
     // MARK: - App Nap
 
     private func beginActivity() {
-        guard activity == nil else { return }
+        guard activity == nil, !SessionPrivacyState.shouldSuppressUI() else { return }
         activity = ProcessInfo.processInfo.beginActivity(
             options: [.userInitiatedAllowingIdleSystemSleep],
             reason: "Live lock screen wallpaper"

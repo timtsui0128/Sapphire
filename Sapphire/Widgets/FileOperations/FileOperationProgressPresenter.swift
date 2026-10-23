@@ -6,6 +6,7 @@
 
 import AppKit
 import SwiftUI
+import Combine
 
 @MainActor
 final class FileOperationProgressPresenter {
@@ -14,12 +15,24 @@ final class FileOperationProgressPresenter {
     private var panel: NSPanel?
     private let state = FileOperationProgressState()
     private var dismissWorkItem: DispatchWorkItem?
+    private var sessionPrivacySubscription: AnyCancellable?
 
-    private init() {}
+    private init() {
+        sessionPrivacySubscription = SessionPrivacyState.shared.$isSuppressed
+            .dropFirst()
+            .sink { [weak self] suppressed in
+                guard suppressed else { return }
+                self?.dismissWorkItem?.cancel()
+                self?.dismissWorkItem = nil
+                self?.hide()
+            }
+    }
 
     func update(_ task: FileTransferTask?) {
         dismissWorkItem?.cancel()
         dismissWorkItem = nil
+
+        guard !SessionPrivacyState.shouldSuppressUI() else { hide(); return }
 
         guard let task else {
             hide()
@@ -37,6 +50,7 @@ final class FileOperationProgressPresenter {
     }
 
     private func showPanelIfNeeded() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { hide(); return }
         guard panel == nil else { return }
 
         let size = NSSize(width: 340, height: 92)

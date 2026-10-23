@@ -98,7 +98,7 @@ struct BatteryDetailView: View {
                 .foregroundColor(levelColor)
             Text("Power overview")
                 .font(.system(size: 23, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(.primary)
         }
     }
 
@@ -113,14 +113,14 @@ struct BatteryDetailView: View {
                 } else {
                     Text("Charge limit \(chargeLimit)%")
                         .font(.system(size: 11, weight: .medium, design: .rounded))
-                        .foregroundColor(.white.opacity(0.65))
+                        .foregroundColor(.primary.opacity(0.65))
                         .monospacedDigit()
                         .transition(.opacity)
                 }
                 Spacer()
                 Text(stats.timeRemaining == "--" ? "No estimate" : stats.timeRemaining)
                     .font(.system(size: 11, weight: .medium, design: .rounded))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.primary.opacity(0.6))
             }
             HStack(spacing: 8) {
                 chargeLimitBar
@@ -137,7 +137,7 @@ struct BatteryDetailView: View {
             let markerWidth: CGFloat = 3
             let markerX = max(markerWidth / 2, min(width - markerWidth / 2, width * CGFloat(displayedLimit) / 100))
             ZStack(alignment: .leading) {
-                Capsule().fill(Color.white.opacity(0.08))
+                Capsule().fill(Color.primary.opacity(0.08))
                 Capsule().fill(levelColor.gradient).frame(width: max(0, width * level))
                 HStack(spacing: 3) {
                     Image(systemName: statusIcon)
@@ -146,7 +146,7 @@ struct BatteryDetailView: View {
                         .font(.system(size: 10, weight: .bold, design: .rounded))
                         .monospacedDigit()
                 }
-                .foregroundColor(.white.opacity(0.92))
+                .foregroundColor(.primary.opacity(0.92))
                 .padding(.leading, 10)
                 Capsule()
                     .fill(Color.white)
@@ -184,14 +184,14 @@ struct BatteryDetailView: View {
                 .foregroundColor(color)
             Text(text)
                 .font(.system(size: 10, weight: .semibold, design: .rounded))
-                .foregroundColor(.white.opacity(0.92))
+                .foregroundColor(.primary.opacity(0.92))
                 .monospacedDigit()
                 .lineLimit(1)
         }
         .padding(.horizontal, 10)
         .frame(height: 26)
-        .background(Color.white.opacity(0.10), in: Capsule())
-        .overlay(Capsule().strokeBorder(Color.white.opacity(0.14), lineWidth: 1))
+        .background(Color.primary.opacity(0.10), in: Capsule())
+        .overlay(Capsule().strokeBorder(Color.primary.opacity(0.14), lineWidth: 1))
     }
 
     private var statusPill: some View {
@@ -201,7 +201,7 @@ struct BatteryDetailView: View {
                 .foregroundColor(statusColor)
             Text(statusText)
                 .font(.system(size: 10, weight: .semibold, design: .rounded))
-                .foregroundColor(.white.opacity(0.92))
+                .foregroundColor(.primary.opacity(0.92))
                 .lineLimit(1)
         }
         .padding(.horizontal, 10)
@@ -228,7 +228,7 @@ struct BatteryDetailView: View {
             HStack(alignment: .firstTextBaseline) {
                 Text("System Power")
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white.opacity(0.72))
+                    .foregroundColor(.primary.opacity(0.72))
                 Spacer()
                 HStack(spacing: 5) {
                     Circle()
@@ -243,12 +243,12 @@ struct BatteryDetailView: View {
             HStack(alignment: .lastTextBaseline, spacing: 5) {
                 Text(String(format: "%.2f", power.heroWatts))
                     .font(.system(size: 34, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
                     .monospacedDigit()
                     .contentTransition(.numericText())
                 Text("W")
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.primary.opacity(0.7))
                 Spacer(minLength: 0)
                 Image(systemName: power.adapterConnected ? "powerplug.fill" : "battery.100")
                     .font(.system(size: 18, weight: .medium))
@@ -268,8 +268,8 @@ struct BatteryDetailView: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.white.opacity(0.10), lineWidth: 1))
+        .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.primary.opacity(0.10), lineWidth: 1))
     }
 
     private func powerMetaChip(icon: String, text: String) -> some View {
@@ -281,7 +281,7 @@ struct BatteryDetailView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.85)
         }
-        .foregroundColor(.white.opacity(0.72))
+        .foregroundColor(.primary.opacity(0.72))
         .fixedSize(horizontal: true, vertical: false)
     }
 
@@ -293,17 +293,17 @@ struct BatteryDetailView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(value)
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
                     .monospacedDigit()
                 Text(title.uppercased())
                     .font(.system(size: 8.5, weight: .bold))
                     .tracking(0.8)
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(.primary.opacity(0.5))
             }
         }
         .padding(11)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(Color.white.opacity(0.10), lineWidth: 1))
+        .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(Color.primary.opacity(0.10), lineWidth: 1))
     }
 }

@@ -234,8 +234,8 @@ private struct AudioSettingsAdjustmentSheet: View {
 
             adjustmentView
         }
-        .background(Color.black)
-        .preferredColorScheme(.dark)
+        .background(Color(nsColor: .windowBackgroundColor))
+        .appAppearance()
     }
 
     @ViewBuilder

@@ -26,6 +26,7 @@ final class FocusEnvironmentManager {
     private let cid = CGSMainConnectionID()
     private var windowChangeToken: SystemWindowChangeMonitor.Token?
     private var activeAppCancellables = Set<AnyCancellable>()
+    private var sessionPrivacySubscription: AnyCancellable?
     private var dimWindows: [NSWindow] = []
     private var appliedScreenFrames: [NSRect] = []
     private var appliedDimOpacity: Double = 0.45
@@ -44,6 +45,18 @@ final class FocusEnvironmentManager {
     ]
 
     private init() {
+        sessionPrivacySubscription = SessionPrivacyState.shared.$isSuppressed
+            .dropFirst()
+            .sink { [weak self] suppressed in
+                guard let self else { return }
+                if suppressed {
+                    self.hideSessionOverlays()
+                } else if self.isActive {
+                    self.refresh()
+                } else {
+                    self.restoreHiddenWindows()
+                }
+            }
         NotificationCenter.default.addObserver(
             forName: NSApplication.willTerminateNotification,
             object: nil,
@@ -123,6 +136,7 @@ final class FocusEnvironmentManager {
     // MARK: - Refresh
 
     private func refresh() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { hideSessionOverlays(); return }
         guard isActive else { return }
         updateWallpaperWindows()
         if dimInactive {
@@ -141,7 +155,16 @@ final class FocusEnvironmentManager {
 
     private var appliedWallpaperFrames: [NSRect] = []
 
+    private func hideSessionOverlays() {
+        removeAllDimOverlays()
+        for window in wallpaperWindows { window.orderOut(nil) }
+        wallpaperWindows.removeAll()
+        appliedWallpaperFrames.removeAll()
+        appliedScreenFrames.removeAll()
+    }
+
     private func updateWallpaperWindows() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { hideSessionOverlays(); return }
         guard hideWallpaper else {
             if !wallpaperWindows.isEmpty {
                 for window in wallpaperWindows { window.orderOut(nil) }
@@ -181,6 +204,7 @@ final class FocusEnvironmentManager {
     // MARK: - Dimming
 
     private func refreshDimOverlays() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { hideSessionOverlays(); return }
         let frontmost = NSWorkspace.shared.frontmostApplication
         let ownPID = ProcessInfo.processInfo.processIdentifier
 
@@ -245,6 +269,7 @@ final class FocusEnvironmentManager {
     }
 
     private func makeDimWindow(for screen: NSScreen) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         let window = NSWindow(
             contentRect: screen.frame,
             styleMask: [.borderless],
@@ -275,6 +300,7 @@ final class FocusEnvironmentManager {
     // MARK: - App limiting
 
     private func handleFrontAppChange(bundleID: String) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { hideSessionOverlays(); return }
         if isActive, dimInactive { refreshDimOverlays() }
         guard isActive, appLimitEnabled else { return }
         if bundleID == Bundle.main.bundleIdentifier || Self.essentials.contains(bundleID) { return }
@@ -289,6 +315,7 @@ final class FocusEnvironmentManager {
     }
 
     private func hideWindows(of bundleID: String) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         hiddenBundleIDs.insert(bundleID)
         for windowNumber in windows(of: bundleID) {
             guard !hiddenWindows.contains(windowNumber) else { continue }
@@ -298,6 +325,7 @@ final class FocusEnvironmentManager {
     }
 
     private func reapplyHiddenWindows() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         guard !hiddenBundleIDs.isEmpty else { return }
         for bundleID in hiddenBundleIDs {
             for windowNumber in windows(of: bundleID) {
@@ -309,6 +337,8 @@ final class FocusEnvironmentManager {
     }
 
     private func restoreHiddenWindows() {
+        // Keep the pending restore set until the session is unlocked.
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         for windowNumber in hiddenWindows {
             _ = CGSOrderWindow(cid, windowNumber, 1, 0)
         }

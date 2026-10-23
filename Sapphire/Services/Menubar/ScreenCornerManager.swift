@@ -54,6 +54,14 @@ final class ScreenCornerManager {
     }
 
     private func setupObservers() {
+        SessionPrivacyState.shared.$isSuppressed
+            .dropFirst()
+            .sink { [weak self] suppressed in
+                guard let self else { return }
+                if suppressed { self.removeAllOverlays() }
+                else { self.applyCornerSettings(from: ScreenCornerSettings(SettingsModel.shared.settings)) }
+            }
+            .store(in: &cancellables)
         SettingsModel.shared.changes(of: ScreenCornerSettings.init)
             .prepend(ScreenCornerSettings(SettingsModel.shared.settings))
             .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
@@ -68,6 +76,7 @@ final class ScreenCornerManager {
     }
 
     private func applyCornerSettings(from settings: ScreenCornerSettings) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { removeAllOverlays(); return }
         let radius = settings.radius
         let shouldShowTop = settings.showTop || settings.showBelowMenu
         let shouldShowBottom = settings.showBottom

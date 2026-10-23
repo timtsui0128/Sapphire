@@ -35,7 +35,7 @@ enum NotchExpandedChrome {
         NotchContentKey(
             config: context.config,
             numbers: [context.fixedSpacer ? context.barWidth : 0, context.iconsIntrinsicWidth],
-            flags: [context.fixedSpacer, context.showRightHUDOverlay],
+            flags: [context.fixedSpacer, context.showRightHUDOverlay, context.isPinned.wrappedValue],
             tags: [String(describing: context.mode), String(describing: context.notchState)]
                 + context.islandBarItems.map { String(describing: $0) }
         )
@@ -215,10 +215,14 @@ struct NotchChromeNavigationHeader: View {
                     .font(.system(size: config.navHeaderTitleFontSize, weight: .bold))
                     .lineLimit(1)
                     .truncationMode(.middle)
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundStyle(Color.primary.opacity(0.9))
                     .padding(.top, config.navHeaderTitleTopPadding)
             }
             Spacer(minLength: 0)
+            if context.isPinned.wrappedValue {
+                NotchPinButton(isPinned: context.isPinned, onPin: context.onPin)
+                    .padding(.trailing, 12)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: config.initialSize.height)
@@ -295,10 +299,7 @@ private struct NotchChromeButton: View {
             }
         case .pin:
             if settings.settings.pinEnabled {
-                SubtleIconButton(systemName: context.isPinned.wrappedValue ? "pin.fill" : "pin", action: {
-                    context.isPinned.wrappedValue.toggle()
-                    context.onPin(context.isPinned.wrappedValue)
-                }, horizontalPadding: 6)
+                NotchPinButton(isPinned: context.isPinned, onPin: context.onPin)
             }
         case .spacer:
             EmptyView()
@@ -463,14 +464,14 @@ private struct NotchIntelligenceControls: View {
                 HStack(spacing: 8) {
                     Image(systemName: microphoneManager.isMuted ? "mic.slash.fill" : "mic.fill")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(microphoneManager.isMuted ? .white.opacity(0.85) : .red)
+                        .foregroundColor(microphoneManager.isMuted ? .primary.opacity(0.85) : .red)
                     Text(microphoneManager.isMuted ? "Muted" : "Mic")
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.primary)
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .background(Capsule().fill(Color.black.opacity(0.25)))
+                .background(Capsule().fill(Color.primary.opacity(0.12)))
             }
             .buttonStyle(.plain)
         }
@@ -516,7 +517,7 @@ private struct ContinuityPhoneStatusItem: View {
                 Image(systemName: "cellularbars")
                     .font(.system(size: 10, weight: .semibold))
                     .symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(snapshot.phoneSignalLevel > 0 ? Color.white.opacity(0.9) : Color.white.opacity(0.35))
+                    .foregroundStyle(snapshot.phoneSignalLevel > 0 ? Color.primary.opacity(0.9) : Color.primary.opacity(0.35))
 
                 if let battery = snapshot.phoneBatteryPercent {
                     HStack(spacing: 2) {
@@ -526,7 +527,7 @@ private struct ContinuityPhoneStatusItem: View {
                             .font(.system(size: 9, weight: .semibold, design: .rounded))
                             .monospacedDigit()
                     }
-                    .foregroundStyle(battery <= 20 && !snapshot.phoneCharging ? Color.orange : Color.white.opacity(0.9))
+                    .foregroundStyle(battery <= 20 && !snapshot.phoneCharging ? Color.orange : Color.primary.opacity(0.9))
                 }
             }
             .padding(.horizontal, 6)

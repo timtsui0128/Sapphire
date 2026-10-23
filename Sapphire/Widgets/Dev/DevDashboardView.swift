@@ -68,7 +68,7 @@ struct DevDashboardView: View {
             }
             Text("Developer")
                 .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
             if !monitor.tasks.isEmpty {
                 DevCountBadge(count: monitor.tasks.count, tint: .green)
             }
@@ -95,20 +95,20 @@ struct DevDashboardView: View {
             VStack(spacing: 10) {
                 Image(systemName: "moon.zzz.fill")
                     .font(.system(size: 22))
-                    .foregroundStyle(.white.opacity(0.35))
+                    .foregroundStyle(.primary.opacity(0.35))
                 Text("Nothing is running")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.8))
+                    .foregroundStyle(.primary.opacity(0.8))
                 Text(emptyHint)
                     .font(.system(size: 11))
-                    .foregroundStyle(.white.opacity(0.5))
+                    .foregroundStyle(.primary.opacity(0.5))
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 360)
                 Button { tab = .terminal } label: {
                     Label("Run a command", systemImage: "terminal")
                         .font(.system(size: 11, weight: .semibold, design: .rounded))
                 }
-                .buttonStyle(DevPillButtonStyle(tint: .white))
+                .buttonStyle(DevPillButtonStyle(tint: .primary))
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
@@ -153,11 +153,11 @@ private struct DevTaskListRow: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(task.title)
                     .font(.system(size: 11.5, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                     .lineLimit(1)
                 Text(task.detail.isEmpty ? task.kind.displayName : task.detail)
                     .font(.system(size: 10))
-                    .foregroundStyle(.white.opacity(0.5))
+                    .foregroundStyle(.primary.opacity(0.5))
                     .lineLimit(1)
             }
             Spacer(minLength: 0)
@@ -168,7 +168,7 @@ private struct DevTaskListRow: View {
         .padding(.vertical, 6)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isSelected ? Color.white.opacity(0.13) : Color.white.opacity(0.04))
+                .fill(isSelected ? Color.primary.opacity(0.13) : Color.primary.opacity(0.04))
         )
     }
 }
@@ -207,7 +207,7 @@ struct DevTaskDetailPane: View {
             chips
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.black.opacity(0.35)))
+                .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.primary.opacity(0.06)))
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             footer
         }
@@ -222,11 +222,11 @@ struct DevTaskDetailPane: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(model.detail?.agent?.sessionName ?? task.title)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                     .lineLimit(1)
                 Text(subtitle)
                     .font(.system(size: 10.5))
-                    .foregroundStyle(.white.opacity(0.55))
+                    .foregroundStyle(.primary.opacity(0.55))
                     .lineLimit(1)
             }
             Spacer(minLength: 6)
@@ -251,9 +251,9 @@ struct DevTaskDetailPane: View {
                     DevElapsedText(startedAt: task.startedAt, size: 10)
                 }
                 if let detail = model.detail {
-                    DevChip(symbol: "cpu", text: String(format: "%.0f%%", detail.totalCPU), tint: .white)
+                    DevChip(symbol: "cpu", text: String(format: "%.0f%%", detail.totalCPU), tint: .primary)
                     if detail.totalResidentBytes > 0 {
-                        DevChip(symbol: "memorychip", text: ByteCountFormatter.string(fromByteCount: Int64(detail.totalResidentBytes), countStyle: .memory), tint: .white)
+                        DevChip(symbol: "memorychip", text: ByteCountFormatter.string(fromByteCount: Int64(detail.totalResidentBytes), countStyle: .memory), tint: .primary)
                     }
                     if let directory = detail.workingDirectory {
                         DevChip(symbol: "folder.fill", text: (directory as NSString).lastPathComponent, tint: .blue, action: model.revealFolder)
@@ -265,15 +265,15 @@ struct DevTaskDetailPane: View {
                         DevChip(symbol: "cpu.fill", text: ClaudePricing.displayName(for: model), tint: task.tool.tint)
                     }
                     if let context = detail.agent?.contextTokens {
-                        DevChip(symbol: "text.alignleft", text: "\(UsageFormat.tokens(context)) ctx", tint: .white)
+                        DevChip(symbol: "text.alignleft", text: "\(UsageFormat.tokens(context)) ctx", tint: .primary)
                     }
                     if let output = detail.agent?.sessionOutputTokens, output > 0 {
-                        DevChip(symbol: "arrow.up.right", text: "\(UsageFormat.tokens(output)) out", tint: .white)
+                        DevChip(symbol: "arrow.up.right", text: "\(UsageFormat.tokens(output)) out", tint: .primary)
                     }
                     if let tty = detail.ttyPath {
-                        DevChip(symbol: "terminal", text: (tty as NSString).lastPathComponent, tint: .white)
+                        DevChip(symbol: "terminal", text: (tty as NSString).lastPathComponent, tint: .primary)
                     }
-                    DevChip(symbol: "number", text: "\(detail.pid)", tint: .white)
+                    DevChip(symbol: "number", text: "\(detail.pid)", tint: .primary)
                 }
             }
         }
@@ -319,12 +319,12 @@ struct DevTaskDetailPane: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text(detail.commandLine)
                     .font(.system(size: 10.5, design: .monospaced))
-                    .foregroundStyle(.white.opacity(0.85))
+                    .foregroundStyle(.primary.opacity(0.85))
                     .lineLimit(4)
                     .textSelection(.enabled)
                 Text(outputHint(detail))
                     .font(.system(size: 10.5))
-                    .foregroundStyle(.white.opacity(0.45))
+                    .foregroundStyle(.primary.opacity(0.45))
             }
             .padding(10)
         }
@@ -349,11 +349,11 @@ struct DevTaskDetailPane: View {
                 if model.canSend {
                     NotchSearchField(placeholder: placeholder, text: $model.draft, onSubmit: model.send)
                         .font(.system(size: 11.5, design: task.kind == .ai ? .rounded : .monospaced))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.primary)
                 } else {
                     Text(model.sendUnavailableReason(for: task))
                         .font(.system(size: 11))
-                        .foregroundStyle(.white.opacity(0.4))
+                        .foregroundStyle(.primary.opacity(0.4))
                         .lineLimit(1)
                     Spacer(minLength: 0)
                 }
@@ -363,7 +363,7 @@ struct DevTaskDetailPane: View {
                     Button(action: model.send) {
                         Image(systemName: "arrow.up.circle.fill")
                             .font(.system(size: 16))
-                            .foregroundStyle(model.draft.isEmpty ? Color.white.opacity(0.25) : task.tool.tint)
+                            .foregroundStyle(model.draft.isEmpty ? Color.primary.opacity(0.25) : task.tool.tint)
                     }
                     .buttonStyle(.plain)
                     .disabled(model.draft.isEmpty)
@@ -372,15 +372,15 @@ struct DevTaskDetailPane: View {
             }
             .padding(.horizontal, 10)
             .frame(height: 30)
-            .background(Capsule().fill(Color.white.opacity(0.08)))
+            .background(Capsule().fill(Color.primary.opacity(0.08)))
             .overlay(alignment: .top) {
                 if let status = model.statusMessage {
                     Text(status)
                         .font(.system(size: 9.5, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.85))
+                        .foregroundStyle(.primary.opacity(0.85))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 2)
-                        .background(Capsule().fill(Color.black.opacity(0.8)))
+                        .background(Capsule().fill(Color(nsColor: .controlBackgroundColor)))
                         .offset(y: -12)
                         .transition(.opacity)
                 }
@@ -391,7 +391,7 @@ struct DevTaskDetailPane: View {
             DevIconButton(
                 symbol: model.confirmingStop ? "exclamationmark.octagon.fill" : "xmark.octagon",
                 help: model.confirmingStop ? "Click again to end the process" : "End the process",
-                tint: model.confirmingStop ? .red : .white,
+                tint: model.confirmingStop ? .red : .primary,
                 action: model.terminate
             )
             .disabled(model.detail?.isAlive != true)
@@ -406,9 +406,9 @@ struct DevTaskDetailPane: View {
             } label: {
                 Image(systemName: "ellipsis")
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.8))
+                    .foregroundStyle(.primary.opacity(0.8))
                     .frame(width: 28, height: 28)
-                    .background(Circle().fill(Color.white.opacity(0.08)))
+                    .background(Circle().fill(Color.primary.opacity(0.08)))
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
@@ -454,7 +454,7 @@ private struct DevTranscriptView: View {
                 Spacer(minLength: 40)
                 Text(message.text)
                     .font(.system(size: 11.5))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                     .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(tint.opacity(0.35)))
@@ -463,7 +463,7 @@ private struct DevTranscriptView: View {
         case .assistant:
             Text(message.text)
                 .font(.system(size: 11.5))
-                .foregroundStyle(.white.opacity(0.88))
+                .foregroundStyle(.primary.opacity(0.88))
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .textSelection(.enabled)
         case .tool:
@@ -473,13 +473,13 @@ private struct DevTranscriptView: View {
                     .foregroundStyle(tint.opacity(0.8))
                 Text(message.text)
                     .font(.system(size: 10, design: .monospaced))
-                    .foregroundStyle(.white.opacity(0.6))
+                    .foregroundStyle(.primary.opacity(0.6))
                     .lineLimit(2)
             }
         case .toolResult(let isError):
             Text(message.text)
                 .font(.system(size: 9.5, design: .monospaced))
-                .foregroundStyle(isError ? Color.red.opacity(0.8) : Color.white.opacity(0.38))
+                .foregroundStyle(isError ? Color.red.opacity(0.8) : Color.primary.opacity(0.38))
                 .lineLimit(3)
                 .padding(.leading, 14)
         }
@@ -498,21 +498,21 @@ private struct DevProcessList: View {
                     HStack(spacing: 6) {
                         Text(process.name)
                             .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
-                            .foregroundStyle(.white.opacity(0.9))
+                            .foregroundStyle(.primary.opacity(0.9))
                             .padding(.leading, CGFloat(min(process.depth, 6)) * 10)
                         Text(process.commandLine)
                             .font(.system(size: 9.5, design: .monospaced))
-                            .foregroundStyle(.white.opacity(0.4))
+                            .foregroundStyle(.primary.opacity(0.4))
                             .lineLimit(1)
                             .truncationMode(.middle)
                         Spacer(minLength: 4)
                         Text(process.cpuPercent.map { String(format: "%.0f%%", $0) } ?? "–")
                             .font(.system(size: 9.5, design: .monospaced))
-                            .foregroundStyle(.white.opacity(0.6))
+                            .foregroundStyle(.primary.opacity(0.6))
                             .frame(width: 36, alignment: .trailing)
                         Text("\(process.pid)")
                             .font(.system(size: 9.5, design: .monospaced))
-                            .foregroundStyle(.white.opacity(0.35))
+                            .foregroundStyle(.primary.opacity(0.35))
                             .frame(width: 44, alignment: .trailing)
                     }
                 }
@@ -530,7 +530,7 @@ struct DevMonospaceLog: View {
             ScrollView {
                 Text(text)
                     .font(.system(size: 10, design: .monospaced))
-                    .foregroundStyle(.white.opacity(0.82))
+                    .foregroundStyle(.primary.opacity(0.82))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .textSelection(.enabled)
                     .padding(10)
@@ -582,20 +582,20 @@ private struct DevUsageCardView: View {
                     .background(Circle().fill(card.tint.opacity(0.18)))
                 Text(card.title)
                     .font(.system(size: 11.5, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.9))
+                    .foregroundStyle(.primary.opacity(0.9))
                 Spacer(minLength: 0)
                 if !card.daily.isEmpty { DevSparkBars(values: card.daily, tint: card.tint) }
             }
             VStack(alignment: .leading, spacing: 1) {
                 Text(card.headline)
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                 if let subtitle = card.subtitle {
                     Text(subtitle)
                         .font(.system(size: 10))
-                        .foregroundStyle(.white.opacity(0.55))
+                        .foregroundStyle(.primary.opacity(0.55))
                         .lineLimit(1)
                 }
             }
@@ -607,10 +607,10 @@ private struct DevUsageCardView: View {
                         Text("\(Int((meter.usedFraction * 100).rounded()))% used")
                     }
                     .font(.system(size: 9.5, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.7))
+                    .foregroundStyle(.primary.opacity(0.7))
                     GeometryReader { geometry in
                         ZStack(alignment: .leading) {
-                            Capsule().fill(Color.white.opacity(0.1))
+                            Capsule().fill(Color.primary.opacity(0.1))
                             Capsule()
                                 .fill(meter.usedFraction > 0.85 ? Color.red : card.tint)
                                 .frame(width: max(3, geometry.size.width * meter.usedFraction))
@@ -620,7 +620,7 @@ private struct DevUsageCardView: View {
                     if let caption = meter.caption {
                         Text(caption)
                             .font(.system(size: 8.5))
-                            .foregroundStyle(.white.opacity(0.4))
+                            .foregroundStyle(.primary.opacity(0.4))
                     }
                 }
             }
@@ -628,9 +628,9 @@ private struct DevUsageCardView: View {
                 VStack(spacing: 2) {
                     ForEach(card.stats) { stat in
                         HStack {
-                            Text(stat.label).foregroundStyle(.white.opacity(0.45))
+                            Text(stat.label).foregroundStyle(.primary.opacity(0.45))
                             Spacer()
-                            Text(stat.value).foregroundStyle(.white.opacity(0.8)).lineLimit(1)
+                            Text(stat.value).foregroundStyle(.primary.opacity(0.8)).lineLimit(1)
                         }
                         .font(.system(size: 9.5, weight: .medium))
                     }
@@ -639,13 +639,13 @@ private struct DevUsageCardView: View {
             if let footnote = card.footnote {
                 Text(footnote)
                     .font(.system(size: 8.5))
-                    .foregroundStyle(.white.opacity(0.3))
+                    .foregroundStyle(.primary.opacity(0.3))
                     .lineLimit(2)
             }
         }
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .topLeading)
-        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.white.opacity(0.06)))
+        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.primary.opacity(0.06)))
     }
 }
 
@@ -685,7 +685,7 @@ private struct DevTerminalPanel: View {
                         .foregroundStyle(.green)
                     NotchSearchField(placeholder: "Run a command…", text: $command, onSubmit: run)
                         .font(.system(size: 11.5, design: .monospaced))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.primary)
                     if !runner.history.isEmpty {
                         Menu {
                             ForEach(runner.history, id: \.self) { entry in
@@ -694,7 +694,7 @@ private struct DevTerminalPanel: View {
                         } label: {
                             Image(systemName: "clock.arrow.circlepath")
                                 .font(.system(size: 10, weight: .semibold))
-                                .foregroundStyle(.white.opacity(0.6))
+                                .foregroundStyle(.primary.opacity(0.6))
                         }
                         .menuStyle(.borderlessButton)
                         .menuIndicator(.hidden)
@@ -704,7 +704,7 @@ private struct DevTerminalPanel: View {
                 }
                 .padding(.horizontal, 10)
                 .frame(height: 28)
-                .background(Capsule().fill(Color.white.opacity(0.08)))
+                .background(Capsule().fill(Color.primary.opacity(0.08)))
 
                 Button(action: run) {
                     Image(systemName: "play.fill").font(.system(size: 10, weight: .bold))
@@ -721,7 +721,7 @@ private struct DevTerminalPanel: View {
                 } label: {
                     Image(systemName: "macwindow.badge.plus").font(.system(size: 10, weight: .bold))
                 }
-                .buttonStyle(DevPillButtonStyle(tint: .white))
+                .buttonStyle(DevPillButtonStyle(tint: .primary))
                 .disabled(command.trimmingCharacters(in: .whitespaces).isEmpty)
                 .help("Run in a new Terminal window (for interactive commands)")
             }
@@ -737,7 +737,7 @@ private struct DevTerminalPanel: View {
                             Button("Clear") { runner.clearFinished() }
                                 .buttonStyle(.plain)
                                 .font(.system(size: 9.5, weight: .semibold))
-                                .foregroundStyle(.white.opacity(0.45))
+                                .foregroundStyle(.primary.opacity(0.45))
                         }
                     }
                 }
@@ -754,7 +754,7 @@ private struct DevTerminalPanel: View {
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.black.opacity(0.35)))
+                    .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.primary.opacity(0.06)))
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
                     HStack(spacing: 4) {
@@ -775,7 +775,7 @@ private struct DevTerminalPanel: View {
                     symbol: "terminal",
                     text: "Commands run in your login shell in the folder on the left. Use the window button for interactive programs."
                 )
-                .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.black.opacity(0.25)))
+                .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.primary.opacity(0.08)))
             }
         }
         .onAppear(perform: loadRecentDirectories)
@@ -795,10 +795,10 @@ private struct DevTerminalPanel: View {
                     .font(.system(size: 10.5, weight: .semibold, design: .rounded))
                     .lineLimit(1)
             }
-            .foregroundStyle(.white.opacity(0.85))
+            .foregroundStyle(.primary.opacity(0.85))
             .padding(.horizontal, 9)
             .frame(height: 28)
-            .background(Capsule().fill(Color.white.opacity(0.08)))
+            .background(Capsule().fill(Color.primary.opacity(0.08)))
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
@@ -873,10 +873,10 @@ private struct DevRunChip: View {
                 Text("\(code)").font(.system(size: 9, weight: .bold, design: .monospaced)).foregroundStyle(.red)
             }
         }
-        .foregroundStyle(.white.opacity(isSelected ? 0.95 : 0.6))
+        .foregroundStyle(.primary.opacity(isSelected ? 0.95 : 0.6))
         .padding(.horizontal, 8)
         .frame(height: 20)
-        .background(Capsule().fill(Color.white.opacity(isSelected ? 0.15 : 0.06)))
+        .background(Capsule().fill(Color.primary.opacity(isSelected ? 0.15 : 0.06)))
     }
 }
 
@@ -914,7 +914,7 @@ struct DevCountBadge: View {
     var body: some View {
         Text("\(count)")
             .font(.system(size: 9.5, weight: .bold, design: .rounded))
-            .foregroundStyle(.white)
+            .foregroundStyle(.primary)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(Capsule().fill(tint.opacity(0.55)))
@@ -944,10 +944,10 @@ private struct DevChip<Accessory: View>: View {
             }
             accessory()
         }
-        .foregroundStyle(.white.opacity(0.8))
+        .foregroundStyle(.primary.opacity(0.8))
         .padding(.horizontal, 7)
         .frame(height: 19)
-        .background(Capsule().fill(Color.white.opacity(0.07)))
+        .background(Capsule().fill(Color.primary.opacity(0.07)))
 
         if let action {
             Button(action: action) { label }.buttonStyle(.plain)
@@ -966,7 +966,7 @@ private extension DevChip where Accessory == EmptyView {
 struct DevIconButton: View {
     let symbol: String
     let help: String
-    var tint: Color = .white
+    var tint: Color = .primary
     var size: CGFloat = 28
     let action: () -> Void
 
@@ -976,7 +976,7 @@ struct DevIconButton: View {
                 .font(.system(size: size * 0.38, weight: .bold))
                 .foregroundStyle(tint.opacity(0.85))
                 .frame(width: size, height: size)
-                .background(Circle().fill(tint.opacity(tint == .white ? 0.08 : 0.2)))
+                .background(Circle().fill(tint.opacity(tint == .primary ? 0.08 : 0.2)))
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
@@ -1005,10 +1005,10 @@ private struct DevPlaceholder: View {
         VStack(spacing: 6) {
             Image(systemName: symbol)
                 .font(.system(size: 16))
-                .foregroundStyle(.white.opacity(0.3))
+                .foregroundStyle(.primary.opacity(0.3))
             Text(text)
                 .font(.system(size: 10.5))
-                .foregroundStyle(.white.opacity(0.45))
+                .foregroundStyle(.primary.opacity(0.45))
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 320)
         }

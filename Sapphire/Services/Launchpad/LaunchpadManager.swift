@@ -8,6 +8,7 @@
 import Cocoa
 import SwiftUI
 import CoreImage.CIFilterBuiltins
+import Combine
 
 extension Notification.Name {
     static let requestCloseLaunchpad = Notification.Name("requestCloseLaunchpad")
@@ -25,7 +26,15 @@ fileprivate extension NSImage {
     }
 }
 class KeyableLaunchpadWindow: NSWindow {
-    override var canBecomeKey: Bool { return true }
+    override var canBecomeKey: Bool { !SessionPrivacyState.shouldSuppressUI() }
+    override func order(_ place: NSWindow.OrderingMode, relativeTo otherWin: Int) {
+        guard place == .out || !SessionPrivacyState.shouldSuppressUI() else { super.order(.out, relativeTo: 0); return }
+        super.order(place, relativeTo: otherWin)
+    }
+    override func orderFrontRegardless() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { orderOut(nil); return }
+        super.orderFrontRegardless()
+    }
 }
 class LaunchpadGestureMonitor {
     static let shared = LaunchpadGestureMonitor()
@@ -40,6 +49,7 @@ class LaunchpadGestureMonitor {
         if let monitor = monitor { NSEvent.removeMonitor(monitor); self.monitor = nil }; isMonitoring = false
     }
     private func handleMagnifyEvent(_ event: NSEvent) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { hasProcessedGesture = false; return }
         if event.phase == .began { hasProcessedGesture = false }
         if !hasProcessedGesture && (event.phase == .changed) {
             let magnification = event.magnification
@@ -65,12 +75,20 @@ class LaunchpadWindowController: NSWindowController {
     private var closeObserver: NSObjectProtocol?
     private var wallpaperCacheKey: WallpaperCacheKey?
     private var cachedBlurredWallpaper: NSImage?
+    private var privacyObservation: AnyCancellable?
 
     private var isVisible: Bool = false {
         didSet {
             guard oldValue != isVisible else { return }
 
             if isVisible {
+                guard !SessionPrivacyState.shouldSuppressUI() else {
+                    isVisible = false
+                    gestureManager.stopMonitoring()
+                    inputInterceptor.stop()
+                    window?.orderOut(nil)
+                    return
+                }
                 window?.setFrame(NSScreen.main?.frame ?? .zero, display: true)
                 showWindow(self)
                 window?.makeKeyAndOrderFront(nil)
@@ -104,6 +122,7 @@ class LaunchpadWindowController: NSWindowController {
         window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
         window.isOpaque = false
         window.backgroundColor = .clear
+        window.canBecomeVisibleWithoutLogin = false
 
         super.init(window: window)
 
@@ -118,6 +137,11 @@ class LaunchpadWindowController: NSWindowController {
         )
 
         window.contentView = NSHostingView(rootView: launchpadView)
+        privacyObservation = SessionPrivacyState.shared.$isSuppressed.sink { [weak self] suppressed in
+            guard suppressed else { return }
+            self?.hideLaunchpad()
+            LaunchInterceptor.shared.interceptNextMissionControlLaunch = false
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -132,7 +156,7 @@ class LaunchpadWindowController: NSWindowController {
         inputInterceptor.stop()
         let gestureManager = self.gestureManager
         Task { @MainActor in gestureManager.stopMonitoring() }
-        if isVisible {
+        if isVisible, !SessionPrivacyState.shouldSuppressUI() {
             let notificationName = "com.apple.expose.awake" as CFString
             CoreDockSendNotification(notificationName, 0)
         }
@@ -173,6 +197,7 @@ class LaunchpadWindowController: NSWindowController {
     }
 
     func showLaunchpad() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { hideLaunchpad(); return }
         guard !isVisible else { return }
 
         let screen = NSScreen.main
@@ -189,7 +214,8 @@ class LaunchpadWindowController: NSWindowController {
 
         isVisible = true
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            guard self?.isVisible == true, !SessionPrivacyState.shouldSuppressUI() else { return }
             let notificationName = "com.apple.expose.awake" as CFString
             LaunchInterceptor.shared.interceptNextMissionControlLaunch = true
             CoreDockSendNotification(notificationName, 0)

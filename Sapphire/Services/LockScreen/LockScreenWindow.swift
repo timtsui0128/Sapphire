@@ -34,7 +34,7 @@ class TopmostWindow: NSWindow {
             .ignoresCycle,
         ]
         hasShadow = false
-        canBecomeVisibleWithoutLogin = true
+        canBecomeVisibleWithoutLogin = false
         level = .init(rawValue: .init(Int32.max - 2))
     }
 

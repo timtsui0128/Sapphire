@@ -21,7 +21,7 @@ final class LiveWallpaperWindow: NSWindow {
         ignoresMouseEvents = true
         animationBehavior = .none
         isExcludedFromWindowsMenu = true
-        canBecomeVisibleWithoutLogin = true
+        canBecomeVisibleWithoutLogin = false
         self.level = level
         collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
         contentView = wallpaperView
@@ -29,6 +29,14 @@ final class LiveWallpaperWindow: NSWindow {
 
     override var canBecomeKey: Bool { false }
     override var canBecomeMain: Bool { false }
+    override func order(_ place: NSWindow.OrderingMode, relativeTo otherWin: Int) {
+        guard place == .out || !SessionPrivacyState.shouldSuppressUI() else { super.order(.out, relativeTo: 0); return }
+        super.order(place, relativeTo: otherWin)
+    }
+    override func orderFrontRegardless() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { orderOut(nil); return }
+        super.orderFrontRegardless()
+    }
 }
 
 final class LiveWallpaperView: NSView {

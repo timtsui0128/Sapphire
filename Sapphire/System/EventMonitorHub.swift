@@ -108,6 +108,7 @@ final class EventMonitorHub {
     }
 
     private func dispatch(_ event: NSEvent) {
+        guard !SessionPrivacyState.isSuppressedSnapshot else { return }
         let handlers = handlers[event.type] ?? [:]
         for (_, handler) in handlers {
             handler(event)

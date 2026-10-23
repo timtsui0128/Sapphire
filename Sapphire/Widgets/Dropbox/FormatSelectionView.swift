@@ -40,7 +40,7 @@ struct FormatSelectionView: View {
         )
         .overlay(
              RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
         )
         .overlay(alignment: .topTrailing) {
             Button(action: onDismiss) {
@@ -71,13 +71,13 @@ private struct FormatButton: View {
             VStack {
                 Image(systemName: format.iconName)
                     .font(.largeTitle)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                 Text(format.displayName)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.white.opacity(0.8))
+                    .foregroundStyle(.primary.opacity(0.8))
             }
             .frame(width: 80, height: 80)
-            .background(Color.white.opacity(isHovering ? 0.2 : 0.1))
+            .background(Color.primary.opacity(isHovering ? 0.2 : 0.1))
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         }
         .buttonStyle(.plain)

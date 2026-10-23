@@ -31,7 +31,7 @@ class LaunchpadInputInterceptor {
     ]
 
     func start() {
-        guard !isMonitoring else { return }
+        guard !isMonitoring, !SessionPrivacyState.shouldSuppressUI() else { return }
         isMonitoring = true
         stateLock.withLock { isAwaitingFirstTypingKey = true }
         registerTrustAwareness()
@@ -46,7 +46,7 @@ class LaunchpadInputInterceptor {
     private func installTap() {
         // Idempotent: `start()` and the trust-monitor reinstall can both land
         // here. Keep exactly one shared-pipeline registration.
-        guard tapToken == nil else { return }
+        guard tapToken == nil, !SessionPrivacyState.shouldSuppressUI() else { return }
 
         let eventTypes: [CGEventType] = [
             .keyDown, .flagsChanged
@@ -91,6 +91,7 @@ class LaunchpadInputInterceptor {
     }
 
     private nonisolated func handle(event: CGEvent, type: CGEventType) {
+        guard !SessionPrivacyState.isSuppressedSnapshot else { return }
         switch type {
         case .keyDown:
             let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
@@ -101,6 +102,7 @@ class LaunchpadInputInterceptor {
             }
             if shouldNotify {
                 DispatchQueue.main.async {
+                    guard !SessionPrivacyState.shouldSuppressUI() else { return }
                     NotificationCenter.default.post(name: .userStartedTypingInLaunchpad, object: nil)
                 }
             }

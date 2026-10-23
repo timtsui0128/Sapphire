@@ -154,7 +154,7 @@ struct RequiredPermissionsView: View {
                     .foregroundStyle(.orange)
                 Text(missingPermissionsMessage)
                     .font(.system(size: 12))
-                    .foregroundStyle(.white.opacity(0.8))
+                    .foregroundStyle(.secondary)
             }
             .padding()
             .background(Color.orange.opacity(0.15))
@@ -1030,7 +1030,7 @@ private struct AppsMetricCard: View {
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(.white.opacity(0.1)))
+        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.primary.opacity(0.1)))
     }
 }
 
@@ -1149,7 +1149,7 @@ private struct AppUninstallReviewSheet: View {
                             }
                             .padding(14)
                             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(.white.opacity(0.1)))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.primary.opacity(0.1)))
                         }
                     }
                     .padding(20)
@@ -1482,7 +1482,7 @@ private struct StorageBreadcrumbBar: View {
             }
             .buttonStyle(.plain)
             .background(.thinMaterial, in: Capsule())
-            .overlay(Capsule().stroke(.white.opacity(0.12)))
+            .overlay(Capsule().stroke(Color.primary.opacity(0.12)))
             .disabled(model.currentURL.path == "/")
             .help("Go to parent folder")
 
@@ -1504,8 +1504,8 @@ private struct StorageBreadcrumbBar: View {
                         .buttonStyle(.plain)
                         .padding(.horizontal, 11)
                         .padding(.vertical, 7)
-                        .background(index == pathComponents.count - 1 ? Color.accentColor.opacity(0.22) : Color.white.opacity(0.07), in: Capsule())
-                        .overlay(Capsule().stroke(index == pathComponents.count - 1 ? Color.accentColor.opacity(0.55) : Color.white.opacity(0.10)))
+                        .background(index == pathComponents.count - 1 ? Color.accentColor.opacity(0.22) : Color.primary.opacity(0.07), in: Capsule())
+                        .overlay(Capsule().stroke(index == pathComponents.count - 1 ? Color.accentColor.opacity(0.55) : Color.primary.opacity(0.10)))
                     }
                 }
                 .padding(.vertical, 2)
@@ -1516,13 +1516,13 @@ private struct StorageBreadcrumbBar: View {
                 .buttonStyle(.plain)
                 .frame(width: 30, height: 30)
                 .background(.thinMaterial, in: Capsule())
-                .overlay(Capsule().stroke(.white.opacity(0.12)))
+                .overlay(Capsule().stroke(Color.primary.opacity(0.12)))
                 .help("Refresh folder contents")
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 9)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.white.opacity(0.14)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.primary.opacity(0.14)))
     }
 }
 
@@ -1541,7 +1541,7 @@ private struct IndexingPill: View {
         }
         .padding(.horizontal, 12).padding(.vertical, 8)
         .background(.thinMaterial, in: Capsule())
-        .overlay(Capsule().stroke(.white.opacity(0.12)))
+        .overlay(Capsule().stroke(Color.primary.opacity(0.12)))
     }
 }
 
@@ -1554,26 +1554,34 @@ private struct StoragePieSlice: View {
 
     var body: some View {
         GeometryReader { geometry in
+            let angle: Double = (start + end) / 2 * 2 * Double.pi - Double.pi / 2
+            let radius: CGFloat = min(geometry.size.width, geometry.size.height) * 0.36
+            let labelPosition = CGPoint(
+                x: geometry.size.width / 2 + CGFloat(cos(angle)) * radius,
+                y: geometry.size.height / 2 + CGFloat(sin(angle)) * radius
+            )
             ZStack {
                 PieSlicePath(start: start, end: end)
                     .fill(color)
                     .overlay(PieSlicePath(start: start, end: end).stroke(Color.black.opacity(0.35), lineWidth: 1))
-                let angle = (start + end) / 2 * 2 * .pi - .pi / 2
-                let radius = min(geometry.size.width, geometry.size.height) * 0.36
                 if fraction >= 0.035 {
-                    Text(label)
-                        .font(.system(size: fraction < 0.06 ? 8 : 10, weight: .semibold))
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                        .frame(width: fraction < 0.06 ? 48 : 82)
-                        .foregroundStyle(.white)
-                        .shadow(radius: 2)
-                        .clipped()
-                        .rotationEffect(.radians(angle + .pi / 2))
-                        .position(x: geometry.size.width / 2 + cos(angle) * radius, y: geometry.size.height / 2 + sin(angle) * radius)
+                    sliceLabel
+                        .rotationEffect(.radians(angle + Double.pi / 2))
+                        .position(labelPosition)
                 }
             }
         }
+    }
+
+    private var sliceLabel: some View {
+        Text(label)
+            .font(.system(size: fraction < 0.06 ? 8 : 10, weight: .semibold))
+            .lineLimit(1)
+            .truncationMode(.middle)
+            .frame(width: fraction < 0.06 ? 48 : 82)
+            .foregroundStyle(.white)
+            .shadow(radius: 2)
+            .clipped()
     }
 }
 
@@ -2095,6 +2103,9 @@ struct FileShelfSettingsView: View {
                     .font(.largeTitle.bold())
                     .padding(.bottom)
 
+                ScreenshotShelfSettingsView()
+                    .modifier(SettingsContainerModifier())
+
                 VStack(alignment: .leading, spacing: 0) {
                     ToggleRow(
                         title: "Expand Shelf on Hover",
@@ -2259,7 +2270,7 @@ struct ClipboardSettingsView: View {
                                 .font(.caption.monospaced())
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 3)
-                                .background(Color.white.opacity(0.07))
+                                .background(Color.primary.opacity(0.07))
                                 .clipShape(Capsule())
                         }
 
@@ -3258,7 +3269,7 @@ struct ShortcutsSettingsView: View {
 
                     TextField("Search Shortcuts", text: $searchText)
                         .textFieldStyle(.plain).padding(8)
-                        .background(Color.black.opacity(0.2)).clipShape(RoundedRectangle(cornerRadius: 8))
+                        .background(Color(nsColor: .controlBackgroundColor)).clipShape(RoundedRectangle(cornerRadius: 8))
                         .padding(.horizontal)
 
                     if fetcher.isLoading {
@@ -3673,7 +3684,7 @@ fileprivate struct IconPickerView: View {
             HStack {
                 Text("Select Icon")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
                 Spacer()
 
                 Button(action: {
@@ -3683,7 +3694,7 @@ fileprivate struct IconPickerView: View {
                 }) {
                     Image(systemName: "magnifyingglass")
                         .font(.title3)
-                        .foregroundColor(isSearchVisible ? .accentColor : .white)
+                        .foregroundColor(isSearchVisible ? .accentColor : .primary)
                         .padding(5)
                 }
                 .buttonStyle(.plain)
@@ -3693,7 +3704,7 @@ fileprivate struct IconPickerView: View {
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.title2)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.secondary)
                         .padding(5)
                 }
                 .buttonStyle(.plain)
@@ -3704,12 +3715,12 @@ fileprivate struct IconPickerView: View {
             if isSearchVisible {
                 HStack {
                     Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
+                        .foregroundColor(.secondary)
                     TextField("Search icons...", text: $searchText)
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                 }
                 .padding(8)
-                .background(Color.white.opacity(0.1))
+                .background(Color.primary.opacity(0.1))
                 .cornerRadius(10)
                 .padding(.horizontal)
                 .padding(.bottom, 10)
@@ -3720,7 +3731,7 @@ fileprivate struct IconPickerView: View {
             LazyVStack(alignment: .leading, spacing: 20) {
                     if filteredIconSections.isEmpty {
                         Text("No icons found for \"\(searchText)\"")
-                            .foregroundColor(.gray)
+                            .foregroundColor(.secondary)
                             .padding()
                             .frame(maxWidth: .infinity, alignment: .center)
                     } else {
@@ -3728,7 +3739,7 @@ fileprivate struct IconPickerView: View {
                             Text(section.title)
                                 .font(.headline)
                                 .fontWeight(.bold)
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(.secondary)
                                 .padding(.leading, 5)
 
                             LazyVGrid(columns: columns, spacing: 15) {
@@ -3740,9 +3751,9 @@ fileprivate struct IconPickerView: View {
                                         Image(systemName: symbolName)
                                             .font(.system(size: 24, weight: .bold))
                                             .frame(width: 50, height: 50)
-                                            .background(Color.white.opacity(0.1))
+                                            .background(Color.primary.opacity(0.1))
                                             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.primary)
                                     }
                                     .buttonStyle(.plain)
                                 }
@@ -3755,7 +3766,7 @@ fileprivate struct IconPickerView: View {
 
         }
         .frame(width: 350, height: 700)
-        .background(Color(red: 0.18, green: 0.18, blue: 0.28))
+        .background(Color(nsColor: .windowBackgroundColor))
     }
 }
 
@@ -3789,7 +3800,6 @@ struct BatteryInfoSettingsView: View {
 
 struct LockScreenSettingsView: View {
     @EditingSettings var settings: SettingsEditingSession
-    @State private var notchsettingsHaveChanged: Bool = false
 
     var body: some View {
         ScrollView {
@@ -3798,44 +3808,35 @@ struct LockScreenSettingsView: View {
                     .font(.largeTitle.bold())
                     .padding(.bottom)
 
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Wallpaper").font(.headline).padding([.top, .horizontal])
-
-                    ToggleRow(
-                        title: "Custom Lock Screen Wallpaper",
-                        description: "Show your own image or video behind the clock, sign-in controls, and Sapphire widgets on the lock screen.",
-                        isOn: $settings.settings.lockScreenCustomWallpaperEnabled
-                    )
-
-                    if settings.settings.lockScreenCustomWallpaperEnabled {
-                        Divider().padding(.leading, 20)
-
-                        WallpaperFileRow(
-                            path: $settings.settings.lockScreenCustomWallpaperPath,
-                            panelTitle: "Choose Lock Screen Wallpaper",
-                            panelMessage: "Select an image or video to show on your lock screen."
-                        )
-
-                        Divider().padding(.leading, 20)
-
-                        ToggleRow(
-                            title: "Use on Desktop",
-                            description: "Also show the lock screen wallpaper (live video included) on your desktop, unless a separate desktop wallpaper is set below.",
-                            isOn: $settings.settings.lockScreenKeepWallpaperAfterUnlock
-                        )
+                HStack(alignment: .top, spacing: 14) {
+                    Image(systemName: "lock.shield.fill")
+                        .font(.system(size: 28))
+                        .foregroundStyle(.green)
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Hidden while your Mac is locked")
+                            .font(.headline)
+                        Text("Sapphire hides its windows, notch, widgets, and overlays on the lock screen. Its interface cannot be opened or interacted with until you unlock your Mac.")
+                            .foregroundStyle(.secondary)
+                        Text("Your usual Sapphire interface becomes available again after you unlock.")
+                            .foregroundStyle(.secondary)
                     }
+                }
+                .padding(20)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .modifier(SettingsContainerModifier())
 
-                    Divider().padding(.leading, 20)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Desktop Wallpaper").font(.headline).padding([.top, .horizontal])
 
                     ToggleRow(
                         title: "Custom Desktop Wallpaper",
-                        description: "Use your own image or video on the desktop. A video plays behind your desktop icons and pauses whenever the desktop is covered. The lock screen shows it too unless it has its own wallpaper.",
+                        description: "Use your own image or video on the desktop. A video plays behind your desktop icons and pauses whenever the desktop is covered.",
                         isOn: $settings.settings.desktopWallpaperEnabled
                     )
 
                     if settings.settings.desktopWallpaperEnabled {
                         Divider().padding(.leading, 20)
-
                         WallpaperFileRow(
                             path: $settings.settings.desktopWallpaperPath,
                             panelTitle: "Choose Desktop Wallpaper",
@@ -3843,9 +3844,8 @@ struct LockScreenSettingsView: View {
                         )
                     }
 
-                    if wallpaperConfiguration.desktopPath != nil || wallpaperConfiguration.lockScreenPath != nil {
+                    if wallpaperConfiguration.desktopPath != nil {
                         Divider().padding(.leading, 20)
-
                         HStack {
                             SettingsRowLabel(
                                 title: "Scaling",
@@ -3866,7 +3866,6 @@ struct LockScreenSettingsView: View {
 
                     if hasVideoWallpaper {
                         Divider().padding(.leading, 20)
-
                         HStack {
                             SettingsRowLabel(
                                 title: "Video Playback",
@@ -3886,15 +3885,12 @@ struct LockScreenSettingsView: View {
 
                         if settings.settings.liveWallpaperPlaybackMode == .adaptive {
                             Divider().padding(.leading, 20)
-
                             ToggleRow(
                                 title: "Pause in Low Power Mode",
                                 description: "Show the first frame instead of playing the video while Low Power Mode is on.",
                                 isOn: $settings.settings.liveWallpaperPauseOnLowPower
                             )
-
                             Divider().padding(.leading, 20)
-
                             ToggleRow(
                                 title: "Pause on Battery Power",
                                 description: "Only play video wallpapers while your Mac is plugged in.",
@@ -3902,151 +3898,14 @@ struct LockScreenSettingsView: View {
                             )
                         }
                     }
-
                 }
                 .modifier(SettingsContainerModifier())
-                .animation(.default, value: settings.settings.lockScreenCustomWallpaperEnabled)
                 .animation(.default, value: settings.settings.desktopWallpaperEnabled)
                 .animation(.default, value: hasVideoWallpaper)
                 .animation(.default, value: settings.settings.liveWallpaperPlaybackMode)
-
-                ToggleRow(
-                    title: "Show Music When Paused",
-                    description: "Keep showing the current track in lock screen widgets even when playback is paused.",
-                    isOn: $settings.settings.lockScreenShowMusicWhenPaused
-                )
-                .modifier(SettingsContainerModifier())
-
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Top Info Widget").font(.headline).padding([.top, .horizontal])
-
-                    ToggleRow(
-                        title: "Show Info Widget(s)",
-                        description: "Display small, informational widgets below the clock.",
-                        isOn: $settings.settings.lockScreenShowInfoWidget
-                    )
-
-                    if settings.settings.lockScreenShowInfoWidget {
-                        Divider().padding(.leading, 20)
-
-                        ToggleRow(
-                            title: "Hide When Inactive",
-                            description: "Only show widgets like Music, Calendar, or Focus when they are active.",
-                            isOn: $settings.settings.lockScreenHideInactiveInfoWidgets
-                        )
-
-                        Divider().padding(.leading, 20)
-
-                        SettingsMultiSelectList(
-                            title: "Visible Widgets",
-                            options: LockScreenWidgetType.selectableCases,
-                            selection: $settings.settings.lockScreenWidgets,
-                            label: \.displayName
-                        )
-
-                        if settings.settings.lockScreenWidgets.contains(.weather) {
-                            Divider().padding(.horizontal)
-                            WeatherInfoSettingsView(selectedInfo: $settings.settings.lockScreenWeatherInfo)
-                        }
-
-                        if settings.settings.lockScreenWidgets.contains(.battery) {
-                            Divider().padding(.horizontal)
-                            BatteryInfoSettingsView(selectedInfo: $settings.settings.lockScreenBatteryInfo)
-                        }
-                    }
-                }
-                .modifier(SettingsContainerModifier())
-                .animation(.default, value: settings.settings.lockScreenShowInfoWidget)
-                .animation(.default, value: settings.settings.lockScreenWidgets.contains(.weather))
-                .animation(.default, value: settings.settings.lockScreenWidgets.contains(.battery))
-
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Main Widget(s)").font(.headline).padding([.top, .horizontal])
-
-                    ToggleRow(
-                        title: "Show Main Widget(s)",
-                        description: "Display larger, interactive widgets in the middle of the screen.",
-                        isOn: $settings.settings.lockScreenShowMainWidget
-                    )
-
-                    if settings.settings.lockScreenShowMainWidget {
-                        Divider().padding(.leading, 20)
-
-                        SettingsMultiSelectList(
-                            title: "Visible Main Widgets",
-                            options: LockScreenMainWidgetType.selectableCases,
-                            selection: $settings.settings.lockScreenMainWidgets,
-                            label: \.displayName
-                        )
-                        .transition(.opacity.combined(with: .move(edge: .top)))
-                    }
-                }
-                .modifier(SettingsContainerModifier())
-                .animation(.default, value: settings.settings.lockScreenShowMainWidget)
-
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Mini Widgets").font(.headline).padding([.top, .horizontal])
-
-                    ToggleRow(
-                        title: "Show Mini Widget(s)",
-                        description: "Display compact widgets below the main widget area.",
-                        isOn: $settings.settings.lockScreenShowMiniWidgets
-                    )
-
-                    if settings.settings.lockScreenShowMiniWidgets {
-                        Divider().padding(.leading, 20)
-
-                        SettingsMultiSelectList(
-                            title: "Visible Mini Widgets",
-                            options: LockScreenMiniWidgetType.selectableCases,
-                            selection: $settings.settings.lockScreenMiniWidgets,
-                            label: \.displayName
-                        )
-                        .transition(.opacity.combined(with: .move(edge: .top)))
-                    }
-                }
-                .modifier(SettingsContainerModifier())
-                .animation(.default, value: settings.settings.lockScreenShowMiniWidgets)
-
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Appearance").font(.headline).padding([.top, .horizontal])
-
-                    ToggleRow(
-                        title: "Liquid Glass Effect",
-                        description: "Put the lock screen's widgets on native Liquid Glass.",
-                        isOn: $settings.settings.lockScreenLiquidGlassLook
-                    )
-
-                    if settings.settings.lockScreenLiquidGlassLook {
-                        Divider().padding(.leading, 20)
-                        LiquidGlassOptionsEditor(options: $settings.settings.lockScreenGlass)
-                    }
-                }
-                .modifier(SettingsContainerModifier())
-                .animation(.default, value: settings.settings.lockScreenLiquidGlassLook)
-
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Notch Bar").font(.headline).padding([.top, .horizontal])
-
-                    ToggleRow(
-                        title: "Show Notch on Lock Screen",
-                        description: "Keep the Sapphire notch bar visible at the top of the lock screen.",
-                        isOn: $settings.settings.lockScreenShowNotch
-                    )
-
-                    Divider().padding(.leading, 20)
-
-                    ToggleRow(
-                        title: "Show Lock Screen Live Activity",
-                        description: "Display an authentication status activity in the notch on the lock screen.",
-                        isOn: $settings.settings.lockScreenLiveActivityEnabled
-                    )
-                }
-                .modifier(SettingsContainerModifier())
             }
             .padding(25)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .onChange(of: settings.settings.lockScreenShowNotch) {notchsettingsHaveChanged = true}
         }
     }
 
@@ -4055,11 +3914,8 @@ struct LockScreenSettingsView: View {
     }
 
     private var hasVideoWallpaper: Bool {
-        let configuration = wallpaperConfiguration
-        return WallpaperMedia.isVideo(path: configuration.desktopPath)
-            || WallpaperMedia.isVideo(path: configuration.lockScreenPath)
+        WallpaperMedia.isVideo(path: wallpaperConfiguration.desktopPath)
     }
-
 }
 
 private struct WallpaperFileRow: View {
@@ -4858,7 +4714,7 @@ fileprivate struct ModernMenuPicker<T: Identifiable & Hashable>: View {
                 Image(systemName: "chevron.down").font(.caption.bold())
             }
             .padding(.horizontal, 10).padding(.vertical, 6)
-            .background(Color.white.opacity(0.1))
+            .background(Color.primary.opacity(0.1))
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .foregroundColor(.primary)
         }
@@ -4926,7 +4782,7 @@ fileprivate struct ModernMenuPickerWithID<T: Identifiable & Hashable>: View wher
                 Image(systemName: "chevron.down").font(.caption.bold())
             }
             .padding(.horizontal, 10).padding(.vertical, 6)
-            .background(Color.white.opacity(0.1))
+            .background(Color.primary.opacity(0.1))
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .foregroundColor(.primary)
         }
@@ -4990,7 +4846,7 @@ fileprivate struct AppPickerView: View {
             TextField("Search Apps", text: $searchText)
                 .textFieldStyle(.plain)
                 .padding()
-                .background(Color.black.opacity(0.1))
+                .background(Color(nsColor: .controlBackgroundColor))
 
             List(filteredApps) { app in
                 Button(action: { onSelect(app.id) }) {
@@ -5117,7 +4973,7 @@ struct NotificationsSettingsView: View {
                             NotificationToggleRowView(source: source)
                             if source != NotificationSource.allCases.last {
                                 Rectangle()
-                                    .fill(Color.white.opacity(0.2))
+                                    .fill(Color.primary.opacity(0.2))
                                     .frame(height: 1)
                                     .padding(.leading, 60)
                             }
@@ -5134,7 +4990,7 @@ struct NotificationsSettingsView: View {
                         }
                         .padding(EdgeInsets(top: 12, leading: 20, bottom: 12, trailing: 20))
 
-                        Rectangle().fill(Color.white.opacity(0.2)).frame(height: 1).padding(.leading, 60)
+                        Rectangle().fill(Color.primary.opacity(0.2)).frame(height: 1).padding(.leading, 60)
 
                         Text("Allow Notifications From:")
                             .font(.headline)
@@ -5619,7 +5475,7 @@ struct ProximityUnlockSettingsView: View {
                         }
                     }
                     .frame(height: listHeight)
-                    .background(Color.black.opacity(0.1))
+                    .background(Color(nsColor: .controlBackgroundColor))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .animation(.spring(), value: listHeight)
                 }.padding(.horizontal).animation(.default, value: showUnnamedDevices)
@@ -6669,7 +6525,7 @@ struct DateRangePickerView: View {
             }
         }
         .padding(5)
-        .background(Color.black.opacity(0.15))
+        .background(Color(nsColor: .controlBackgroundColor))
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
@@ -7144,7 +7000,7 @@ struct BatterySpecsCard: View {
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(
-                            (powerModeManager.isLowPowerModeActive ? Color.green.opacity(0.15) : Color.white.opacity(0.08)),
+                            (powerModeManager.isLowPowerModeActive ? Color.green.opacity(0.15) : Color.primary.opacity(0.08)),
                             in: Capsule()
                         )
                 }
@@ -7566,7 +7422,7 @@ struct BatteryHistoryView: View {
                 )
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [Color.white.opacity(0.10), Color.white.opacity(0.02), .clear],
+                        colors: [Color.primary.opacity(0.10), Color.primary.opacity(0.02), .clear],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -8078,7 +7934,7 @@ struct BatteryConfigurationView: View {
                     HelperStatusBanner(helperManager: helperManager)
                 }
                 .padding()
-                .roundedCard(fill: Color.black.opacity(0.15), cornerRadius: 20, stroke: Color.white.opacity(0.1))
+                .roundedCard(fill: Color.primary.opacity(0.04), cornerRadius: 20, stroke: Color.primary.opacity(0.1))
                 .onAppear { helperManager.checkIfRunning() }
 
                 notificationsSection
@@ -9128,16 +8984,16 @@ struct MusicSettingsView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Spotify API Credentials").font(.system(size: 14, weight: .medium))
                             Text("Register your app at developer.spotify.com and copy these values here. The redirect URI is: sapphire://callback").font(.caption).foregroundColor(.secondary).padding(.bottom, 4)
-                            Text("Client ID").font(.system(size: 13, weight: .medium)).foregroundStyle(.white.opacity(0.8))
+                            Text("Client ID").font(.system(size: 13, weight: .medium)).foregroundStyle(.secondary)
                             SecureField("Enter your Client ID", text: Binding(
                                 get: { APIKeyManager.shared.spotifyClientId },
                                 set: { APIKeyManager.shared.spotifyClientId = $0 }
-                            )).textFieldStyle(.plain).padding(8).background(Color.black.opacity(0.2)).clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.2)))
-                            Text("Client Secret").font(.system(size: 13, weight: .medium)).foregroundStyle(.white.opacity(0.8)).padding(.top, 5)
+                            )).textFieldStyle(.plain).padding(8).background(Color(nsColor: .controlBackgroundColor)).clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.primary.opacity(0.2)))
+                            Text("Client Secret").font(.system(size: 13, weight: .medium)).foregroundStyle(.secondary).padding(.top, 5)
                             SecureField("Enter your Client Secret", text: Binding(
                                 get: { APIKeyManager.shared.spotifyClientSecret },
                                 set: { APIKeyManager.shared.spotifyClientSecret = $0 }
-                            )).textFieldStyle(.plain).padding(8).background(Color.black.opacity(0.2)).clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.2)))
+                            )).textFieldStyle(.plain).padding(8).background(Color(nsColor: .controlBackgroundColor)).clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.primary.opacity(0.2)))
                         }.padding().padding(.top, 5)
                         Text("Log in here to enable official features like device switching for Premium users.").font(.caption).foregroundColor(.secondary).padding(.horizontal)
                         Divider().padding(.horizontal, 20)
@@ -9164,16 +9020,16 @@ struct MusicSettingsView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("TIDAL API Credentials").font(.system(size: 14, weight: .medium))
                         Text("Create an app at developer.tidal.com, enable the user.read, search.read, collection.read/write, and playlists.read/write scopes, and set the redirect URI exactly to sapphire://callback.").font(.caption).foregroundColor(.secondary).padding(.bottom, 4)
-                        Text("Client ID").font(.system(size: 13, weight: .medium)).foregroundStyle(.white.opacity(0.8))
+                        Text("Client ID").font(.system(size: 13, weight: .medium)).foregroundStyle(.secondary)
                         SecureField("Enter your Client ID", text: Binding(
                             get: { APIKeyManager.shared.tidalClientId },
                             set: { APIKeyManager.shared.tidalClientId = $0 }
-                        )).textFieldStyle(.plain).padding(8).background(Color.black.opacity(0.2)).clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.2)))
-                        Text("Client Secret").font(.system(size: 13, weight: .medium)).foregroundStyle(.white.opacity(0.8)).padding(.top, 5)
+                        )).textFieldStyle(.plain).padding(8).background(Color(nsColor: .controlBackgroundColor)).clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.primary.opacity(0.2)))
+                        Text("Client Secret").font(.system(size: 13, weight: .medium)).foregroundStyle(.secondary).padding(.top, 5)
                         SecureField("Enter your Client Secret", text: Binding(
                             get: { APIKeyManager.shared.tidalClientSecret },
                             set: { APIKeyManager.shared.tidalClientSecret = $0 }
-                        )).textFieldStyle(.plain).padding(8).background(Color.black.opacity(0.2)).clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.2)))
+                        )).textFieldStyle(.plain).padding(8).background(Color(nsColor: .controlBackgroundColor)).clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.primary.opacity(0.2)))
                     }.padding().padding(.top, 5)
                     Text("Log in here to enable TIDAL features like catalog search and syncing liked tracks and playlists. Requires a TIDAL developer account (third-party access tier).").font(.caption).foregroundColor(.secondary).padding(.horizontal)
                     Divider().padding(.horizontal, 20)
@@ -9410,7 +9266,7 @@ struct WeatherSettingsView: View {
                     }
                     .padding()
 
-                    Rectangle().fill(Color.white.opacity(0.2)).frame(height: 1).padding(.leading, 20)
+                    Rectangle().fill(Color.primary.opacity(0.2)).frame(height: 1).padding(.leading, 20)
 
                     HStack {
                         Text("Use Metric Units")
@@ -9420,7 +9276,7 @@ struct WeatherSettingsView: View {
                     }
                     .padding()
 
-                    Rectangle().fill(Color.white.opacity(0.2)).frame(height: 1).padding(.leading, 20)
+                    Rectangle().fill(Color.primary.opacity(0.2)).frame(height: 1).padding(.leading, 20)
 
                     HStack {
                         Text("Open detailed Weather widget on live activity click")
@@ -9493,7 +9349,7 @@ struct CalendarSettingsView: View {
                     }
                     .padding()
 
-                    Rectangle().fill(Color.white.opacity(0.2)).frame(height: 1).padding(.leading, 20)
+                    Rectangle().fill(Color.primary.opacity(0.2)).frame(height: 1).padding(.leading, 20)
 
                     HStack {
                         Text("Start Week On")
@@ -9508,7 +9364,7 @@ struct CalendarSettingsView: View {
                     }
                     .padding()
 
-                    Rectangle().fill(Color.white.opacity(0.2)).frame(height: 1).padding(.leading, 20)
+                    Rectangle().fill(Color.primary.opacity(0.2)).frame(height: 1).padding(.leading, 20)
 
                     ToggleRow(
                         title: "Open Calendar on Click",
@@ -10210,7 +10066,7 @@ struct BluetoothSettingsView: View {
                     Text("Notifications").font(.headline).padding([.top, .horizontal])
                     ToggleRow(title: "Notify for Low Battery", description: "Show an alert when a connected device's battery is low.", isOn: $settings.settings.bluetoothNotifyLowBattery)
                     Divider().padding(.leading, 20)
-                    ToggleRow(title: "Play Connection Sounds", description: "Play a sound when devices connect or disconnect.", isOn: $settings.settings.bluetoothNotifySound)
+                    ToggleRow(title: "Play Connection Sounds", description: "Off by default. Turn on to play a sound when devices connect or disconnect.", isOn: $settings.settings.bluetoothNotifySound)
                 }
                 .modifier(SettingsContainerModifier())
 
@@ -10257,7 +10113,7 @@ struct NearbyShareSettingsView: View {
                         }
                         .padding(EdgeInsets(top: 12, leading: 20, bottom: 12, trailing: 20))
 
-                        Rectangle().fill(Color.white.opacity(0.2)).frame(height: 1).padding(.horizontal, 20)
+                        Rectangle().fill(Color.primary.opacity(0.2)).frame(height: 1).padding(.horizontal, 20)
 
                         InfoContainer(
                             text: "Nearby Share allows you to share files from Android phones to your Mac using Android's native file sharing (Nearby Share / Quick Share). It's recommended to keep this feature enabled for convenient sharing from family and friends.",
@@ -10270,16 +10126,16 @@ struct NearbyShareSettingsView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Device Display Name")
                                     .font(.system(size: 14, weight: .medium))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(.primary)
 
                                 TextField("My Mac", text: $settings.settings.nearbyShareDeviceDisplayName)
                                     .textFieldStyle(.plain)
                                     .padding(.vertical, 8)
                                     .padding(.horizontal, 12)
-                                    .background(Color.black.opacity(0.2))
+                                    .background(Color(nsColor: .controlBackgroundColor))
                                     .clipShape(RoundedRectangle(cornerRadius: 8))
-                                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.2), lineWidth: 1))
-                                    .foregroundStyle(.white)
+                                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.primary.opacity(0.2), lineWidth: 1))
+                                    .foregroundStyle(.primary)
                                     .font(.system(size: 13))
                                     .disabled(!settings.settings.nearbyShareEnabled)
                             }
@@ -10287,12 +10143,12 @@ struct NearbyShareSettingsView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Download Location")
                                     .font(.system(size: 14, weight: .medium))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(.primary)
 
                                 HStack {
                                     TextField("Path", text: $downloadPath, onCommit: validateAndSavePath)
                                         .textFieldStyle(.plain)
-                                        .foregroundStyle(.white)
+                                        .foregroundStyle(.primary)
                                         .font(.system(size: 13))
                                         .disabled(!settings.settings.nearbyShareEnabled)
 
@@ -10301,9 +10157,9 @@ struct NearbyShareSettingsView: View {
                                 }
                                 .padding(.vertical, 8)
                                 .padding(.horizontal, 12)
-                                .background(Color.black.opacity(0.2))
+                                .background(Color(nsColor: .controlBackgroundColor))
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
-                                .overlay(RoundedRectangle(cornerRadius: 8).stroke(isPathValid ? Color.white.opacity(0.2) : Color.red, lineWidth: 1))
+                                .overlay(RoundedRectangle(cornerRadius: 8).stroke(isPathValid ? Color.primary.opacity(0.2) : Color.red, lineWidth: 1))
 
                                 if !isPathValid {
                                     Text("A valid directory is required.")
@@ -10315,7 +10171,7 @@ struct NearbyShareSettingsView: View {
                         .padding([.horizontal, .bottom], 20)
                         .opacity(settings.settings.nearbyShareEnabled ? 1.0 : 0.5)
 
-                        Rectangle().fill(Color.white.opacity(0.2)).frame(height: 1).padding(.horizontal, 20)
+                        Rectangle().fill(Color.primary.opacity(0.2)).frame(height: 1).padding(.horizontal, 20)
 
                         HStack {
                             Text("Open detailed AirDrop widget on live activity click")
@@ -10420,10 +10276,9 @@ struct AboutSettingsView: View {
     }
 
     private var versionLabel: String {
-        if BetaEntitlementRuntime.isBetaBuild {
-            return "Version \(currentAppVersion) Beta"
-        }
-        return "Version \(currentAppVersion)"
+        let version = "Version \(currentAppVersion)" + (BetaEntitlementRuntime.isBetaBuild ? " Beta" : "")
+        guard let localBuild = Bundle.main.object(forInfoDictionaryKey: "SapphireLocalBuild") as? String else { return version }
+        return "\(version) · \(localBuild)"
     }
 
     var body: some View {
@@ -11093,7 +10948,7 @@ struct ModernChannelSwitcher: View {
                     .opacity(isLockedToRunningBuild && channel != selection ? 0.35 : ((channel == .beta && !hasBetaAccess) ? 0.4 : 1))
             }
         }
-        .background(Color.white.opacity(0.08))
+        .background(Color.primary.opacity(0.08))
         .clipShape(Capsule())
         .opacity(isLockedToRunningBuild ? 0.85 : 1)
     }
@@ -11252,6 +11107,7 @@ struct AppearanceSettingsView: View {
             LazyVStack(alignment: .leading, spacing: 40) {
                 Text("Appearance")
                     .font(.largeTitle.bold())
+                AppAppearanceSettingsSection()
                 DisplaySettingsView()
                 NotchAppearanceDisplaySection()
                 MenuBarHidingSettingsView()
@@ -11443,7 +11299,7 @@ private struct MenuBarHotkeysSettingsSection: View {
                     .font(.caption.monospaced())
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Color.white.opacity(0.07))
+                    .background(Color.primary.opacity(0.07))
                     .clipShape(Capsule())
             }
             Button(isRecording ? "Cancel" : "Record…") {
@@ -11898,11 +11754,11 @@ private struct MenuBarSpaceBindingsEditor: View {
                                 .frame(width: 32, height: 28)
                                 .background(
                                     RoundedRectangle(cornerRadius: 7, style: .continuous)
-                                        .fill(isBound ? Color.accentColor.opacity(0.25) : Color.white.opacity(0.06))
+                                        .fill(isBound ? Color.accentColor.opacity(0.25) : Color.primary.opacity(0.06))
                                 )
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 7, style: .continuous)
-                                        .stroke(isBound ? Color.accentColor : Color.white.opacity(0.12), lineWidth: 1)
+                                        .stroke(isBound ? Color.accentColor : Color.primary.opacity(0.12), lineWidth: 1)
                                 )
                         }
                         .buttonStyle(.plain)
@@ -12391,7 +12247,7 @@ struct ModernSegmentedPicker: View {
             }
         }
         .padding(6)
-        .background(Color.black.opacity(0.15))
+        .background(Color(nsColor: .controlBackgroundColor))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
@@ -12435,9 +12291,9 @@ struct IntelligenceRunnerView: View {
                 TextField("Describe a task...", text: $vm.taskInput)
                     .textFieldStyle(.plain)
                     .padding(8)
-                    .background(Color.black.opacity(0.2))
+                    .background(Color(nsColor: .controlBackgroundColor))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.15)))
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.primary.opacity(0.15)))
                     .onSubmit {
                         if !vm.isRunning && !isLaunchDisabled {
                             let activeKey = backend.resolveAPIKey(fallbackGeminiKey: apiKey)
@@ -12481,7 +12337,7 @@ struct IntelligenceRunnerView: View {
                     runScreenshotDebug()
                 } label: {
                     Image(systemName: isRunningScreenshotDebug ? "camera.fill" : "camera")
-                        .foregroundStyle(isRunningScreenshotDebug ? .yellow : .white)
+                        .foregroundStyle(isRunningScreenshotDebug ? .orange : .primary)
                 }
                 .buttonStyle(.plain)
                 .frame(width: 32, height: 32)
@@ -12504,9 +12360,9 @@ struct IntelligenceRunnerView: View {
                         ))
                         .textFieldStyle(.plain)
                         .padding(6)
-                        .background(Color.black.opacity(0.2))
+                        .background(Color(nsColor: .controlBackgroundColor))
                         .clipShape(RoundedRectangle(cornerRadius: 6))
-                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.white.opacity(0.12)))
+                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.primary.opacity(0.12)))
 
                         TextField("Model Name", text: Binding(
                             get: { UserDefaults.standard.string(forKey: "hackClubModel") ?? "qwen/qwen3-32b" },
@@ -12514,9 +12370,9 @@ struct IntelligenceRunnerView: View {
                         ))
                         .textFieldStyle(.plain)
                         .padding(6)
-                        .background(Color.black.opacity(0.2))
+                        .background(Color(nsColor: .controlBackgroundColor))
                         .clipShape(RoundedRectangle(cornerRadius: 6))
-                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.white.opacity(0.12)))
+                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.primary.opacity(0.12)))
                     }
                 }
                 .padding(.top, 4)
@@ -12566,7 +12422,7 @@ struct IntelligenceRunnerView: View {
                     .padding(8)
                 }
                 .frame(maxHeight: 140)
-                .background(Color.black.opacity(0.25))
+                .background(Color(nsColor: .controlBackgroundColor))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
             }
         }
@@ -13016,9 +12872,9 @@ struct FocusSessionSettingsView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "shield.lefthalf.filled")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .frame(width: 20, height: 20)
-                        .background(Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 5))
+                        .background(Color.primary.opacity(0.1), in: RoundedRectangle(cornerRadius: 5))
                     Text("Blocking Intensity")
                         .font(.system(size: 12, weight: .semibold))
                 }
@@ -13069,7 +12925,7 @@ struct FocusSessionSettingsView: View {
                         .padding(.vertical, 8)
                         .background(
                             RoundedRectangle(cornerRadius: 9, style: .continuous)
-                                .fill(settings.settings.focusIntensity == level ? Color.green.opacity(0.12) : Color.white.opacity(0.05))
+                                .fill(settings.settings.focusIntensity == level ? Color.green.opacity(0.12) : Color.primary.opacity(0.05))
                         )
                     }
                     .buttonStyle(.plain)
@@ -13312,7 +13168,7 @@ struct FocusSessionSettingsView: View {
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
-                .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
+                .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
             }
             .buttonStyle(.plain)
             .padding(.horizontal, 16).padding(.bottom, 12)
@@ -13322,9 +13178,9 @@ struct FocusSessionSettingsView: View {
             HStack(spacing: 8) {
                 Image(systemName: "link.icloud")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
                     .frame(width: 20, height: 20)
-                    .background(Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 5))
+                    .background(Color.primary.opacity(0.1), in: RoundedRectangle(cornerRadius: 5))
                 Text("System Clock & Shortcuts")
                     .font(.system(size: 12, weight: .semibold))
             }
@@ -13385,7 +13241,7 @@ struct FocusSessionSettingsView: View {
             Button(action: onRemove) { Image(systemName: "xmark.circle.fill").font(.caption) }.buttonStyle(.plain)
         }
         .padding(.horizontal, 8).padding(.vertical, 4)
-        .background(Color.white.opacity(0.08), in: Capsule())
+        .background(Color.primary.opacity(0.08), in: Capsule())
     }
 }
 
@@ -13578,7 +13434,7 @@ private struct AddFocusScheduleView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 28)
                 .background(
-                    isOn ? Color.green : Color.white.opacity(0.08),
+                    isOn ? Color.green : Color.primary.opacity(0.08),
                     in: Capsule()
                 )
         }        .buttonStyle(.plain)

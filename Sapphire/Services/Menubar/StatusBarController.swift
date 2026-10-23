@@ -250,6 +250,7 @@ final class StatusBarController {
     // MARK: - Core Logic
 
     @objc private func statusBarButtonAction(sender: NSStatusBarButton) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         guard let event = NSApp.currentEvent else { return }
         if event.type == .rightMouseUp || event.modifierFlags.contains(.control) {
             showChevronContextMenu()
@@ -259,6 +260,7 @@ final class StatusBarController {
     }
 
     @objc private func primaryAction() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         let modifiers = NSEvent.modifierFlags
         if modifiers.contains(.control) {
             showChevronContextMenu()
@@ -268,6 +270,7 @@ final class StatusBarController {
     }
 
     private func handlePrimaryClick(modifiers: NSEvent.ModifierFlags) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         (NSApp.delegate as? AppDelegate)?.interactionManager?.temporarilyDisable(for: 0.5)
 
         if isZenModeActive {
@@ -285,6 +288,7 @@ final class StatusBarController {
     }
 
     private func showChevronContextMenu() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         let menu = createChevronContextMenu()
         if usesForwardedPrimaryAction, let frame = chevronFrame {
             let cocoa = AX.cocoaRect(fromAXRect: frame)
@@ -295,6 +299,7 @@ final class StatusBarController {
     }
 
     func expand(inline: Bool = false) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         guard isCollapsed, !isZenModeActive else { return }
         if usesHiddenItemsBar, !inline {
             MenuBarHiddenItemsBar.shared.show(below: chevronFrame)
@@ -326,11 +331,13 @@ final class StatusBarController {
     }
 
     private func toggleAlwaysHidden() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         isAlwaysHiddenExpanded.toggle()
         updateItems()
     }
 
     @objc private func enterEditMode() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         if isZenModeActive { setZenMode(false) }
         isEditing = true
         isCollapsed = false
@@ -342,11 +349,13 @@ final class StatusBarController {
     // MARK: - Public Toggles (hotkeys, search, menus)
 
     @objc func toggleHiddenSection() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         if isZenModeActive { setZenMode(false) }
         isCollapsed ? expand() : collapse()
     }
 
     @objc func toggleAlwaysHiddenSection() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         guard alwaysHiddenItem != nil else {
             toggleHiddenSection()
             return
@@ -362,6 +371,7 @@ final class StatusBarController {
     }
 
     @objc func toggleZenMode() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         setZenMode(!isZenModeActive)
     }
 
@@ -393,6 +403,7 @@ final class StatusBarController {
     }
 
     func showAlwaysHiddenSection() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         guard !isZenModeActive, alwaysHiddenItem != nil else { return }
         if isCollapsed { expand() }
         guard !isAlwaysHiddenExpanded else { return }
@@ -401,6 +412,7 @@ final class StatusBarController {
     }
 
     func revealAllSections(then completion: @escaping @MainActor () -> Void) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         if isZenModeActive { setZenMode(false) }
         rehideGraceUntil = Date().addingTimeInterval(2)
         let wasFullyShown = !isCollapsed && (isAlwaysHiddenExpanded || alwaysHiddenItem == nil)
@@ -415,7 +427,10 @@ final class StatusBarController {
         }
         MenuBarItemCatalog.shared.invalidate()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            MainActor.assumeIsolated { completion() }
+            MainActor.assumeIsolated {
+                guard !SessionPrivacyState.shouldSuppressUI() else { return }
+                completion()
+            }
         }
     }
 
@@ -862,6 +877,7 @@ final class StatusBarController {
     // MARK: - Application Menu Hiding
 
     private func hideApplicationMenusIfCrowded() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         guard SettingsModel.shared.current.hideAppMenusWhenShowingItems,
               appWithHiddenMenus == nil,
               let frontmost = NSWorkspace.shared.frontmostApplication,
@@ -885,7 +901,8 @@ final class StatusBarController {
                     guard crowdsMenus || blockedByNotch else { return }
                     DispatchQueue.main.async {
                         MainActor.assumeIsolated {
-                            guard generation == self.appMenuHidingGeneration, !self.isCollapsed else { return }
+                            guard generation == self.appMenuHidingGeneration, !self.isCollapsed,
+                                  !SessionPrivacyState.shouldSuppressUI() else { return }
                             self.appWithHiddenMenus = frontmost
                             NSApp.activate()
                         }
@@ -899,7 +916,7 @@ final class StatusBarController {
         appMenuHidingGeneration += 1
         guard let app = appWithHiddenMenus else { return }
         appWithHiddenMenus = nil
-        guard !app.isTerminated,
+        guard !SessionPrivacyState.shouldSuppressUI(), !app.isTerminated,
               NSWorkspace.shared.frontmostApplication?.processIdentifier == ProcessInfo.processInfo.processIdentifier else { return }
         app.activate()
     }
@@ -1068,10 +1085,12 @@ final class StatusBarController {
     }
 
     @objc private func openItemSearch() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         MenuBarSearchPanelController.shared.toggle()
     }
 
     @objc private func openPreferences() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         (NSApp.delegate as? AppDelegate)?.openSettingsWindow()
     }
 }

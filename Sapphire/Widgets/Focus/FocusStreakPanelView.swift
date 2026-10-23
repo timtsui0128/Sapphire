@@ -14,7 +14,7 @@ struct StreakFlame: View {
     var body: some View {
         Image(systemName: "flame.fill")
             .font(.system(size: size * 0.62, weight: .semibold))
-            .foregroundColor(isActive ? .orange : Color.white.opacity(0.2))
+            .foregroundColor(isActive ? .orange : Color.primary.opacity(0.2))
             .frame(width: size, height: size)
     }
 }
@@ -46,10 +46,10 @@ struct FocusStreakPanelView: View {
             if !expanded {
                 stripLegend
             } else {
-                Divider().overlay(Color.white.opacity(0.08))
+                Divider().overlay(Color.primary.opacity(0.08))
                 immunitySection
             }
-            Divider().overlay(Color.white.opacity(0.08))
+            Divider().overlay(Color.primary.opacity(0.08))
             passesRow
             if snapshot.canRestore {
                 reviveRow
@@ -69,16 +69,16 @@ struct FocusStreakPanelView: View {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text("\(snapshot.streak)")
                         .font(.system(size: 34, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .monospacedDigit()
                         .contentTransition(.numericText())
                     Text(snapshot.streak == 1 ? "day" : "days")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.55))
+                        .foregroundColor(.primary.opacity(0.55))
                 }
                 Text("Focus streak")
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(.primary.opacity(0.5))
             }
             Spacer()
         }
@@ -89,7 +89,7 @@ struct FocusStreakPanelView: View {
         HStack(spacing: 12) {
             legendItem(icon: "flame.fill", color: .orange, label: "Focused")
             legendItem(icon: "shield.fill", color: .teal, label: "Immunity")
-            legendItem(icon: "circle.fill", color: .white.opacity(0.12), label: "Missed")
+            legendItem(icon: "circle.fill", color: .primary.opacity(0.12), label: "Missed")
         }
         .padding(.top, 2)
     }
@@ -101,7 +101,7 @@ struct FocusStreakPanelView: View {
                 .foregroundColor(color)
             Text(label)
                 .font(.system(size: 9, weight: .medium))
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(.primary.opacity(0.5))
         }
     }
 
@@ -115,18 +115,18 @@ struct FocusStreakPanelView: View {
                     .foregroundColor(.purple)
                 Text("Streak Passes")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.85))
+                    .foregroundColor(.primary.opacity(0.85))
                 Spacer()
                 Text("\(snapshot.passesAvailableThisMonth) left this month")
                     .font(.system(size: 11, weight: .bold, design: .monospaced))
-                    .foregroundColor(snapshot.passesAvailableThisMonth > 0 ? .purple : .white.opacity(0.4))
+                    .foregroundColor(snapshot.passesAvailableThisMonth > 0 ? .purple : .primary.opacity(0.4))
             }
 
             passDots
 
             Text("Free \(snapshot.tierName) users get \(snapshot.passesBaseAllowance) every month. Use one to revive a broken streak.")
                 .font(.system(size: 10))
-                .foregroundColor(.white.opacity(0.45))
+                .foregroundColor(.primary.opacity(0.45))
         }
     }
 
@@ -136,7 +136,7 @@ struct FocusStreakPanelView: View {
         return HStack(spacing: 5) {
             ForEach(0..<total, id: \.self) { i in
                 Circle()
-                    .fill(i < available ? Color.purple : Color.white.opacity(0.1))
+                    .fill(i < available ? Color.purple : Color.primary.opacity(0.1))
                     .frame(width: 8, height: 8)
             }
         }
@@ -153,10 +153,10 @@ struct FocusStreakPanelView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Your streak broke")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                     Text(brokenDayText)
                         .font(.system(size: 10))
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(.primary.opacity(0.5))
                 }
                 Spacer()
             }
@@ -168,7 +168,7 @@ struct FocusStreakPanelView: View {
             }) {
                 Label("Revive with a streak pass", systemImage: "flame.fill")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
                     .frame(maxWidth: .infinity)
                     .frame(height: 32)
                     .background(Color.orange.opacity(0.28), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
@@ -201,7 +201,7 @@ struct FocusStreakPanelView: View {
                     .foregroundColor(.teal)
                 Text("Immunity Days")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.85))
+                    .foregroundColor(.primary.opacity(0.85))
                 Spacer()
                 Text("Unlimited")
                     .font(.system(size: 10, weight: .semibold))
@@ -209,7 +209,7 @@ struct FocusStreakPanelView: View {
             }
             Text("Report days you can’t focus — at least 3 days in advance — and they won’t break your streak. Unlimited.")
                 .font(.system(size: 10))
-                .foregroundColor(.white.opacity(0.45))
+                .foregroundColor(.primary.opacity(0.45))
 
             HStack(spacing: 8) {
                 DatePicker(
@@ -223,7 +223,7 @@ struct FocusStreakPanelView: View {
                 Button(action: addImmunity) {
                     Image(systemName: "plus")
                         .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .frame(width: 30, height: 26)
                         .background(Color.teal.opacity(0.3), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
                 }
@@ -237,7 +237,7 @@ struct FocusStreakPanelView: View {
                             Circle().fill(Color.teal.opacity(0.6)).frame(width: 5, height: 5)
                             Text(Self.dateText(day.date))
                                 .font(.system(size: 11))
-                                .foregroundColor(.white.opacity(0.75))
+                                .foregroundColor(.primary.opacity(0.75))
                             Spacer()
                             Button {
                                 focusManager.removeImmunityDay(id: day.id)
@@ -254,7 +254,7 @@ struct FocusStreakPanelView: View {
             } else {
                 Text("No upcoming immunity days.")
                     .font(.system(size: 11))
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundColor(.primary.opacity(0.4))
             }
         }
     }
@@ -273,10 +273,10 @@ struct FocusStreakPanelView: View {
 
     private var panelBackground: some View {
         RoundedRectangle(cornerRadius: 12, style: .continuous)
-            .fill(Color.white.opacity(0.03))
+            .fill(Color.primary.opacity(0.03))
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                    .stroke(Color.primary.opacity(0.05), lineWidth: 1)
             )
     }
 }
@@ -327,7 +327,7 @@ struct FocusStreakWeekStrip: View {
                             .frame(width: compact ? 15 : 11, height: compact ? 15 : 11)
                             .overlay(
                                 Circle()
-                                    .stroke(cell.isToday ? Color.white : Color.white.opacity(0.15), lineWidth: 1.2)
+                                    .stroke(cell.isToday ? Color.primary : Color.primary.opacity(0.15), lineWidth: 1.2)
                             )
                         if cell.immunized {
                             Image(systemName: "shield.fill")
@@ -342,7 +342,7 @@ struct FocusStreakWeekStrip: View {
                     if showLetters {
                         Text(weekdayLetter(for: cell.date))
                             .font(.system(size: 8, weight: .medium))
-                            .foregroundColor(cell.isToday ? .white : .white.opacity(0.35))
+                            .foregroundColor(cell.isToday ? .primary : .primary.opacity(0.35))
                     }
                 }
             }
@@ -352,7 +352,7 @@ struct FocusStreakWeekStrip: View {
     private func fillColor(for cell: DayCell) -> Color {
         if cell.immunized { return Color.teal.opacity(0.3) }
         if cell.covered { return Color.orange.opacity(0.75) }
-        return Color.white.opacity(0.08)
+        return Color.primary.opacity(0.08)
     }
 
     private func weekdayLetter(for date: Date) -> String {

@@ -43,7 +43,7 @@ struct MirrorPlayerView: View {
             RoundedRectangle(cornerRadius: 26, style: .continuous)
                 .fill(
                     LinearGradient(
-                        colors: [Color.indigo.opacity(0.22), Color.black.opacity(0.28)],
+                        colors: [Color.indigo.opacity(0.22), Color.primary.opacity(0.04)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -71,7 +71,7 @@ struct MirrorPlayerView: View {
             HStack(spacing: 10) {
                 ZStack {
                     Circle()
-                        .fill(camera.isLive ? Color.green.opacity(0.2) : Color.white.opacity(0.08))
+                        .fill(camera.isLive ? Color.green.opacity(0.2) : Color.primary.opacity(0.08))
                         .frame(width: 30, height: 30)
                     Image(systemName: "camera.fill")
                         .font(.system(size: 12, weight: .semibold))
@@ -128,10 +128,10 @@ struct MirrorPlayerView: View {
         Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.85))
+                .foregroundStyle(.primary.opacity(0.85))
                 .frame(width: 30, height: 30)
-                .background(.black.opacity(0.28), in: Circle())
-                .overlay(Circle().stroke(.white.opacity(0.12), lineWidth: 0.5))
+                .background(Color.primary.opacity(0.08), in: Circle())
+                .overlay(Circle().stroke(Color.primary.opacity(0.12), lineWidth: 0.5))
         }
         .buttonStyle(.plain)
         .help(help)
@@ -143,10 +143,10 @@ struct MirrorPlayerView: View {
         } label: {
             Image(systemName: "web.camera")
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.85))
+                .foregroundStyle(.primary.opacity(0.85))
                 .frame(width: 30, height: 30)
-                .background(.black.opacity(0.28), in: Circle())
-                .overlay(Circle().stroke(.white.opacity(0.12), lineWidth: 0.5))
+                .background(Color.primary.opacity(0.08), in: Circle())
+                .overlay(Circle().stroke(Color.primary.opacity(0.12), lineWidth: 0.5))
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
@@ -181,10 +181,10 @@ struct MirrorPlayerView: View {
         } label: {
             Image(systemName: "xmark")
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.85))
+                .foregroundStyle(.primary.opacity(0.85))
                 .frame(width: 30, height: 30)
-                .background(.black.opacity(0.28), in: Circle())
-                .overlay(Circle().stroke(.white.opacity(0.12), lineWidth: 0.5))
+                .background(Color.primary.opacity(0.08), in: Circle())
+                .overlay(Circle().stroke(Color.primary.opacity(0.12), lineWidth: 0.5))
         }
         .buttonStyle(.plain)
         .help("Close and stop camera")

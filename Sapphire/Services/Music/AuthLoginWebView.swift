@@ -73,6 +73,7 @@ class AuthLoginCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         for navigationAction: WKNavigationAction,
         windowFeatures: WKWindowFeatures
     ) -> WKWebView? {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return nil }
         let popup = WKWebView(frame: .zero, configuration: configuration)
         popup.customUserAgent = AuthLoginWebView.desktopUserAgent
         popup.navigationDelegate = self
@@ -82,7 +83,7 @@ class AuthLoginCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         let height = CGFloat(windowFeatures.height?.doubleValue ?? 720)
         let rect = NSRect(x: 0, y: 0, width: max(width, 480), height: max(height, 640))
 
-        let window = NSWindow(
+        let window = KeyableWindow(
             contentRect: rect,
             styleMask: [.titled, .closable, .resizable],
             backing: .buffered,
@@ -114,12 +115,12 @@ class AuthLoginCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         initiatedByFrame frame: WKFrameInfo,
         completionHandler: @escaping () -> Void
     ) {
-        let alert = NSAlert()
-        alert.messageText = serviceName
-        alert.informativeText = message
-        alert.addButton(withTitle: "OK")
-        alert.runModal()
-        completionHandler()
+        HelperAlertPresenter.presentModal(
+            messageText: serviceName,
+            informativeText: message,
+            alertStyle: .informational,
+            buttonTitles: ["OK"]
+        ) { _ in completionHandler() }
     }
 
     func webView(
@@ -128,11 +129,11 @@ class AuthLoginCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         initiatedByFrame frame: WKFrameInfo,
         completionHandler: @escaping (Bool) -> Void
     ) {
-        let alert = NSAlert()
-        alert.messageText = serviceName
-        alert.informativeText = message
-        alert.addButton(withTitle: "OK")
-        alert.addButton(withTitle: "Cancel")
-        completionHandler(alert.runModal() == .alertFirstButtonReturn)
+        HelperAlertPresenter.presentModal(
+            messageText: serviceName,
+            informativeText: message,
+            alertStyle: .informational,
+            buttonTitles: ["OK", "Cancel"]
+        ) { index in completionHandler(index == 0) }
     }
 }

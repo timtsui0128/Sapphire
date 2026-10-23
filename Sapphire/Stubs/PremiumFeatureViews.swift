@@ -47,6 +47,13 @@ struct ArchivesAndDMGInstallerSettingsView: View { var body: some View { Premium
 struct AppLockSettingsView: View { var body: some View { PremiumUnavailableView(title: "App Lock") } }
 struct DockLayoutsSettingsView: View { var body: some View { PremiumUnavailableView(title: "Dock Layouts") } }
 struct MediaOptimizerSettingsView: View { var body: some View { PremiumUnavailableView(title: "Media Optimizer") } }
+struct SEQuitProtectionRulesView: View {
+    var body: some View {
+        PremiumUnavailableView(title: "Quit & Close Protection")
+            .fixedSize(horizontal: false, vertical: true)
+            .padding()
+    }
+}
 
 struct StorageWorkspaceView: View {
     @ObservedObject var model: StorageViewModel

@@ -720,6 +720,14 @@ final class NotchStageView: NSView {
         outlineContains(band.convert(point, from: self))
     }
 
+    func stagePointIsInsideInteractiveRegion(_ point: CGPoint) -> Bool {
+        let inBand = band.convert(point, from: self)
+        if outlineContains(inBand) { return true }
+        guard let presentedFrame else { return false }
+        return satelliteStage.restingRects(outline: presentedRect, values: presentedFrame.values)
+            .contains { CGPath(ellipseIn: $0, transform: nil).contains(inBand) }
+    }
+
     // MARK: Hit testing and taps
 
     private func outlineContains(_ pointInBand: CGPoint) -> Bool {
@@ -732,6 +740,7 @@ final class NotchStageView: NSView {
     }
 
     override func hitTest(_ point: NSPoint) -> NSView? {
+        guard stagePointIsInsideInteractiveRegion(convert(point, from: superview)) else { return nil }
         let hit = super.hitTest(point)
         if let hit, hit !== self { return hit }
         guard onTap != nil, bounds.contains(convert(point, from: superview)) else { return nil }

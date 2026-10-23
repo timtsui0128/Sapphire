@@ -32,16 +32,16 @@ struct DeviceAdjustView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(device.isOutput ? "MASTER ADJUSTMENTS" : "MICROPHONE CONFIGURATION")
                         .font(.system(size: 10, weight: .black))
-                        .foregroundStyle(.white.opacity(0.4))
+                        .foregroundStyle(.primary.opacity(0.4))
                         .tracking(1.2)
                     Text(device.name)
                         .font(.system(size: 20, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.primary)
                 }
                 Spacer()
                 Image(systemName: device.isOutput ? "slider.horizontal.3" : "mic.fill")
                     .font(.title2)
-                    .foregroundStyle(.white.opacity(0.7))
+                    .foregroundStyle(.primary.opacity(0.7))
             }
             .padding(.horizontal, 24)
             .padding(.top, 20)
@@ -56,7 +56,7 @@ struct DeviceAdjustView: View {
             Spacer(minLength: 0)
         }
         .frame(width: 750, height: 380)
-        .background(Color.black)
+        .background(Color(nsColor: .windowBackgroundColor))
         .onAppear {
             if device.isInput {
                 refreshInputStats()
@@ -103,7 +103,7 @@ struct DeviceAdjustView: View {
 
                     if !appStore.runningApps.isEmpty {
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("APP MIXER").font(.system(size: 9, weight: .bold)).foregroundStyle(.white.opacity(0.4)).tracking(1)
+                            Text("APP MIXER").font(.system(size: 9, weight: .bold)).foregroundStyle(.primary.opacity(0.4)).tracking(1)
                             VStack(spacing: 8) {
                                 ForEach(appStore.runningApps.prefix(3)) { app in
                                     AppMixRow(app: app, volume: appStore.volume(for: app.bundleID), onVolumeChange: { appStore.setVolume($0, for: app.bundleID) })
@@ -128,13 +128,13 @@ struct DeviceAdjustView: View {
         HStack(alignment: .top, spacing: 16) {
             VStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("LEVELS").font(.system(size: 9, weight: .bold)).foregroundStyle(.white.opacity(0.4)).tracking(1)
+                    Text("LEVELS").font(.system(size: 9, weight: .bold)).foregroundStyle(.primary.opacity(0.4)).tracking(1)
                     ModernDarkSlider(label: "Input Gain", value: Binding(get: { micGain }, set: { micGain = $0; audioManager.setInputVolume(Float($0), for: device.id) }), range: 0...1.0, formatDisplay: { "\(Int($0 * 100))%" })
 
                     HStack {
                         Label("Hardware Mute", systemImage: isMicMuted ? "mic.slash.fill" : "mic.fill")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(isMicMuted ? .red : .white.opacity(0.8))
+                            .foregroundStyle(isMicMuted ? .red : .primary.opacity(0.8))
                         Spacer()
                         Toggle("", isOn: Binding(get: { isMicMuted }, set: {
                             isMicMuted = $0
@@ -162,12 +162,12 @@ struct DeviceAdjustView: View {
             .frame(width: 360)
 
             VStack(alignment: .leading, spacing: 12) {
-                Text("SPECIFICATIONS").font(.system(size: 9, weight: .bold)).foregroundStyle(.white.opacity(0.4)).tracking(1)
+                Text("SPECIFICATIONS").font(.system(size: 9, weight: .bold)).foregroundStyle(.primary.opacity(0.4)).tracking(1)
 
                 VStack(spacing: 12) {
                     specRow(label: "Stream Format", value: streamFormat)
 
-                    Divider().background(Color.white.opacity(0.1))
+                    Divider().background(Color.primary.opacity(0.1))
 
                     HStack {
                         Text("Sample Rate").font(.caption).foregroundStyle(.secondary)
@@ -194,14 +194,14 @@ struct DeviceAdjustView: View {
         HStack {
             Text(label).font(.caption).foregroundStyle(.secondary)
             Spacer()
-            Text(value).font(.system(size: 12, weight: .bold, design: .monospaced)).foregroundStyle(.white)
+            Text(value).font(.system(size: 12, weight: .bold, design: .monospaced)).foregroundStyle(.primary)
         }
     }
 
     private var cardBackground: some View {
         RoundedRectangle(cornerRadius: 16, style: .continuous)
-            .fill(Color.white.opacity(0.04))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.white.opacity(0.06), lineWidth: 1))
+            .fill(Color.primary.opacity(0.04))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.primary.opacity(0.06), lineWidth: 1))
     }
 }
 
@@ -220,8 +220,8 @@ fileprivate struct ModernDarkSlider: View {
                 Text(formatDisplay(value)).font(.system(size: 11, weight: .bold, design: .monospaced))
             }.padding(.horizontal, 12)
             ZStack(alignment: .leading) {
-                Capsule().fill(Color.white.opacity(0.06))
-                textView.foregroundColor(.white.opacity(0.5))
+                Capsule().fill(Color.primary.opacity(0.06))
+                textView.foregroundColor(.primary.opacity(0.5))
                 ZStack {
                     Capsule().fill(Color.accentColor)
                     textView.foregroundColor(.white)

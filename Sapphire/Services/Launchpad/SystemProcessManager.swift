@@ -34,6 +34,10 @@ class LaunchInterceptor {
     }
 
     @objc private func handleAppLaunch(notification: Notification) {
+        guard !SessionPrivacyState.shouldSuppressUI() else {
+            interceptNextMissionControlLaunch = false
+            return
+        }
         guard interceptNextMissionControlLaunch else { return }
 
         guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else {

@@ -31,9 +31,22 @@ final class PasteboardChangeMonitor {
     private var workspaceObservers: [NSObjectProtocol] = []
     private var applicationObservers: [NSObjectProtocol] = []
     private var pendingEventChecks: [DispatchWorkItem] = []
-    private var lastChangeCount = NSPasteboard.general.changeCount
+    private var lastChangeCount = -1
+    private var isSessionSuppressed = false
 
     private init() {}
+
+    func setSessionSuppressed(_ suppressed: Bool) {
+        guard isSessionSuppressed != suppressed else { return }
+        isSessionSuppressed = suppressed
+        if suppressed {
+            stopEventMonitoring()
+        } else if !subscriptions.isEmpty {
+            lastChangeCount = NSPasteboard.general.changeCount
+            startEventMonitoring()
+        }
+        synchronizeTimer()
+    }
 
     func subscribe(
         interval: TimeInterval,
@@ -41,7 +54,7 @@ final class PasteboardChangeMonitor {
         handler: @escaping (Int) -> Void
     ) -> Token {
         let wasEmpty = subscriptions.isEmpty
-        if wasEmpty {
+        if wasEmpty, !isSessionSuppressed {
             lastChangeCount = NSPasteboard.general.changeCount
         }
         let token = Token()
@@ -50,7 +63,7 @@ final class PasteboardChangeMonitor {
             priority: priority,
             handler: handler
         )
-        if wasEmpty { startEventMonitoring() }
+        if wasEmpty, !isSessionSuppressed { startEventMonitoring() }
         synchronizeTimer()
         return token
     }
@@ -85,7 +98,7 @@ final class PasteboardChangeMonitor {
     }
 
     private func synchronizeTimer() {
-        guard let fastestInterval = subscriptions.values.map(\.interval).min() else {
+        guard !isSessionSuppressed, let fastestInterval = subscriptions.values.map(\.interval).min() else {
             fallbackTimer?.invalidate()
             fallbackTimer = nil
             fallbackTimerInterval = nil
@@ -107,7 +120,7 @@ final class PasteboardChangeMonitor {
     private var lastIdleCheck: CFAbsoluteTime = 0
 
     private func startEventMonitoring() {
-        guard eventMonitorTokens.isEmpty else { return }
+        guard !isSessionSuppressed, eventMonitorTokens.isEmpty else { return }
         eventMonitorTokens = EventMonitorHub.shared.register(
             for: [.keyDown, .leftMouseUp, .rightMouseUp, .otherMouseUp]
         ) { [weak self] event in
@@ -157,6 +170,7 @@ final class PasteboardChangeMonitor {
     }
 
     private func scheduleEventChecks() {
+        guard !isSessionSuppressed else { return }
         pendingEventChecks.forEach { $0.cancel() }
         pendingEventChecks = [0.04, 0.25, 0.8].map { delay in
             let work = DispatchWorkItem { [weak self] in
@@ -168,6 +182,7 @@ final class PasteboardChangeMonitor {
     }
 
     private func tick() {
+        guard !isSessionSuppressed else { return }
         let now = CFAbsoluteTimeGetCurrent()
         if now - lastIdleCheck >= Self.activeFallbackInterval {
             lastIdleCheck = now
@@ -182,7 +197,11 @@ final class PasteboardChangeMonitor {
         let handlers = subscriptions.values
             .sorted { $0.priority > $1.priority }
             .map(\.handler)
-        for handler in handlers { handler(changeCount) }
+        for handler in handlers {
+            guard !isSessionSuppressed else { return }
+            handler(changeCount)
+        }
+        guard !isSessionSuppressed else { return }
         lastChangeCount = NSPasteboard.general.changeCount
     }
 }
@@ -276,10 +295,11 @@ struct ClipboardItem: Identifiable, Equatable, Codable, Sendable {
     }
 
     private static func measure(textContent: String?, imagePNGData: Data?, fileURLString: String?, fileBookmarkData: Data?) -> Int {
-        (textContent?.utf8.count ?? 0)
-            + (imagePNGData?.count ?? 0)
-            + (fileURLString?.utf8.count ?? 0)
-            + (fileBookmarkData?.count ?? 0)
+        let textBytes: Int = textContent?.utf8.count ?? 0
+        let imageBytes: Int = imagePNGData?.count ?? 0
+        let pathBytes: Int = fileURLString?.utf8.count ?? 0
+        let bookmarkBytes: Int = fileBookmarkData?.count ?? 0
+        return textBytes + imageBytes + pathBytes + bookmarkBytes
     }
 
     static func == (lhs: ClipboardItem, rhs: ClipboardItem) -> Bool {
@@ -372,7 +392,9 @@ final class ClipboardManager: ObservableObject {
 
     private var pasteboardSubscription: PasteboardChangeMonitor.Token?
     private var activeFallbackInterval: TimeInterval?
-    private var lastChangeCount: Int = NSPasteboard.general.changeCount
+    private var lastChangeCount = -1
+    private(set) var isSessionSuppressed = false
+    private nonisolated let sessionGate = ClipboardCaptureSessionGate()
     private var highPriorityConsumers = 0
     private var ignoredExternalPasteboardChanges = 0
     private var captureInFlight = false
@@ -406,10 +428,11 @@ final class ClipboardManager: ObservableObject {
         return 0.35
     }
 
-    private init() {
+    /// A private storage directory can be supplied by isolated native fixture checks.
+    init(storageDirectory: URL? = nil) {
         let fileManager = FileManager.default
         let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let appDirectory = appSupport.appendingPathComponent(Bundle.main.bundleIdentifier ?? "com.sapphire.app")
+        let appDirectory = storageDirectory ?? appSupport.appendingPathComponent(Bundle.main.bundleIdentifier ?? "com.sapphire.app")
         if !fileManager.fileExists(atPath: appDirectory.path) {
             try? fileManager.createDirectory(at: appDirectory, withIntermediateDirectories: true)
         }
@@ -437,8 +460,24 @@ final class ClipboardManager: ObservableObject {
         .store(in: &cancellables)
     }
 
+    /// Root session privacy controls this flag without changing the saved clipboard setting.
+    func setSessionSuppressed(_ suppressed: Bool) {
+        guard isSessionSuppressed != suppressed else { return }
+        isSessionSuppressed = suppressed
+        sessionGate.setSuppressed(suppressed)
+        PasteboardChangeMonitor.shared.setSessionSuppressed(suppressed)
+        if suppressed {
+            stopMonitoring()
+        } else {
+            // Discard clipboard changes made while locked instead of collecting them on wake.
+            lastChangeCount = NSPasteboard.general.changeCount
+            startMonitoring()
+        }
+    }
+
     func startMonitoring() {
-        guard SettingsModel.shared.current.clipboardMonitoringEnabled else { return }
+        guard !isSessionSuppressed, SettingsModel.shared.current.clipboardMonitoringEnabled else { return }
+        if lastChangeCount < 0 { lastChangeCount = NSPasteboard.general.changeCount }
         restartMonitoringIfNeeded(force: pasteboardSubscription == nil)
         captureCurrentIfNeeded()
     }
@@ -482,6 +521,7 @@ final class ClipboardManager: ObservableObject {
     }
 
     private func restartMonitoringIfNeeded(force: Bool) {
+        guard !isSessionSuppressed, SettingsModel.shared.current.clipboardMonitoringEnabled else { return }
         let interval = requestedCheckInterval
         if !force, let activeFallbackInterval, abs(activeFallbackInterval - interval) < 0.01 {
             return
@@ -499,6 +539,7 @@ final class ClipboardManager: ObservableObject {
     // MARK: - Writing
 
     func copyToClipboard(_ text: String) {
+        guard !isSessionSuppressed else { return }
         writeText(text, completion: nil)
         prependText(text)
     }
@@ -508,18 +549,16 @@ final class ClipboardManager: ObservableObject {
     }
 
     private func writeText(_ text: String, completion: ((Bool) -> Void)?) {
-        PasteboardLane.shared.write({ pasteboard in
+        writeOwn({ pasteboard in
             pasteboard.clearContents()
             return pasteboard.setString(text, forType: .string)
-        }, completion: { [weak self] changeCount in
-            if let changeCount { self?.lastChangeCount = changeCount }
-            completion?(changeCount != nil)
-        })
+        }, completion: completion)
     }
 
     // MARK: - Continuity (remote clipboard)
 
     func applyRemoteClipboard(text: String, from deviceName: String) {
+        guard !isSessionSuppressed else { return }
         let marker = Self.continuityRemoteMarker
         writeRemote({ pasteboard in
             pasteboard.clearContents()
@@ -533,6 +572,8 @@ final class ClipboardManager: ObservableObject {
     }
 
     func applyRemoteClipboard(image: NSImage, pngData: Data, from deviceName: String) {
+        guard !isSessionSuppressed else { return }
+        let generation = sessionGate.generation
         let marker = Self.continuityRemoteMarker
         writeRemote({ pasteboard in
             pasteboard.clearContents()
@@ -546,7 +587,10 @@ final class ClipboardManager: ObservableObject {
         processingQueue.async { [weak self] in
             let hash = Self.sha256(pngData)
             DispatchQueue.main.async {
-                MainActor.assumeIsolated { self?.prependImage(pngData: pngData, preview: preview, hash: hash) }
+                MainActor.assumeIsolated {
+                    guard let self, self.sessionGate.allows(generation) else { return }
+                    self.prependImage(pngData: pngData, preview: preview, hash: hash)
+                }
             }
         }
         NotificationCenter.default.post(name: .continuityClipboardReceived,
@@ -554,7 +598,8 @@ final class ClipboardManager: ObservableObject {
     }
 
     func applyRemoteClipboard(files urls: [URL], from deviceName: String) {
-        guard !urls.isEmpty else { return }
+        guard !isSessionSuppressed, !urls.isEmpty else { return }
+        let generation = sessionGate.generation
         let marker = Self.continuityRemoteMarker
         writeRemote({ pasteboard in
             pasteboard.clearContents()
@@ -565,7 +610,10 @@ final class ClipboardManager: ObservableObject {
         processingQueue.async { [weak self] in
             let files = Self.inspectFiles(urls)
             DispatchQueue.main.async {
-                MainActor.assumeIsolated { self?.prependFiles(files) }
+                MainActor.assumeIsolated {
+                    guard let self, self.sessionGate.allows(generation) else { return }
+                    self.prependFiles(files)
+                }
             }
         }
         NotificationCenter.default.post(name: .continuityClipboardReceived,
@@ -573,14 +621,22 @@ final class ClipboardManager: ObservableObject {
     }
 
     private func writeRemote(_ work: @escaping (NSPasteboard) -> Bool) {
+        guard !isSessionSuppressed else { return }
+        let generation = sessionGate.generation
+        let gate = sessionGate
         beginIgnoringExternalPasteboardChanges()
-        PasteboardLane.shared.write(work) { [weak self] changeCount in
-            self?.endIgnoringExternalPasteboardChanges(ownChangeCount: changeCount)
+        PasteboardLane.shared.write({ pasteboard in
+            guard gate.allows(generation) else { return false }
+            return work(pasteboard)
+        }) { [weak self] changeCount in
+            self?.endIgnoringExternalPasteboardChanges(ownChangeCount: gate.allows(generation) ? changeCount : nil)
         }
     }
 
     @discardableResult
     func copyItem(_ item: ClipboardItem, completion: ((Bool) -> Void)? = nil) -> Bool {
+        guard !isSessionSuppressed else { completion?(false); return false }
+        let generation = sessionGate.generation
         switch item.kind {
         case .image:
             let resident = item.imagePNGData
@@ -591,7 +647,8 @@ final class ClipboardManager: ObservableObject {
                 }
                 DispatchQueue.main.async {
                     MainActor.assumeIsolated {
-                        self?.writeOwn({ pasteboard in
+                        guard let self, self.sessionGate.allows(generation) else { completion?(false); return }
+                        self.writeOwn({ pasteboard in
                             pasteboard.clearContents()
                             if let image = NSImage(data: data) { pasteboard.writeObjects([image]) }
                             return pasteboard.setData(data, forType: .png)
@@ -615,6 +672,8 @@ final class ClipboardManager: ObservableObject {
 
     @discardableResult
     func copyItems(_ items: [ClipboardItem], completion: ((Bool) -> Void)? = nil) -> Bool {
+        guard !isSessionSuppressed else { completion?(false); return false }
+        let generation = sessionGate.generation
         if items.count == 1, let only = items.first { return copyItem(only, completion: completion) }
         guard let plan = ClipboardMultiPaste.plan(for: items) else { return false }
         switch plan {
@@ -646,8 +705,10 @@ final class ClipboardManager: ObservableObject {
                 let box = UncheckedSendableBox(pasteboardItems)
                 DispatchQueue.main.async {
                     MainActor.assumeIsolated {
-                        guard !box.value.isEmpty else { completion?(false); return }
-                        self?.writeOwn({ pasteboard in
+                        guard let self, self.sessionGate.allows(generation), !box.value.isEmpty else {
+                            completion?(false); return
+                        }
+                        self.writeOwn({ pasteboard in
                             pasteboard.clearContents()
                             return pasteboard.writeObjects(box.value)
                         }, completion: completion)
@@ -659,8 +720,15 @@ final class ClipboardManager: ObservableObject {
     }
 
     private func writeOwn(_ work: @escaping (NSPasteboard) -> Bool, completion: ((Bool) -> Void)?) {
-        PasteboardLane.shared.write(work) { [weak self] changeCount in
-            if let changeCount { self?.lastChangeCount = changeCount }
+        guard !isSessionSuppressed else { completion?(false); return }
+        let generation = sessionGate.generation
+        let gate = sessionGate
+        PasteboardLane.shared.write({ pasteboard in
+            guard gate.allows(generation) else { return false }
+            return work(pasteboard)
+        }) { [weak self] changeCount in
+            guard let self, self.sessionGate.allows(generation) else { completion?(false); return }
+            if let changeCount { self.lastChangeCount = changeCount }
             completion?(changeCount != nil)
         }
     }
@@ -711,6 +779,7 @@ final class ClipboardManager: ObservableObject {
 
     @discardableResult
     func shareItem(_ item: ClipboardItem, relativeTo view: NSView? = nil) -> Bool {
+        guard !isSessionSuppressed else { return false }
         var items: [Any] = []
         if item.isImage, let data = item.resolvedImageData, let image = NSImage(data: data) {
             items.append(image)
@@ -736,7 +805,9 @@ final class ClipboardManager: ObservableObject {
     // MARK: - Capture
 
     private func captureCurrentIfNeeded() {
-        guard pasteboardSubscription != nil else { return }
+        guard !isSessionSuppressed, pasteboardSubscription != nil else { return }
+        let generation = sessionGate.generation
+        let gate = sessionGate
         let changeCount = NSPasteboard.general.changeCount
         guard changeCount != lastChangeCount, ignoredExternalPasteboardChanges == 0 else { return }
         guard !captureInFlight else {
@@ -756,9 +827,10 @@ final class ClipboardManager: ObservableObject {
             continuityMarker: Self.continuityRemoteMarker.rawValue
         )
         PasteboardLane.shared.run(timeout: 1.5, { pasteboard in
-            Self.read(pasteboard, request: request)
-        }, completion: { [weak self] raw in
-            guard let self else { return }
+            guard gate.allows(generation) else { return nil }
+            return Self.read(pasteboard, request: request, isAllowed: { gate.allows(generation) })
+        }, completion: { [weak self] (raw: ClipboardRawCapture?) in
+            guard let self, self.sessionGate.allows(generation) else { return }
             guard let raw else {
                 print("[ClipboardManager] Pasteboard read timed out; skipping change \(request.changeCount).")
                 self.lastChangeCount = request.changeCount
@@ -768,6 +840,7 @@ final class ClipboardManager: ObservableObject {
         }, didFinish: { [weak self] in
             guard let self else { return }
             self.captureInFlight = false
+            guard !self.isSessionSuppressed, self.pasteboardSubscription != nil else { return }
             if self.captureRequested || NSPasteboard.general.changeCount != self.lastChangeCount {
                 self.captureRequested = false
                 if self.pasteboardSubscription != nil { self.captureCurrentIfNeeded() }
@@ -776,7 +849,8 @@ final class ClipboardManager: ObservableObject {
     }
 
     private func receive(_ raw: ClipboardRawCapture) {
-        guard raw.changeCount != lastChangeCount, ignoredExternalPasteboardChanges == 0 else { return }
+        guard !isSessionSuppressed, raw.changeCount != lastChangeCount, ignoredExternalPasteboardChanges == 0 else { return }
+        let generation = sessionGate.generation
         lastChangeCount = raw.changeCount
         let maxImageBytes = Self.maxImageBytes
         switch raw.payload {
@@ -786,7 +860,10 @@ final class ClipboardManager: ObservableObject {
             processingQueue.async { [weak self] in
                 let (stored, truncated) = ClipboardTextLimit.truncated(text)
                 DispatchQueue.main.async {
-                    MainActor.assumeIsolated { self?.prependText(stored, truncated: truncated) }
+                    MainActor.assumeIsolated {
+                        guard let self, self.sessionGate.allows(generation) else { return }
+                        self.prependText(stored, truncated: truncated)
+                    }
                 }
             }
         case .image(let data):
@@ -794,7 +871,8 @@ final class ClipboardManager: ObservableObject {
                 guard let processed = Self.processImage(data, maxBytes: maxImageBytes) else { return }
                 DispatchQueue.main.async {
                     MainActor.assumeIsolated {
-                        self?.prependImage(pngData: processed.png, preview: processed.preview, hash: processed.hash)
+                        guard let self, self.sessionGate.allows(generation) else { return }
+                        self.prependImage(pngData: processed.png, preview: processed.preview, hash: processed.hash)
                     }
                 }
             }
@@ -802,19 +880,30 @@ final class ClipboardManager: ObservableObject {
             processingQueue.async { [weak self] in
                 let files = Self.inspectFiles(urls)
                 DispatchQueue.main.async {
-                    MainActor.assumeIsolated { self?.prependFiles(files) }
+                    MainActor.assumeIsolated {
+                        guard let self, self.sessionGate.allows(generation) else { return }
+                        self.prependFiles(files)
+                    }
                 }
             }
         }
     }
 
-    private nonisolated static func read(_ pasteboard: NSPasteboard, request: ClipboardCaptureRequest) -> ClipboardRawCapture {
+    private nonisolated static func read(
+        _ pasteboard: NSPasteboard,
+        request: ClipboardCaptureRequest,
+        isAllowed: () -> Bool
+    ) -> ClipboardRawCapture {
+        let ignored = ClipboardRawCapture(changeCount: request.changeCount, payload: .ignored)
+        guard isAllowed() else { return ignored }
         let changeCount = pasteboard.changeCount
+        guard isAllowed() else { return ignored }
         let types = pasteboard.types ?? []
         let typeNames = Set(types.map(\.rawValue))
         if typeNames.contains(request.continuityMarker) {
             return ClipboardRawCapture(changeCount: changeCount, payload: .ignored)
         }
+        guard isAllowed() else { return ignored }
         let source = typeNames.contains(ClipboardCaptureFilter.sourceType)
             ? pasteboard.string(forType: .sapphireSource) : nil
         if ClipboardCaptureFilter.shouldIgnore(
@@ -827,6 +916,7 @@ final class ClipboardManager: ObservableObject {
             return ClipboardRawCapture(changeCount: changeCount, payload: .ignored)
         }
 
+        guard isAllowed() else { return ignored }
         if types.contains(.fileURL),
            let urls = pasteboard.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL] {
             let fileURLs = Array(urls.filter(\.isFileURL).prefix(request.maxFiles))
@@ -835,24 +925,29 @@ final class ClipboardManager: ObservableObject {
             }
         }
 
+        guard isAllowed() else { return ignored }
         if let png = pasteboard.data(forType: .png), !png.isEmpty {
             return ClipboardRawCapture(changeCount: changeCount, payload: .image(png))
         }
+        guard isAllowed() else { return ignored }
         if let tiff = pasteboard.data(forType: .tiff), !tiff.isEmpty {
             return ClipboardRawCapture(changeCount: changeCount, payload: .image(tiff))
         }
 
+        guard isAllowed() else { return ignored }
         if let string = pasteboard.string(forType: .string),
            !string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             return ClipboardRawCapture(changeCount: changeCount, payload: .text(string.trimmingCharacters(in: .whitespacesAndNewlines)))
         }
+        guard isAllowed() else { return ignored }
         if let objects = pasteboard.readObjects(forClasses: [NSAttributedString.self], options: nil) as? [NSAttributedString],
            let text = objects.first?.string.trimmingCharacters(in: .whitespacesAndNewlines),
            !text.isEmpty {
             return ClipboardRawCapture(changeCount: changeCount, payload: .text(text))
         }
 
-        if NSImage.canInit(with: pasteboard),
+        guard isAllowed() else { return ignored }
+        if NSImage.canInit(with: pasteboard), isAllowed(),
            let image = (pasteboard.readObjects(forClasses: [NSImage.self], options: nil) as? [NSImage])?.first,
            let tiff = image.tiffRepresentation {
             return ClipboardRawCapture(changeCount: changeCount, payload: .image(tiff))
@@ -914,6 +1009,7 @@ final class ClipboardManager: ObservableObject {
     // MARK: - Insertion
 
     private func prependText(_ text: String, truncated: Bool = false) {
+        guard !isSessionSuppressed else { return }
         let preview = text
             .replacingOccurrences(of: "\n", with: " ")
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -940,6 +1036,7 @@ final class ClipboardManager: ObservableObject {
     }
 
     private func prependImage(pngData: Data, preview: String, hash: String) {
+        guard !isSessionSuppressed else { return }
         let duplicate: (ClipboardItem) -> Bool = { existing in
             guard existing.kind == .image else { return false }
             if let existingHash = existing.contentHash { return existingHash == hash }
@@ -963,7 +1060,7 @@ final class ClipboardManager: ObservableObject {
     }
 
     private func prependFiles(_ files: [(url: URL, isDirectory: Bool, bookmark: Data?)]) {
-        guard !files.isEmpty else { return }
+        guard !isSessionSuppressed, !files.isEmpty else { return }
         var items = recentItems
         for file in files.reversed() {
             let name = file.url.lastPathComponent
@@ -1123,4 +1220,28 @@ final class ClipboardManager: ObservableObject {
 private struct UncheckedSendableBox<T>: @unchecked Sendable {
     let value: T
     init(_ value: T) { self.value = value }
+}
+
+/// Read/write jobs carry a generation so work queued before lock cannot replay after unlock.
+private final class ClipboardCaptureSessionGate: @unchecked Sendable {
+    private let lock = NSLock()
+    private var suppressed = false
+    private var value: UInt64 = 0
+
+    var generation: UInt64 {
+        lock.lock(); defer { lock.unlock() }
+        return value
+    }
+
+    func setSuppressed(_ newValue: Bool) {
+        lock.lock(); defer { lock.unlock() }
+        guard suppressed != newValue else { return }
+        suppressed = newValue
+        value &+= 1
+    }
+
+    func allows(_ generation: UInt64) -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        return !suppressed && generation == value
+    }
 }

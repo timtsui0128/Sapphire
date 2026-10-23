@@ -37,7 +37,7 @@ struct NotchSwipeRow<Content: View>: View {
                             Image(systemName: leading.systemImage)
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundStyle(.white)
-                                .opacity(min(1, offset / 36))
+                                .opacity(min(1, Double(offset) / 36))
                         )
                 }
                 Spacer(minLength: 0)
@@ -49,7 +49,7 @@ struct NotchSwipeRow<Content: View>: View {
                             Image(systemName: trailing.systemImage)
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundStyle(.white)
-                                .opacity(min(1, -offset / 36))
+                                .opacity(min(1, Double(-offset) / 36))
                         )
                 }
             }
@@ -275,22 +275,22 @@ struct NotchCapsuleBackButtonContent: View {
 struct NotchCapsuleIconLabel: View {
     let systemName: String
     var isActive: Bool = false
-    var activeTint: Color = .white
+    var activeTint: Color = .primary
 
     var body: some View {
         Image(systemName: systemName)
             .font(.system(size: 11, weight: .bold))
-            .foregroundStyle(isActive ? activeTint.opacity(0.95) : Color.white.opacity(0.92))
+            .foregroundStyle(isActive ? activeTint.opacity(0.95) : Color.primary.opacity(0.92))
             .frame(width: 18, height: 18)
             .padding(4)
             .background(
                 Capsule(style: .continuous)
-                    .fill(isActive ? activeTint.opacity(0.18) : Color.white.opacity(0.08))
+                    .fill(isActive ? activeTint.opacity(0.18) : Color.primary.opacity(0.08))
             )
             .overlay(
                 Capsule(style: .continuous)
                     .stroke(
-                        isActive ? activeTint.opacity(0.35) : Color.white.opacity(0.12),
+                        isActive ? activeTint.opacity(0.35) : Color.primary.opacity(0.12),
                         lineWidth: 1
                     )
             )
@@ -300,7 +300,7 @@ struct NotchCapsuleIconLabel: View {
 struct NotchCapsuleIconButton: View {
     let systemName: String
     var isActive: Bool = false
-    var activeTint: Color = .white
+    var activeTint: Color = .primary
     var help: String? = nil
     let action: () -> Void
 

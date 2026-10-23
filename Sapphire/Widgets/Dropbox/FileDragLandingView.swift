@@ -231,11 +231,11 @@ private struct DeviceDropZoneView: View {
                     .padding(Self.inset)
                     .background(
                         RoundedRectangle(cornerRadius: Self.cardRadius, style: .continuous)
-                            .fill(isTargeted ? Color.accentColor.opacity(0.12) : Color.white.opacity(0.05))
+                            .fill(isTargeted ? Color.accentColor.opacity(0.12) : Color.primary.opacity(0.05))
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: Self.cardRadius, style: .continuous)
-                            .strokeBorder(isTargeted ? Color.accentColor : Color.white.opacity(0.2), lineWidth: 1.5)
+                            .strokeBorder(isTargeted ? Color.accentColor : Color.primary.opacity(0.2), lineWidth: 1.5)
                     )
                     .animation(.spring(response: 0.2, dampingFraction: 0.6), value: isTargeted)
             }
@@ -289,11 +289,11 @@ private struct DeviceDropZoneView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             RoundedRectangle(cornerRadius: Self.cardRadius, style: .continuous)
-                .fill(Color.white.opacity(0.03))
+                .fill(Color.primary.opacity(0.03))
         )
         .overlay(
             RoundedRectangle(cornerRadius: Self.cardRadius, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.12), lineWidth: 1.5)
+                .strokeBorder(Color.primary.opacity(0.12), lineWidth: 1.5)
         )
     }
 }
@@ -324,12 +324,12 @@ private struct DeviceDropTile: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(isTargeted ? Color.accentColor.opacity(0.8) : Color.white.opacity(fillOpacity))
+                    .fill(isTargeted ? Color.accentColor.opacity(0.8) : Color.primary.opacity(fillOpacity))
             )
             .overlay {
                 if style == .card {
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .strokeBorder(isTargeted ? Color.accentColor : Color.white.opacity(0.2), lineWidth: 1.5)
+                        .strokeBorder(isTargeted ? Color.accentColor : Color.primary.opacity(0.2), lineWidth: 1.5)
                 }
             }
             .background {
@@ -422,10 +422,10 @@ private struct EmptyDropZoneView: View {
         }
         .foregroundStyle(.secondary)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.15), lineWidth: 1.5)
+                .strokeBorder(Color.primary.opacity(0.15), lineWidth: 1.5)
         )
     }
 }
@@ -449,17 +449,17 @@ private struct DropZoneView: View {
             ZStack {
                 if isDashed {
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .fill(isTargeted ? Color.white.opacity(0.1) : .clear)
+                        .fill(isTargeted ? Color.primary.opacity(0.1) : .clear)
                 } else {
                      RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .fill(isTargeted ? Color.accentColor.opacity(0.8) : Color.white.opacity(0.05))
+                        .fill(isTargeted ? Color.accentColor.opacity(0.8) : Color.primary.opacity(0.05))
                 }
             }
         )
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: isDashed ? [8] : []), antialiased: true)
-                .foregroundColor(isTargeted ? .accentColor : .white.opacity(0.2))
+                .foregroundColor(isTargeted ? .accentColor : .primary.opacity(0.2))
         )
         .scaleEffect(isTargeted ? 1.03 : 1.0)
         .animation(.spring(response: 0.2, dampingFraction: 0.6), value: isTargeted)

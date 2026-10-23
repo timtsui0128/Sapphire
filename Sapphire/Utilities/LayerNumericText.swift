@@ -15,11 +15,13 @@ struct LayerNumericText: NSViewRepresentable {
 
     func makeNSView(context: Context) -> LayerNumericTextView {
         let view = LayerNumericTextView()
+        view.appearance = NSAppearance(named: context.environment.colorScheme == .dark ? .darkAqua : .aqua)
         view.update(text: text, font: font, color: color, duration: duration, animated: false)
         return view
     }
 
     func updateNSView(_ nsView: LayerNumericTextView, context: Context) {
+        nsView.appearance = NSAppearance(named: context.environment.colorScheme == .dark ? .darkAqua : .aqua)
         let animated = !context.transaction.disablesAnimations
         nsView.update(text: text, font: font, color: color, duration: duration, animated: animated)
     }
@@ -73,6 +75,24 @@ final class LayerNumericTextView: NSView {
     override func viewDidChangeBackingProperties() {
         super.viewDidChangeBackingProperties()
         refreshContentsScale()
+    }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        for slot in slots {
+            slot.layer.string = Self.attributed(String(slot.character), font: font, color: resolvedColor)
+        }
+        CATransaction.commit()
+    }
+
+    private var resolvedColor: NSColor {
+        var result = color
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            result = color.usingColorSpace(.sRGB) ?? color
+        }
+        return result
     }
 
     override func viewDidMoveToWindow() {
@@ -174,7 +194,7 @@ final class LayerNumericTextView: NSView {
 
     private func makeLayer(for character: Character) -> CATextLayer {
         let layer = CATextLayer()
-        layer.string = Self.attributed(String(character), font: font, color: color)
+        layer.string = Self.attributed(String(character), font: font, color: resolvedColor)
         layer.contentsScale = window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
         layer.isWrapped = false
         layer.truncationMode = .none

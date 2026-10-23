@@ -81,6 +81,14 @@ final class MenuBarAppearanceManager {
     }
 
     private func setupObservers() {
+        SessionPrivacyState.shared.$isSuppressed
+            .dropFirst()
+            .sink { [weak self] suppressed in
+                guard let self else { return }
+                if suppressed { self.suspendSessionOverlays() }
+                else { self.scheduleRefresh() }
+            }
+            .store(in: &cancellables)
         SettingsModel.shared.changes(of: MenuBarAppearanceSettings.init)
             .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in self?.scheduleRefresh() }
@@ -88,6 +96,7 @@ final class MenuBarAppearanceManager {
     }
 
     @objc private func scheduleRefresh() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { suspendSessionOverlays(); return }
         let now = CACurrentMediaTime()
         if !coalescer.pending {
             coalescer.pending = true
@@ -112,6 +121,7 @@ final class MenuBarAppearanceManager {
     }
 
     private func refreshAppearanceImmediately() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { suspendSessionOverlays(); return }
         let settings = MenuBarAppearanceSettings(SettingsModel.shared.settings)
         guard settings.menuBarShapeStyle == "roundedSplit" else {
             applyAppearance(from: settings, splitGeometry: nil)
@@ -144,9 +154,16 @@ final class MenuBarAppearanceManager {
     }
     private var splitGeometryGeneration = 0
 
+    private func suspendSessionOverlays() {
+        splitGeometryGeneration += 1
+        MenuBarWallpaperTint.shared.stop()
+        removeAllOverlays()
+    }
+
     // MARK: - Appearance Logic
 
     private func applyAppearance(from settings: MenuBarAppearanceSettings, splitGeometry: SplitGeometry?) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { suspendSessionOverlays(); return }
         if settings.menuBarTintStyle == "adaptive" {
             MenuBarWallpaperTint.shared.start()
         } else {

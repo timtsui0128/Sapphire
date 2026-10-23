@@ -418,7 +418,7 @@ struct MusicPlayerView: View {
                             HStack(spacing: 6) {
                                 if let url = artist.avatarURL ?? artist.headerImageURL {
                                     CachedAsyncImage(url: url) { $0.resizable().aspectRatio(contentMode: .fill) } placeholder: {
-                                        Circle().fill(Color.white.opacity(0.1))
+                                        Circle().fill(Color.primary.opacity(0.1))
                                     }
                                     .frame(width: 16, height: 16)
                                     .clipShape(Circle())
@@ -446,7 +446,7 @@ struct MusicPlayerView: View {
                             HStack(spacing: 6) {
                                 if let url = artist.artworkURL {
                                     CachedAsyncImage(url: url) { $0.resizable().aspectRatio(contentMode: .fill) } placeholder: {
-                                        Circle().fill(Color.white.opacity(0.1))
+                                        Circle().fill(Color.primary.opacity(0.1))
                                     }
                                     .frame(width: 16, height: 16)
                                     .clipShape(Circle())
@@ -997,7 +997,7 @@ struct NotchMediaSourceSwitcher: View {
                             .padding(3)
                             .background(
                                 Circle()
-                                    .fill(selected ? Color.white.opacity(0.22) : Color.clear)
+                                    .fill(selected ? Color.primary.opacity(0.22) : Color.clear)
                             )
                             .opacity(selected ? 1.0 : 0.55)
                     }
@@ -1006,8 +1006,8 @@ struct NotchMediaSourceSwitcher: View {
                 }
             }
             .padding(2)
-            .background(Capsule(style: .continuous).fill(Color.white.opacity(0.08)))
-            .overlay(Capsule(style: .continuous).stroke(Color.white.opacity(0.12), lineWidth: 1))
+            .background(Capsule(style: .continuous).fill(Color.primary.opacity(0.08)))
+            .overlay(Capsule(style: .continuous).stroke(Color.primary.opacity(0.12), lineWidth: 1))
             .fixedSize()
             .animation(.easeInOut(duration: 0.2), value: selectedKey)
             .animation(.easeInOut(duration: 0.2), value: sourceKeys.joined(separator: "|"))
@@ -1107,15 +1107,15 @@ private struct OpenPlayerView: View {
         VStack(spacing: 12) {
             Image(systemName: "music.note")
                 .font(.system(size: 40, weight: .light))
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(.primary.opacity(0.8))
 
             Button(action: action) {
                 Text("Open \(player.displayName)")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
-                    .background(Color.white.opacity(0.15))
+                    .background(Color.primary.opacity(0.15))
                     .clipShape(Capsule())
             }
             .buttonStyle(.plain)
@@ -1143,10 +1143,10 @@ private struct MusicInfoView: View {
             if let artist = artist, !artist.isEmpty {
                 Text(artist)
                     .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.primary.opacity(0.7))
             }
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(.primary)
         .lineLimit(1)
         .padding(.top, 8)
         .minimumScaleFactor(0.8)
@@ -1207,7 +1207,7 @@ private struct MusicControlsView: View {
             .help(MusicLongPressUI.skipHelp(primary: "Next", target: .next, settings: settings.settings.value))
         }
         .font(.system(size: 16))
-        .foregroundColor(.white)
+        .foregroundColor(.primary)
     }
 }
 
@@ -1531,7 +1531,7 @@ struct MusicLiveActivityRightView: View {
         VStack(alignment: .trailing, spacing: 1) {
             Text(musicManager.title ?? "Now Playing")
                 .font(.system(size: 12.5, weight: .semibold))
-                .foregroundColor(.white.opacity(0.95))
+                .foregroundColor(.primary.opacity(0.95))
                 .lineLimit(1)
             HStack(spacing: 3) {
                 if isPhoneMedia {
@@ -1542,7 +1542,7 @@ struct MusicLiveActivityRightView: View {
                     .lineLimit(1)
             }
             .font(.system(size: 10.5))
-            .foregroundColor(.white.opacity(0.62))
+            .foregroundColor(.primary.opacity(0.62))
         }
         .frame(maxWidth: 150, alignment: .trailing)
     }
@@ -1563,7 +1563,7 @@ struct MusicLiveActivityRightView: View {
                 systemName: musicManager.isPlaying ? "waveform" : "pause.fill",
                 pointSize: 12,
                 weight: .semibold,
-                color: NSColor.white.withAlphaComponent(0.85),
+                color: NSColor.labelColor.withAlphaComponent(0.85),
                 variableColor: musicManager.isPlaying
             )
             .frame(width: 16)

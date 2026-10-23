@@ -125,6 +125,7 @@ class AuthenticationManager: NSObject, ObservableObject, BLEDelegate {
     // MARK: - Face ID Authentication
 
     func startFaceIDAuthentication() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         let isForAppLock = pendingAppLockFaceIDCompletion != nil
         guard !isUnlockInProgress, !isFaceIDAuthenticating,
               isForAppLock || !isFaceIDLockedUntilPasswordUnlock,
@@ -151,6 +152,7 @@ class AuthenticationManager: NSObject, ObservableObject, BLEDelegate {
     }
 
     func startFaceIDAuthenticationForAppLock(completion: @escaping (FaceIDAuthResult) -> Void) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { completion(.cancelled); return }
         guard settings.current.hasRegisteredFaceID else {
             completion(.failed)
             return
@@ -165,6 +167,7 @@ class AuthenticationManager: NSObject, ObservableObject, BLEDelegate {
     }
 
     func handleFaceIDAuthenticated() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { cancelPendingPasswordInjection(reason: "session privacy"); return }
         if let completion = pendingAppLockFaceIDCompletion {
             pendingAppLockFaceIDCompletion = nil
             tearDownFaceID()
@@ -274,6 +277,7 @@ class AuthenticationManager: NSObject, ObservableObject, BLEDelegate {
     // MARK: - Auto-Unlock Pipeline
 
     func handleUnlock() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { cancelPendingPasswordInjection(reason: "session privacy"); return }
         guard !isUnlockInProgress else { return }
         isUnlockInProgress = true
 
@@ -333,6 +337,7 @@ class AuthenticationManager: NSObject, ObservableObject, BLEDelegate {
     // MARK: - Password & HID Injection
 
     private func unlockWithPassword(attempt: Int = 1, attemptID: UUID) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { cancelPendingPasswordInjection(reason: "session privacy"); return }
         guard unlockAttemptID == attemptID, isUnlockInProgress, isScreenLocked else {
             isUnlockInProgress = false
             return
@@ -361,6 +366,7 @@ class AuthenticationManager: NSObject, ObservableObject, BLEDelegate {
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) { [weak self] in
             guard let self else { return }
+            guard !SessionPrivacyState.shouldSuppressUI() else { self.cancelPendingPasswordInjection(reason: "session privacy"); return }
             guard self.unlockAttemptID == attemptID, self.isUnlockInProgress,
                   self.isScreenLocked, Self.isScreenActuallyLocked() else {
                 self.isUnlockInProgress = false
@@ -404,6 +410,7 @@ class AuthenticationManager: NSObject, ObservableObject, BLEDelegate {
     // MARK: - Bluetooth Auth Control
 
     func startBluetoothAuthentication() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         guard !isBluetoothAuthenticating, isEnabled, isPasswordSet,
               let deviceID = selectedDeviceID, let uuid = UUID(uuidString: deviceID) else { return }
 

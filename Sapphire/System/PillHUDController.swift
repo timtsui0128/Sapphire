@@ -9,6 +9,7 @@ import SwiftUI
 import AppKit
 import Combine
 
+@MainActor
 final class PillHUDController: ObservableObject {
     static let shared = PillHUDController()
 
@@ -37,6 +38,12 @@ final class PillHUDController: ObservableObject {
     private let edgeMargin: CGFloat = 20
 
     private init() {
+        SessionPrivacyState.shared.$isSuppressed
+            .dropFirst()
+            .sink { [weak self] suppressed in
+                if suppressed { self?.dismissForSessionPrivacy() }
+            }
+            .store(in: &cancellables)
         hudManager.$currentHUD
             .receive(on: DispatchQueue.main)
             .sink { [weak self] hud in
@@ -67,6 +74,7 @@ final class PillHUDController: ObservableObject {
     // MARK: - Lifecycle
 
     private func handleHUDChange(_ hud: HUDType?) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { dismissForSessionPrivacy(); return }
         guard hud != nil, activeStyleIsPill else {
             hidePill()
             return
@@ -75,6 +83,7 @@ final class PillHUDController: ObservableObject {
     }
 
     private func showPill() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { dismissForSessionPrivacy(); return }
         hideWorkItem?.cancel()
         panelAnimationID = UUID()
         guard let screen = targetScreen() else { return }
@@ -112,6 +121,7 @@ final class PillHUDController: ObservableObject {
     }
 
     private func hidePill() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { dismissForSessionPrivacy(); return }
         hideWorkItem?.cancel()
         guard let panel = panel, panel.isVisible else { return }
 
@@ -134,6 +144,15 @@ final class PillHUDController: ObservableObject {
     }
 
     // MARK: - Window
+
+    private func dismissForSessionPrivacy() {
+        hideWorkItem?.cancel()
+        hideWorkItem = nil
+        panelAnimationID = UUID()
+        panel?.orderOut(nil)
+        panel = nil
+        hostingView = nil
+    }
 
     private func ensurePanel() -> NSPanel {
         if let panel = panel { return panel }
@@ -216,6 +235,7 @@ final class PillHUDController: ObservableObject {
     }
 
     private func positionPanel(using layout: LayoutSettings) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { dismissForSessionPrivacy(); return }
         guard let panel = panel else { return }
         guard let screen = targetScreen() else { return }
         let frame = pillFrame(for: layout, screen: screen)

@@ -50,7 +50,7 @@ struct FocusSessionDetailView: View {
 
             Text(statusText)
                 .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(.primary.opacity(0.5))
 
             Spacer(minLength: 0)
 
@@ -65,7 +65,7 @@ struct FocusSessionDetailView: View {
                 Text("ETA \(Date().addingTimeInterval(customMinutes * 60).formatted(date: .omitted, time: .shortened))")
                     .font(.system(size: 9, weight: .bold))
                     .tracking(1.2)
-                    .foregroundColor(.white.opacity(0.35))
+                    .foregroundColor(.primary.opacity(0.35))
             }
 
             Spacer(minLength: 0)
@@ -89,10 +89,10 @@ struct FocusSessionDetailView: View {
                         } label: {
                             Text("\(Int(minutes))m")
                                 .font(.system(size: 11, weight: customMinutes == minutes ? .bold : .medium))
-                                .foregroundColor(customMinutes == minutes ? .white : .white.opacity(0.5))
+                                .foregroundColor(customMinutes == minutes ? .primary : .primary.opacity(0.5))
                                 .frame(width: 42, height: 26)
                                 .background(
-                                    customMinutes == minutes ? Color.white.opacity(0.12) : Color.white.opacity(0.04),
+                                    customMinutes == minutes ? Color.primary.opacity(0.12) : Color.primary.opacity(0.04),
                                     in: RoundedRectangle(cornerRadius: 8, style: .continuous)
                                 )
                         }
@@ -102,7 +102,7 @@ struct FocusSessionDetailView: View {
                     HStack(spacing: 6) {
                         Text("Custom")
                             .font(.system(size: 10, weight: .semibold))
-                            .foregroundColor(isCustomDuration ? accent : .white.opacity(0.4))
+                            .foregroundColor(isCustomDuration ? accent : .primary.opacity(0.4))
                         TextField("Minutes", value: $customMinutes, format: .number)
                             .textFieldStyle(.plain)
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
@@ -121,12 +121,12 @@ struct FocusSessionDetailView: View {
                             }
                         Text("min")
                             .font(.system(size: 10))
-                            .foregroundColor(.white.opacity(0.4))
+                            .foregroundColor(.primary.opacity(0.4))
                     }
                     .frame(height: 30)
                     .padding(.horizontal, 10)
                     .background(
-                        isCustomDuration || durationFieldFocused ? accent.opacity(0.12) : Color.white.opacity(0.04),
+                        isCustomDuration || durationFieldFocused ? accent.opacity(0.12) : Color.primary.opacity(0.04),
                         in: RoundedRectangle(cornerRadius: 8, style: .continuous)
                     )
                     .overlay(
@@ -160,10 +160,10 @@ struct FocusSessionDetailView: View {
                             Text(focusManager.isPaused ? "Resume" : "Pause")
                         }
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .frame(maxWidth: .infinity)
                         .frame(height: 32)
-                        .background(Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .background(Color.primary.opacity(0.1), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                     }
                     .buttonStyle(.plain)
 
@@ -177,10 +177,10 @@ struct FocusSessionDetailView: View {
                                 Text("+5m Postpone")
                                     .font(.system(size: 12, weight: .semibold))
                             }
-                            .foregroundColor(.white.opacity(0.9))
+                            .foregroundColor(.primary.opacity(0.9))
                             .frame(maxWidth: .infinity)
                             .frame(height: 32)
-                            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                         }
                         .buttonStyle(.plain)
                         .help("Postpone the break by 5 minutes and keep focusing")
@@ -190,9 +190,9 @@ struct FocusSessionDetailView: View {
                         } label: {
                             Image(systemName: "forward.fill")
                                 .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(.primary.opacity(0.8))
                                 .frame(width: 44, height: 32)
-                                .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                         }
                         .buttonStyle(.plain)
                         .help("Skip break")
@@ -203,9 +203,9 @@ struct FocusSessionDetailView: View {
                     } label: {
                         Image(systemName: focusManager.canEndSessionEarly ? "stop.fill" : "lock.fill")
                             .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(focusManager.canEndSessionEarly ? .red.opacity(0.8) : .white.opacity(0.2))
+                            .foregroundColor(focusManager.canEndSessionEarly ? .red.opacity(0.8) : .primary.opacity(0.2))
                             .frame(width: 44, height: 32)
-                            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                     }
                     .buttonStyle(.plain)
                     .disabled(!focusManager.canEndSessionEarly)
@@ -237,7 +237,7 @@ struct FocusSessionDetailView: View {
                 StreakFlame(size: 18, isActive: snapshot.streak > 0)
                 Text(snapshot.streak == 1 ? "1 day streak" : "\(snapshot.streak) day streak")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
                     .lineLimit(1)
                 Spacer(minLength: 0)
             }
@@ -250,7 +250,7 @@ struct FocusSessionDetailView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .overlay(alignment: .bottom) {
             Rectangle()
-                .fill(Color.white.opacity(0.08))
+                .fill(Color.primary.opacity(0.08))
                 .frame(height: 1)
         }
     }
@@ -270,7 +270,7 @@ struct FocusSessionDetailView: View {
         .padding(.leading, 20)
         .overlay(alignment: .leading) {
             Rectangle()
-                .fill(Color.white.opacity(0.08))
+                .fill(Color.primary.opacity(0.08))
                 .frame(width: 1)
         }
     }
@@ -283,7 +283,7 @@ struct FocusSessionDetailView: View {
                 .foregroundColor(accent)
             Text("Stay in the zone")
                 .font(.system(size: 21, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(.primary)
         }
     }
 
@@ -300,7 +300,7 @@ struct FocusSessionDetailView: View {
         .frame(maxWidth: .infinity)
         .overlay(alignment: .bottom) {
             Rectangle()
-                .fill(Color.white.opacity(0.08))
+                .fill(Color.primary.opacity(0.08))
                 .frame(height: 1)
         }
     }
@@ -309,10 +309,10 @@ struct FocusSessionDetailView: View {
         VStack(spacing: 2) {
             Text(value)
                 .font(.system(size: 12, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(.primary)
             Text(label)
                 .font(.system(size: 9, weight: .medium))
-                .foregroundColor(.white.opacity(0.4))
+                .foregroundColor(.primary.opacity(0.4))
         }
         .frame(maxWidth: .infinity)
     }
@@ -322,7 +322,7 @@ struct FocusSessionDetailView: View {
             HStack {
                 Label("Ambiance", systemImage: "waveform")
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.primary.opacity(0.6))
 
                 Spacer()
 
@@ -344,9 +344,9 @@ struct FocusSessionDetailView: View {
                 } label: {
                     Image(systemName: ambient.isPlaying ? "pause.fill" : "play.fill")
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .frame(width: 28, height: 28)
-                        .background(ambient.isPlaying ? accent.opacity(0.3) : Color.white.opacity(0.08), in: Circle())
+                        .background(ambient.isPlaying ? accent.opacity(0.3) : Color.primary.opacity(0.08), in: Circle())
                 }
                 .buttonStyle(.plain)
 
@@ -366,12 +366,12 @@ struct FocusSessionDetailView: View {
                             .lineLimit(1)
                         Image(systemName: "chevron.up.chevron.down")
                             .font(.system(size: 8))
-                            .foregroundColor(.white.opacity(0.35))
+                            .foregroundColor(.primary.opacity(0.35))
                     }
-                    .foregroundColor(.white.opacity(0.85))
+                    .foregroundColor(.primary.opacity(0.85))
                     .padding(.horizontal, 8)
                     .frame(height: 26)
-                    .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 6))
+                    .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 6))
                 }
                 .menuStyle(.borderlessButton)
                 .fixedSize()
@@ -391,7 +391,7 @@ struct FocusSessionDetailView: View {
         .padding(.horizontal, 2)
         .overlay(alignment: .bottom) {
             Rectangle()
-                .fill(Color.white.opacity(0.08))
+                .fill(Color.primary.opacity(0.08))
                 .frame(height: 1)
         }
     }
@@ -403,10 +403,10 @@ struct FocusSessionDetailView: View {
                 Spacer()
                 Image(systemName: "slider.horizontal.3")
                     .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.35))
+                    .foregroundColor(.primary.opacity(0.35))
             }
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(.primary.opacity(0.6))
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 6) {
                 quickToggleChip(
@@ -435,7 +435,7 @@ struct FocusSessionDetailView: View {
         .padding(.horizontal, 2)
         .overlay(alignment: .bottom) {
             Rectangle()
-                .fill(Color.white.opacity(0.08))
+                .fill(Color.primary.opacity(0.08))
                 .frame(height: 1)
         }
     }
@@ -447,23 +447,23 @@ struct FocusSessionDetailView: View {
             HStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.system(size: 10))
-                    .foregroundColor(isOn.wrappedValue ? accent : .white.opacity(0.3))
+                    .foregroundColor(isOn.wrappedValue ? accent : .primary.opacity(0.3))
 
                 Text(title)
                     .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(isOn.wrappedValue ? .white : .white.opacity(0.45))
+                    .foregroundColor(isOn.wrappedValue ? .primary : .primary.opacity(0.45))
                     .lineLimit(1)
 
                 Spacer(minLength: 0)
 
                 Circle()
-                    .fill(isOn.wrappedValue ? accent : Color.white.opacity(0.1))
+                    .fill(isOn.wrappedValue ? accent : Color.primary.opacity(0.1))
                     .frame(width: 4, height: 4)
             }
             .padding(.horizontal, 8)
             .frame(height: 28)
             .background(
-                isOn.wrappedValue ? accent.opacity(0.08) : Color.white.opacity(0.03),
+                isOn.wrappedValue ? accent.opacity(0.08) : Color.primary.opacity(0.03),
                 in: RoundedRectangle(cornerRadius: 8, style: .continuous)
             )
             .overlay(
@@ -491,7 +491,7 @@ private struct FocusSessionTimerRing: View {
             LayerGradientProgressRing(
                 motion: .focusBlock(focusManager, minimum: 0.001),
                 lineWidth: 9,
-                trackColor: Color.white.opacity(0.05),
+                trackColor: Color.primary.opacity(0.05),
                 colors: [accent],
                 shadowColor: accent.opacity(0.4),
                 shadowRadius: 12,
@@ -512,7 +512,7 @@ private struct FocusSessionTimerRing: View {
             LayerNumericText(
                 text: FocusSessionManager.format(focusManager.remaining(at: date)),
                 font: Self.clockFont,
-                color: .white,
+                color: .labelColor,
                 duration: 0.2
             )
 
@@ -527,7 +527,7 @@ private struct FocusSessionTimerRing: View {
                 Text("TAP START TO BEGIN")
                     .font(.system(size: 9, weight: .bold))
                     .tracking(1.2)
-                    .foregroundColor(.white.opacity(0.35))
+                    .foregroundColor(.primary.opacity(0.35))
             }
         }
     }

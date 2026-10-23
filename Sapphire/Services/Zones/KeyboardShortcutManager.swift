@@ -245,6 +245,7 @@ class KeyboardShortcutManager {
 
     @discardableResult
     private func handleNSEvent(_ event: NSEvent, swallow: Bool) -> Bool {
+        guard !SessionPrivacyState.isSuppressedSnapshot else { return false }
         guard event.type == .keyDown, !event.isARepeat else { return false }
         guard event.cgEvent?.getIntegerValueField(.eventSourceUserData) != SapphireSyntheticEventMarker.plainTextPaste else {
             return false
@@ -308,6 +309,7 @@ class KeyboardShortcutManager {
 
     nonisolated private func perform(_ action: ShortcutAction) {
         DispatchQueue.main.async {
+            guard !SessionPrivacyState.shouldSuppressUI() else { return }
             switch action {
             case .plane(let plane):
                 guard SettingsModel.shared.settings.isShortcutEnabled(ShortcutIdentifier.plane(plane.id)) else { return }

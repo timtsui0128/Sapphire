@@ -817,8 +817,8 @@ struct LyricsView: View {
                             .resizable()
                             .scaledToFit()
                             .padding(8)
-                            .foregroundStyle(.white.opacity(0.85))
-                            .background(.white.opacity(0.12))
+                            .foregroundStyle(.primary.opacity(0.85))
+                            .background(.primary.opacity(0.12))
                     }
                 }
                 .frame(width: 25, height: 26)
@@ -934,11 +934,11 @@ struct LyricsDetachedWindowView: View {
             }
         }
         .frame(minWidth: 1100, idealWidth: 1280, minHeight: 650, idealHeight: 760)
-        .environment(\.colorScheme, .dark)
+        .appAppearance()
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.1), lineWidth: 1)
+                .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
         )
         .background(
             WindowAccessor { window in
@@ -983,7 +983,7 @@ private struct LyricsDetachedAmbientBackground: View {
                         .blur(radius: 100)
                 }
 
-                Color.black.opacity(0.65)
+                Color(nsColor: .windowBackgroundColor).opacity(0.82)
 
                 Rectangle()
                     .fill(.ultraThinMaterial)
@@ -1008,10 +1008,10 @@ private struct LyricsDetachedLeftPane: View {
                         .aspectRatio(contentMode: .fill)
                 } else {
                     ZStack {
-                        Color.white.opacity(0.05)
+                        Color.primary.opacity(0.05)
                         Image(systemName: "music.note")
                             .font(.system(size: 80))
-                            .foregroundStyle(.white.opacity(0.2))
+                            .foregroundStyle(.primary.opacity(0.2))
                     }
                 }
             }
@@ -1020,7 +1020,7 @@ private struct LyricsDetachedLeftPane: View {
             .shadow(color: .black.opacity(0.5), radius: 30, y: 15)
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(Color.white.opacity(0.15), lineWidth: 0.5)
+                    .strokeBorder(Color.primary.opacity(0.15), lineWidth: 0.5)
             )
             .scaleEffect(musicManager.isPlaying ? 1.0 : 0.95)
             .animation(.spring(response: 0.6, dampingFraction: 0.7), value: musicManager.isPlaying)
@@ -1029,17 +1029,17 @@ private struct LyricsDetachedLeftPane: View {
                 HStack(spacing: 8) {
                     Image(systemName: "music.note.tv.fill")
                         .font(.system(size: 12))
-                        .foregroundStyle(.white.opacity(0.6))
+                        .foregroundStyle(.primary.opacity(0.6))
 
                     Text(displayTitle)
                         .font(.system(size: 20, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.primary)
                         .lineLimit(1)
                 }
 
                 Text(displayArtist)
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.5))
+                    .foregroundStyle(.primary.opacity(0.5))
                     .lineLimit(1)
             }
             .padding(.leading, 4)
@@ -1072,7 +1072,7 @@ private struct SongCreditsView: View {
                 if let album = info.album {
                     Text([album, info.releaseYear].compactMap { $0 }.joined(separator: " · "))
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.45))
+                        .foregroundStyle(.primary.opacity(0.45))
                         .lineLimit(1)
                 }
                 ForEach(info.creditSections) { section in
@@ -1080,10 +1080,10 @@ private struct SongCreditsView: View {
                         Text(section.title.uppercased())
                             .font(.system(size: 10, weight: .semibold))
                             .tracking(0.6)
-                            .foregroundStyle(.white.opacity(0.35))
+                            .foregroundStyle(.primary.opacity(0.35))
                         Text(section.names.joined(separator: ", "))
                             .font(.system(size: 13, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.75))
+                            .foregroundStyle(.primary.opacity(0.75))
                             .lineLimit(2)
                     }
                 }
@@ -1110,7 +1110,7 @@ private struct SongCreditsFooter: View {
             if !writers.isEmpty {
                 Text("Written by: \(writers.joined(separator: ", "))")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.4))
+                    .foregroundStyle(.primary.opacity(0.4))
             }
         }
         .task(id: "\(title ?? "")|\(artist ?? "")") {
@@ -1153,7 +1153,7 @@ private struct LyricsDetachedRightPane: View {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Lyrics aren't available.")
                             .font(.system(size: 36, weight: .bold))
-                            .foregroundColor(.white.opacity(0.4))
+                            .foregroundColor(.primary.opacity(0.4))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
@@ -1210,13 +1210,13 @@ private struct LyricsDetachedRightPane: View {
                 LyricLineView(
                     lyric: lyric,
                     isCurrent: isCurrent,
-                    accentColor: .white,
+                    accentColor: .primary,
                     elapsedTime: playbackState.elapsed,
                     alignment: side,
                     fontSize: isCurrent ? 44 : 36
                 )
                 .equatable()
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
                 .scaleEffect(isCurrent ? 1.0 : 0.95, anchor: anchor)
                 .opacity(isCurrent || isBrowsing ? 1.0 : 0.35)
                 .blur(radius: isCurrent || isBrowsing || distance > 6 ? 0 : min(CGFloat(distance), 4) * 0.6)
@@ -1235,7 +1235,7 @@ private struct LyricsDetachedRightPane: View {
             }
 
             if let interlude, tops.indices.contains(interlude.nextIndex) {
-                LyricsInterludeDots(start: interlude.start, end: interlude.end, color: .white)
+                LyricsInterludeDots(start: interlude.start, end: interlude.end, color: .primary)
                     .frame(width: size.width, alignment: sides[lyrics[interlude.nextIndex].id] == .trailing ? .trailing : .leading)
                     .offset(y: origin + tops[interlude.nextIndex] - 34)
                     .transition(.opacity.combined(with: .scale(scale: 0.6, anchor: .leading)))
@@ -1288,7 +1288,7 @@ private struct LyricsDetachedBottomBar: View {
             VStack(spacing: 8) {
                 InteractiveProgressBar(
                     value: $currentProgress,
-                    gradient: Gradient(colors: [.white, .white.opacity(0.8)]),
+                    gradient: Gradient(colors: [.primary, .primary.opacity(0.8)]),
                     onSeek: { newProgress in
                         let seekTime = newProgress * musicManager.totalDuration
                         if seekTime.isFinite && musicManager.totalDuration > 0 {
@@ -1297,19 +1297,19 @@ private struct LyricsDetachedBottomBar: View {
                     }
                 )
                 .frame(height: 4)
-                .background(Color.white.opacity(0.2))
+                .background(Color.primary.opacity(0.2))
                 .clipShape(Capsule())
 
                 HStack {
                     Text(displayedElapsedTime.asMinuteSecondClock)
                         .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(.white.opacity(0.6))
+                        .foregroundStyle(.primary.opacity(0.6))
 
                     Spacer()
 
                     Text("-" + (max(0, musicManager.totalDuration - displayedElapsedTime)).asMinuteSecondClock)
                         .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(.white.opacity(0.6))
+                        .foregroundStyle(.primary.opacity(0.6))
                 }
             }
 
@@ -1325,7 +1325,7 @@ private struct LyricsDetachedBottomBar: View {
                     displayedSystemName: holdFeedbackButtonID == "previous" ? holdFeedbackIcon : nil
                 )
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(holdFeedbackButtonID == "previous" ? holdFeedbackColor : .white.opacity(0.8))
+                .foregroundStyle(holdFeedbackButtonID == "previous" ? holdFeedbackColor : .primary.opacity(0.8))
                 .help(MusicLongPressUI.skipHelp(primary: "Previous", target: .previous, settings: settings.settings.value))
 
                 LongPressControlButton(
@@ -1347,7 +1347,7 @@ private struct LyricsDetachedBottomBar: View {
                           ? (holdFeedbackIcon ?? (musicManager.isPlaying ? "pause.fill" : "play.fill"))
                           : (musicManager.isPlaying ? "pause.fill" : "play.fill"))
                         .font(.system(size: 32, weight: .bold))
-                        .foregroundStyle(holdFeedbackButtonID == "playPause" ? holdFeedbackColor : .white)
+                        .foregroundStyle(holdFeedbackButtonID == "playPause" ? holdFeedbackColor : .primary)
                         .frame(width: 44, height: 44)
                         .contentTransition(.symbolEffect(.replace))
                 }
@@ -1367,7 +1367,7 @@ private struct LyricsDetachedBottomBar: View {
                     displayedSystemName: holdFeedbackButtonID == "next" ? holdFeedbackIcon : nil
                 )
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(holdFeedbackButtonID == "next" ? holdFeedbackColor : .white.opacity(0.8))
+                .foregroundStyle(holdFeedbackButtonID == "next" ? holdFeedbackColor : .primary.opacity(0.8))
                 .help(MusicLongPressUI.skipHelp(primary: "Next", target: .next, settings: settings.settings.value))
             }
         }

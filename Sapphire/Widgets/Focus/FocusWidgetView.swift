@@ -46,8 +46,7 @@ struct FocusWidgetView: View {
         .buttonStyle(.plain)
         .frame(minWidth: 200, minHeight: 90)
         .fixedSize()
-        .foregroundColor(.white)
-        .preferredColorScheme(.dark)
+        .foregroundColor(.primary)
         .contentShape(Rectangle())
         .animation(.default, value: focusManager.phase)
     }
@@ -176,7 +175,7 @@ private struct FocusWidgetCountdownText: View {
             LayerNumericText(
                 text: FocusSessionManager.format(focusManager.remaining(at: context.date)),
                 font: Self.font,
-                color: .white
+                color: .labelColor
             )
         }
     }

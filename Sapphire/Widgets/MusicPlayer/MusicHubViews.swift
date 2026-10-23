@@ -161,7 +161,7 @@ struct QueueAndPlaylistsView: View {
 
                     if hubPane == .audio {
                         Capsule()
-                            .fill(Color.white.opacity(0.14))
+                            .fill(Color.primary.opacity(0.14))
                             .frame(width: 1, height: 16)
                             .padding(.horizontal, 4)
 
@@ -327,7 +327,7 @@ struct QueueAndPlaylistsView: View {
 
             if musicManager.isOfficialAPIAuthenticated || musicManager.isPrivateAPIAuthenticated {
                 Capsule()
-                    .fill(Color.white.opacity(0.1))
+                    .fill(Color.primary.opacity(0.1))
                     .frame(width: 1, height: 14)
 
                 Button {
@@ -347,7 +347,7 @@ struct QueueAndPlaylistsView: View {
         .padding(.horizontal, 9)
         .padding(.vertical, 5)
         .background(MaterialChartPalette.surfaceContainer.opacity(0.75), in: Capsule())
-        .overlay(Capsule().stroke(Color.white.opacity(0.06), lineWidth: 1))
+        .overlay(Capsule().stroke(Color.primary.opacity(0.06), lineWidth: 1))
         .task(id: musicManager.spotifyPrivateAPI.userProfile?.profile.username) {
             if let username = musicManager.spotifyPrivateAPI.userProfile?.profile.username,
                !username.isEmpty,
@@ -377,7 +377,7 @@ struct QueueAndPlaylistsView: View {
 
             if let title = musicManager.title, !title.isEmpty {
                 Capsule()
-                    .fill(Color.white.opacity(0.1))
+                    .fill(Color.primary.opacity(0.1))
                     .frame(width: 1, height: 14)
                 Button {
                     musicManager.appleMusic.revealCurrentTrack()
@@ -392,7 +392,7 @@ struct QueueAndPlaylistsView: View {
         .padding(.horizontal, 9)
         .padding(.vertical, 5)
         .background(MaterialChartPalette.surfaceContainer.opacity(0.75), in: Capsule())
-        .overlay(Capsule().stroke(Color.white.opacity(0.06), lineWidth: 1))
+        .overlay(Capsule().stroke(Color.primary.opacity(0.06), lineWidth: 1))
     }
 
     // MARK: - Custom Transitions
@@ -1753,7 +1753,7 @@ struct TabButton: View {
                 .padding(.vertical, 6)
         }
         .buttonStyle(.plain)
-        .background(isSelected ? Color.accentColor : Color.white.opacity(0.08))
+        .background(isSelected ? Color.accentColor : Color.primary.opacity(0.08))
         .foregroundColor(isSelected ? .white : .primary).clipShape(Capsule())
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
     }
@@ -2133,7 +2133,7 @@ struct QueueTrackRow: View {
             Text((Double(track.durationMs) / 1000.0).asMinuteSecondClock).font(.caption.monospacedDigit()).foregroundColor(.secondary)
         }
         .padding(.vertical, 6)
-        .padding(.horizontal, 10)        .background(Color.white.opacity(isHovered ? 0.15 : 0.1)).cornerRadius(10)
+        .padding(.horizontal, 10)        .background(Color.primary.opacity(isHovered ? 0.15 : 0.1)).cornerRadius(10)
         .contentShape(Rectangle())
         .onHover { hovering in self.isHovered = hovering }
         .onTapGesture { Task { onPlay(await musicManager.play(trackUri: track.uri, contextUri: nil, trackUid: nil, trackIndex: nil)) }}
@@ -2164,7 +2164,7 @@ struct FullPlaylistRow: View {
             Image(systemName: "chevron.right").foregroundColor(.secondary)
         }
         .padding(10)
-        .background(Color.white.opacity(isHovered ? 0.15 : 0.1)).cornerRadius(12)
+        .background(Color.primary.opacity(isHovered ? 0.15 : 0.1)).cornerRadius(12)
         .contentShape(Rectangle())
         .onHover { hovering in self.isHovered = hovering }
         .onTapGesture {
@@ -2225,7 +2225,7 @@ struct ActiveDeviceView: View {
                 .foregroundColor(.green)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(Color.black.opacity(0.2))
+                .background(Color.primary.opacity(0.08))
                 .clipShape(Capsule())
                 .help("Playing on \(device.name)")
             }
@@ -2314,7 +2314,7 @@ struct RecentlyPlayedCard: View {
         }
         .buttonStyle(.plain)
         .padding(4)
-        .background(Color.white.opacity(isHovered ? 0.1 : 0), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(Color.primary.opacity(isHovered ? 0.1 : 0), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .contentShape(Rectangle())
         .onHover { isHovered = $0 }
     }
@@ -2341,7 +2341,7 @@ struct PopularReleaseCard: View {
         }
         .buttonStyle(.plain)
         .padding(4)
-        .background(Color.white.opacity(isHovered ? 0.1 : 0), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(Color.primary.opacity(isHovered ? 0.1 : 0), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .contentShape(Rectangle())
         .onHover { isHovered = $0 }
     }
@@ -2789,7 +2789,7 @@ struct DevicesView: View {
             }
         }
         .padding(5)
-        .background(Color.black.opacity(0.2))
+        .background(Color.primary.opacity(0.08))
         .clipShape(Capsule())
     }
 
@@ -2892,7 +2892,7 @@ struct DevicesView: View {
                     .foregroundStyle(.secondary)
                     .padding(12)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
 
             if !sortedNativeDevices.isEmpty {
@@ -4578,7 +4578,7 @@ struct SpotifyNowPlayingExtras: View {
                 HStack(spacing: 10) {
                     if let url = artist.avatarURL ?? artist.headerImageURL {
                         CachedAsyncImage(url: url) { $0.resizable().aspectRatio(contentMode: .fill) } placeholder: {
-                            Circle().fill(Color.white.opacity(0.08))
+                            Circle().fill(Color.primary.opacity(0.08))
                         }
                         .frame(width: 28, height: 28)
                         .clipShape(Circle())
@@ -4617,7 +4617,7 @@ struct SpotifyNowPlayingExtras: View {
                             }
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(Color.white.opacity(0.08))
+                            .background(Color.primary.opacity(0.08))
                             .clipShape(Capsule())
                         }
                     }
@@ -4668,7 +4668,7 @@ struct ArtistProfileCard: View {
             HStack(spacing: 12) {
                 if let url = artist.avatarURL ?? artist.headerImageURL {
                     CachedAsyncImage(url: url) { $0.resizable().aspectRatio(contentMode: .fill) } placeholder: {
-                        RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08))
+                        RoundedRectangle(cornerRadius: 10).fill(Color.primary.opacity(0.08))
                     }
                     .frame(width: 56, height: 56)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -4703,7 +4703,7 @@ struct ArtistProfileCard: View {
             }
         }
         .padding(12)
-        .background(Color.white.opacity(0.06))
+        .background(Color.primary.opacity(0.06))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
@@ -4743,7 +4743,7 @@ struct SimilarAlbumCard: View {
         }
         .buttonStyle(.plain)
         .padding(4)
-        .background(Color.white.opacity(isHovered ? 0.1 : 0), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(Color.primary.opacity(isHovered ? 0.1 : 0), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .contentShape(Rectangle())
         .onHover { isHovered = $0 }
     }
@@ -4775,7 +4775,7 @@ struct ConcertCard: View {
         }
         .padding(10)
         .frame(width: 150, alignment: .leading)
-        .background(Color.white.opacity(isHovered ? 0.15 : 0.08))
+        .background(Color.primary.opacity(isHovered ? 0.15 : 0.08))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .contentShape(Rectangle())
         .onHover { isHovered = $0 }
@@ -4815,7 +4815,7 @@ struct MerchCard: View {
         }
         .buttonStyle(.plain)
         .padding(4)
-        .background(Color.white.opacity(isHovered ? 0.1 : 0), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(Color.primary.opacity(isHovered ? 0.1 : 0), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .contentShape(Rectangle())
         .onHover { isHovered = $0 }
     }
@@ -5032,7 +5032,7 @@ private struct AppleQueueRow: View {
             HStack(spacing: 9) {
                 CachedAsyncImage(url: track.artworkURL) { $0.resizable().aspectRatio(contentMode: .fill) } placeholder: {
                     ZStack {
-                        Color.white.opacity(0.08)
+                        Color.primary.opacity(0.08)
                         Image(systemName: "music.note")
                             .font(.system(size: 10))
                             .foregroundStyle(.tertiary)
@@ -5058,7 +5058,7 @@ private struct AppleQueueRow: View {
             .padding(.vertical, 4)
             .background(
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(Color.white.opacity(isHovered ? 0.07 : 0))
+                    .fill(Color.primary.opacity(isHovered ? 0.07 : 0))
             )
             .contentShape(Rectangle())
         }
@@ -5379,10 +5379,10 @@ struct AppleMusicSearchView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
-        .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .background(Color.primary.opacity(0.07), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
         )
     }
 
@@ -5719,7 +5719,7 @@ struct AppleMusicSearchView: View {
                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                 .padding(.horizontal, 9)
                 .padding(.vertical, 4)
-                .background(selected ? Color.pink.opacity(0.8) : Color.white.opacity(0.08), in: Capsule())
+                .background(selected ? Color.pink.opacity(0.8) : Color.primary.opacity(0.08), in: Capsule())
                 .foregroundStyle(selected ? Color.white : Color.primary)
         }
         .buttonStyle(.plain)
@@ -5815,7 +5815,7 @@ struct AppleMusicSearchView: View {
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
-                .background(Color.white.opacity(0.07), in: Capsule())
+                .background(Color.primary.opacity(0.07), in: Capsule())
             }
             .buttonStyle(.plain)
             Spacer(minLength: 0)
@@ -6028,7 +6028,7 @@ struct AppleMusicSearchView: View {
                 img.resizable().aspectRatio(contentMode: .fill)
             } placeholder: {
                 ZStack {
-                    Color.white.opacity(0.08)
+                    Color.primary.opacity(0.08)
                     Image(systemName: circular ? "music.mic" : "music.note")
                         .foregroundStyle(.secondary)
                 }
@@ -6072,7 +6072,7 @@ struct AppleMusicSearchView: View {
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
-                .background(prominent ? Color.pink.opacity(0.85) : Color.white.opacity(0.09), in: Capsule())
+                .background(prominent ? Color.pink.opacity(0.85) : Color.primary.opacity(0.09), in: Capsule())
                 .foregroundStyle(prominent ? Color.white : Color.primary)
         }
         .buttonStyle(.plain)
@@ -6187,7 +6187,7 @@ private struct AppleMusicMediaTile: View {
                     img.resizable().aspectRatio(contentMode: .fill)
                 } placeholder: {
                     ZStack {
-                        Color.white.opacity(0.08)
+                        Color.primary.opacity(0.08)
                         Image(systemName: item.placeholderSymbol)
                             .foregroundStyle(.secondary)
                     }
@@ -6226,7 +6226,7 @@ struct AppleMusicAudioBadgeRow: View {
                     .labelStyle(.titleAndIcon)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(Color.white.opacity(0.09), in: Capsule())
+                    .background(Color.primary.opacity(0.09), in: Capsule())
                     .foregroundStyle(.secondary)
             }
         }
@@ -6255,7 +6255,7 @@ private struct AppleMusicSongRow: View {
                     img.resizable().aspectRatio(contentMode: .fill)
                 } placeholder: {
                     ZStack {
-                        Color.white.opacity(0.08)
+                        Color.primary.opacity(0.08)
                         Image(systemName: "music.note")
                             .font(.system(size: 14))
                             .foregroundStyle(.secondary)
@@ -6283,7 +6283,7 @@ private struct AppleMusicSongRow: View {
             .padding(.vertical, 5)
             .background(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(Color.white.opacity(isHovered ? 0.07 : 0))
+                    .fill(Color.primary.opacity(isHovered ? 0.07 : 0))
             )
             .contentShape(Rectangle())
         }
@@ -6304,7 +6304,7 @@ private struct AppleMusicAlbumRow: View {
                     img.resizable().aspectRatio(contentMode: .fill)
                 } placeholder: {
                     ZStack {
-                        Color.white.opacity(0.08)
+                        Color.primary.opacity(0.08)
                         Image(systemName: "square.stack")
                             .font(.system(size: 14))
                             .foregroundStyle(.secondary)
@@ -6349,7 +6349,7 @@ private struct AppleMusicArtistRow: View {
                     img.resizable().aspectRatio(contentMode: .fill)
                 } placeholder: {
                     ZStack {
-                        Color.white.opacity(0.08)
+                        Color.primary.opacity(0.08)
                         Image(systemName: "music.mic")
                             .font(.system(size: 14))
                             .foregroundStyle(.secondary)
@@ -6394,7 +6394,7 @@ private struct SuggestedAppleTrackRow: View {
                     img.resizable().aspectRatio(contentMode: .fill)
                 } placeholder: {
                     ZStack {
-                        Color.white.opacity(0.08)
+                        Color.primary.opacity(0.08)
                         Image(systemName: "music.note")
                             .font(.system(size: 14))
                             .foregroundStyle(.secondary)
@@ -6439,7 +6439,7 @@ private struct AppleMusicPlaylistRow: View {
                     img.resizable().aspectRatio(contentMode: .fill)
                 } placeholder: {
                     ZStack {
-                        Color.white.opacity(0.08)
+                        Color.primary.opacity(0.08)
                         Image(systemName: "music.note.list")
                             .foregroundStyle(.secondary)
                     }

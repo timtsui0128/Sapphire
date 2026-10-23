@@ -124,7 +124,7 @@ struct SystemAudioPanel: View {
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(Capsule().fill(.black.opacity(0.2)))
+                .background(Capsule().fill(Color.primary.opacity(0.08)))
                 .padding(.horizontal, 12)
 
                 ScrollView(.vertical, showsIndicators: false) {
@@ -157,7 +157,7 @@ struct SystemAudioPanel: View {
                 .padding(.vertical, 8)
         }
         .buttonStyle(.plain)
-        .background(selectedTab == tab ? Color.accentColor : Color.white.opacity(0.06))
+        .background(selectedTab == tab ? Color.accentColor : Color.primary.opacity(0.06))
         .foregroundColor(selectedTab == tab ? .white : .primary)
         .clipShape(Capsule())
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: selectedTab == tab)
@@ -289,7 +289,7 @@ fileprivate struct AppControlCard: View {
         .padding(.vertical, 15).padding(.horizontal, 12)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(isCurrentlyOutputting || isRecentlyActive ? Color.accentColor.opacity(0.08) : Color.white.opacity(0.05))
+                .fill(isCurrentlyOutputting || isRecentlyActive ? Color.accentColor.opacity(0.08) : Color.primary.opacity(0.05))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 16)
@@ -338,7 +338,7 @@ fileprivate struct AppRouteMenu: View {
             Image(systemName: route == nil ? "hifispeaker" : (routeIsConnected ? "arrow.triangle.branch" : "exclamationmark.triangle"))
                 .font(.system(size: 11, weight: .bold))
                 .frame(width: 32, height: 32)
-                .background(route == nil ? Color.white.opacity(0.08) : Color.accentColor)
+                .background(route == nil ? Color.primary.opacity(0.08) : Color.accentColor)
                 .foregroundColor(route == nil ? .primary : .white)
                 .clipShape(Circle())
         }
@@ -532,7 +532,7 @@ fileprivate struct DeviceControlCard: View {
     private func getColor() -> Color { device.isOutput ? (isActive ? .accentColor : .primary.opacity(0.8)) : (isMicMuted ? .red : (isActive ? .accentColor : .primary.opacity(0.8))) }
     private func getSubtitle() -> String { device.isOutput ? (isActive ? "Active Channel" : "Standby") : (isMicMuted ? "Muted" : (isActive ? "System Input" : "Microphone")) }
     private func getSubtitleColor() -> Color { device.isOutput ? (isActive ? .accentColor.opacity(0.8) : .secondary) : (isMicMuted ? .red.opacity(0.8) : .secondary) }
-    private func getBg() -> Color { device.isOutput ? (isActive ? Color.accentColor.opacity(0.08) : Color.white.opacity(0.05)) : (isMicMuted ? Color.red.opacity(0.08) : (isActive ? Color.accentColor.opacity(0.08) : Color.white.opacity(0.05))) }
+    private func getBg() -> Color { device.isOutput ? (isActive ? Color.accentColor.opacity(0.08) : Color.primary.opacity(0.05)) : (isMicMuted ? Color.red.opacity(0.08) : (isActive ? Color.accentColor.opacity(0.08) : Color.primary.opacity(0.05))) }
     private func getBorder() -> Color { device.isOutput ? (isExplicitlySelected ? .accentColor : (isActive ? .accentColor.opacity(0.4) : .clear)) : (isMicMuted ? .red.opacity(0.4) : (isExplicitlySelected ? .accentColor : (isActive ? .accentColor.opacity(0.4) : .clear))) }
 }
 
@@ -546,7 +546,7 @@ fileprivate struct SmallIconButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: icon).font(.system(size: 11, weight: .bold)).frame(width: 32, height: 32)
-                .background(active ? (destructive ? Color.red : Color.accentColor) : (destructive ? Color.red.opacity(0.1) : Color.white.opacity(0.08)))
+                .background(active ? (destructive ? Color.red : Color.accentColor) : (destructive ? Color.red.opacity(0.1) : Color.primary.opacity(0.08)))
                 .foregroundColor(active ? .white : (destructive ? .red : .primary)).clipShape(Circle())
         }.buttonStyle(.plain).scaleEffect(active ? 1.05 : 1.0)
     }

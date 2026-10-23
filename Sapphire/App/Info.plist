@@ -2,6 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>SapphireLocalBuild</key>
+	<string>Notch Click Recovery 5</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Collect newly saved screenshots and keep them ready in the file shelf for multi-file dragging.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Collect screenshots when Documents is your screenshot save location.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Collect screenshots when Downloads is your screenshot save location.</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>

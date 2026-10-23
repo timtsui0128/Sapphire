@@ -104,12 +104,14 @@ struct LayerProgressBar: NSViewRepresentable {
 
     func makeNSView(context: Context) -> LayerProgressBarView {
         let view = LayerProgressBarView()
+        view.appearance = NSAppearance(named: context.environment.colorScheme == .dark ? .darkAqua : .aqua)
         view.configure(colors: colors, trackColor: trackColor, barHeight: barHeight)
         view.apply(motion, catchUp: 0)
         return view
     }
 
     func updateNSView(_ nsView: LayerProgressBarView, context: Context) {
+        nsView.appearance = NSAppearance(named: context.environment.colorScheme == .dark ? .darkAqua : .aqua)
         nsView.configure(colors: colors, trackColor: trackColor, barHeight: barHeight)
         nsView.apply(motion, catchUp: catchUpDuration)
     }
@@ -175,7 +177,7 @@ final class LayerProgressBarView: NSView {
         CATransaction.setDisableActions(true)
         effectiveAppearance.performAsCurrentDrawingAppearance {
             trackLayer.backgroundColor = NSColor(trackColor).cgColor
-            let fills = colors.isEmpty ? [Color.white] : colors
+            let fills = colors.isEmpty ? [Color.primary] : colors
             fillLayer.colors = (fills.count == 1 ? [fills[0], fills[0]] : fills).map { NSColor($0).cgColor }
         }
         CATransaction.commit()
@@ -233,19 +235,21 @@ struct LayerProgressRing: NSViewRepresentable {
     var motion: LinearProgressMotion
     var lineWidth: CGFloat
     var trackLineWidth: CGFloat? = nil
-    var trackColor: Color = Color.white.opacity(0.18)
+    var trackColor: Color = Color.primary.opacity(0.18)
     var activeColor: Color
     var lineCap: CAShapeLayerLineCap = .round
     var catchUpDuration: CFTimeInterval = 0.25
 
     func makeNSView(context: Context) -> LayerProgressRingView {
         let view = LayerProgressRingView()
+        view.appearance = NSAppearance(named: context.environment.colorScheme == .dark ? .darkAqua : .aqua)
         view.configure(self)
         view.apply(motion, catchUp: 0)
         return view
     }
 
     func updateNSView(_ nsView: LayerProgressRingView, context: Context) {
+        nsView.appearance = NSAppearance(named: context.environment.colorScheme == .dark ? .darkAqua : .aqua)
         nsView.configure(self)
         nsView.apply(motion, catchUp: catchUpDuration)
     }

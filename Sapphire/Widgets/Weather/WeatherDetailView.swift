@@ -16,10 +16,10 @@ struct RelativeTimeView: View {
                 Text(formattedString(from: validDate, to: context.date))
                     .font(.caption2)
                     .fontWeight(.medium)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.primary.opacity(0.7))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(.black.opacity(0.2))
+                    .background(Color.primary.opacity(0.08))
                     .clipShape(Capsule())
             }
         }
@@ -68,9 +68,9 @@ struct WeatherPlayerView: View {
                         .fontWeight(.medium)
                 }
                 .buttonStyle(.plain)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(.primary.opacity(0.7))
                 .padding(6)
-                .background(.black.opacity(0.2))
+                .background(Color.primary.opacity(0.08))
                 .clipShape(Circle())
                 .rotationEffect(.degrees(viewModel.isFetching ? 360 : 0))
                 .animation(viewModel.isFetching ? .linear(duration: 1).repeatForever(autoreverses: false) : .default, value: viewModel.isFetching)
@@ -80,8 +80,7 @@ struct WeatherPlayerView: View {
             .padding(.trailing, 12)
         }
         .frame(width: 560, height: 240)
-        .foregroundColor(.white)
-        .preferredColorScheme(.dark)
+        .foregroundColor(.primary)
         .animation(.spring(response: 0.6, dampingFraction: 1, blendDuration: 0.2), value: viewModel.temperature)
         .animation(.easeInOut(duration: 0.8), value: viewModel.gradientColors.first)
     }

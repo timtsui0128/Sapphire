@@ -17,6 +17,10 @@ class SnapPreviewManager {
     private init() {}
 
     func showPreview(for zone: SnapZone) {
+        guard !SessionPrivacyState.shouldSuppressUI() else {
+            previewWindow?.orderOut(nil)
+            return
+        }
         if previewWindow == nil {
             createPreviewWindow()
         }
@@ -47,6 +51,10 @@ class SnapPreviewManager {
 
     func hidePreview() {
         guard let window = previewWindow, window.isVisible else { return }
+        guard !SessionPrivacyState.shouldSuppressUI() else {
+            window.orderOut(nil)
+            return
+        }
 
         NSAnimationContext.runAnimationGroup({ context in
             context.duration = 0.1

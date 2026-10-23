@@ -131,6 +131,7 @@ final class MirrorCameraManager: ObservableObject {
     }
 
     func start() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
         guard !isLive, !isPending else { return }
         beginDeviceMonitoring()
 
@@ -174,6 +175,7 @@ final class MirrorCameraManager: ObservableObject {
     }
 
     func restartPreviewIfNeeded() {
+        guard !SessionPrivacyState.shouldSuppressUI() else { stop(); return }
         guard isLive else { return }
         configureAndStart(generation: advanceGeneration())
     }
@@ -315,6 +317,7 @@ final class MirrorCameraManager: ObservableObject {
     // MARK: - Configuration
 
     private func configureAndStart(generation: UInt64) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { stop(); return }
         let worker = worker
         worker.queue.async {
             let result = worker.configureAndStart(generation: generation)
@@ -411,7 +414,7 @@ private final class MirrorSessionWorker: @unchecked Sendable {
     }
 
     func configureAndStart(generation: UInt64) -> StartResult {
-        guard isCurrent(generation) else { return .stale }
+        guard isCurrent(generation), !SessionPrivacyState.shouldSuppressUI() else { return .stale }
 
         let discovery = Self.discover()
         dismantle()
@@ -443,8 +446,9 @@ private final class MirrorSessionWorker: @unchecked Sendable {
             dismantle()
             return .stale
         }
+        guard !SessionPrivacyState.shouldSuppressUI() else { dismantle(); return .stale }
         session.startRunning()
-        guard isCurrent(generation) else {
+        guard isCurrent(generation), !SessionPrivacyState.shouldSuppressUI() else {
             dismantle()
             return .stale
         }

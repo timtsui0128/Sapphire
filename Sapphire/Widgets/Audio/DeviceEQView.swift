@@ -125,8 +125,8 @@ struct DeviceEQView: View {
                 .frame(height: 132)
                 .background(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(.black.opacity(0.2))
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(.white.opacity(0.1), lineWidth: 1))
+                        .fill(Color.primary.opacity(0.08))
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.primary.opacity(0.1), lineWidth: 1))
                 )
 
                 EQFrequencyAxis(frequencies: bandLayout.frequencies)
@@ -261,7 +261,7 @@ struct ModernChip: View {
                 .font(.system(size: 12, weight: .medium))
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(isSelected ? Color.accentColor : Color.white.opacity(0.1))
+                .background(isSelected ? Color.accentColor : Color.primary.opacity(0.1))
                 .foregroundColor(isSelected ? .white : .primary)
                 .clipShape(Capsule())
         }

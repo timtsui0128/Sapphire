@@ -43,7 +43,7 @@ struct ShopifyOrdersWidgetView: View {
         }
         .frame(minWidth: 150, minHeight: 32)
         .fixedSize(horizontal: true, vertical: false)
-        .foregroundStyle(.white)
+        .foregroundStyle(.primary)
         .contentShape(Rectangle())
         .onTapGesture {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {

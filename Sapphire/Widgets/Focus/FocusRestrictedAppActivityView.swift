@@ -159,7 +159,7 @@ struct FocusRestrictedAppActivityView: View {
     private var iconView: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color.white.opacity(0.08))
+                .fill(Color.primary.opacity(0.08))
             if let appIcon {
                 Image(nsImage: appIcon)
                     .resizable()
@@ -168,7 +168,7 @@ struct FocusRestrictedAppActivityView: View {
             } else {
                 Image(systemName: "app.badge.fill")
                     .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(.primary.opacity(0.5))
             }
         }
         .frame(width: 50, height: 50)

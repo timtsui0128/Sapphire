@@ -43,6 +43,7 @@ final class MenuBarHiddenItemsBar: ObservableObject {
     }
 
     func show(below anchor: CGRect?) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { close(); return }
         guard AccessibilityTrustMonitor.isCurrentlyTrusted() else {
             AccessibilityPermission.request()
             return
@@ -105,6 +106,7 @@ final class MenuBarHiddenItemsBar: ObservableObject {
     // MARK: - Opening an item
 
     func activate(_ entry: Entry) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { close(); return }
         close()
         let restrictor = MenuBarVisibilityRestrictor.shared
         if let key = entry.sectionKey { restrictor.allowTemporarily(key) }
@@ -114,6 +116,7 @@ final class MenuBarHiddenItemsBar: ObservableObject {
                 guard let item = items.first(where: { $0.id == entry.id }) else { return }
                 let element = item.element
                 DispatchQueue.global(qos: .userInitiated).async {
+                    guard !SessionPrivacyState.shouldSuppressUI() else { return }
                     _ = AX.perform(kAXPressAction as String, on: element)
                 }
             }

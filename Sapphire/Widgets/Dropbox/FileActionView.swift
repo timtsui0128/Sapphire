@@ -82,13 +82,13 @@ struct FileActionView: View {
 
             Divider()
                 .frame(height: 340)
-                .overlay(Color.white.opacity(0.1))
+                .overlay(Color.primary.opacity(0.1))
 
             infoAndActionsPanel
                 .frame(width: 288)
                 .padding(15)
         }
-        .background(Color.black.opacity(0.3), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         .onAppear {
             renameText = liveItem.fileName
@@ -119,7 +119,7 @@ struct FileActionView: View {
     private var previewPanel: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color.black.opacity(0.4))
+                .fill(Color.primary.opacity(0.08))
 
             QuickLookView(url: liveItem.storedAt)
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
@@ -127,7 +127,7 @@ struct FileActionView: View {
         }
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
         )
     }
 
@@ -153,7 +153,7 @@ struct FileActionView: View {
                     .fill(Color.accentColor.opacity(0.22))
                 Image(systemName: metadata.iconName)
                     .font(.system(size: 26, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
             }
             .frame(width: 54, height: 54)
 
@@ -227,15 +227,15 @@ struct FileActionView: View {
     private var metadataSection: some View {
         VStack(spacing: 0) {
             MetadataRow(label: "Type", value: metadata.type, icon: "doc.text")
-            Divider().overlay(Color.white.opacity(0.08))
+            Divider().overlay(Color.primary.opacity(0.08))
             MetadataRow(label: "Size", value: metadata.size, icon: "internaldrive")
-            Divider().overlay(Color.white.opacity(0.08))
+            Divider().overlay(Color.primary.opacity(0.08))
             MetadataRow(label: "Added", value: metadata.added, icon: "calendar")
-            Divider().overlay(Color.white.opacity(0.08))
+            Divider().overlay(Color.primary.opacity(0.08))
             MetadataRow(label: "Location", value: liveItem.storedAt.path, icon: "folder")
         }
         .padding(.vertical, 4)
-        .background(Color.black.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     @ViewBuilder
@@ -321,7 +321,7 @@ struct FileActionView: View {
                         .font(.system(size: 14, weight: .semibold))
                         .frame(maxWidth: .infinity)
                         .padding(9)
-                        .background(Color.white.opacity(0.15), in: Capsule())
+                        .background(Color.primary.opacity(0.15), in: Capsule())
                 }
                 .buttonStyle(.plain)
             }
@@ -494,7 +494,7 @@ private struct DetailButton: View {
             .padding(.vertical, 8)
             .foregroundColor(isProminent ? .white : tint)
             .background(
-                (isProminent ? tint : Color.black.opacity(0.18)),
+                (isProminent ? tint : Color.primary.opacity(0.07)),
                 in: RoundedRectangle(cornerRadius: 9, style: .continuous)
             )
         }
@@ -518,7 +518,7 @@ private struct QuickIconAction: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
             .foregroundColor(.primary)
-            .background(Color.black.opacity(0.14), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -536,10 +536,10 @@ private struct ConversionButton: View {
                 Text(format.displayName)
                     .font(.system(size: 12, weight: .semibold))
             }
-            .foregroundColor(.white)
+            .foregroundColor(.primary)
             .padding(.horizontal, 11)
             .padding(.vertical, 6)
-            .background(Color.white.opacity(0.12), in: Capsule())
+            .background(Color.primary.opacity(0.12), in: Capsule())
         }
         .buttonStyle(.plain)
     }

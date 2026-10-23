@@ -89,7 +89,7 @@ struct EarbudControlsView: View {
             }
         }
         .frame(width: 600, height: 446)
-        .background(Color.black)
+        .background(Color(nsColor: .windowBackgroundColor))
         .clipShape(Rectangle())
         .animation(.spring(response: 0.25, dampingFraction: 0.85), value: snap.noiseMode)
         .animation(.spring(response: 0.25, dampingFraction: 0.85), value: snap.eqPreset)
@@ -109,11 +109,11 @@ struct EarbudControlsView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(snap.vendor == .sony ? "SONY HEADPHONES" : "GALAXY BUDS")
                     .font(.system(size: 10, weight: .black))
-                    .foregroundStyle(.white.opacity(0.4))
+                    .foregroundStyle(.primary.opacity(0.4))
                     .tracking(1.2)
                 Text(snap.name.isEmpty ? (device?.name ?? snap.vendor.displayName) : snap.name)
                     .font(.system(size: 20, weight: .bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                     .lineLimit(1)
             }
             Spacer(minLength: 12)
@@ -122,7 +122,7 @@ struct EarbudControlsView: View {
                     statusPill
                     Image(systemName: snap.vendor == .sony ? "headphones" : "earbuds")
                         .font(.title3)
-                        .foregroundStyle(snap.connected ? Color.accentColor : .white.opacity(0.35))
+                        .foregroundStyle(snap.connected ? Color.accentColor : .primary.opacity(0.35))
                 }
                 batteryRow
             }
@@ -134,7 +134,7 @@ struct EarbudControlsView: View {
             .font(.system(size: 10, weight: .bold))
             .padding(.horizontal, 9)
             .padding(.vertical, 3)
-            .background(Capsule().fill(snap.connected ? Color.green.opacity(0.22) : Color.white.opacity(0.08)))
+            .background(Capsule().fill(snap.connected ? Color.green.opacity(0.22) : Color.primary.opacity(0.08)))
             .foregroundStyle(snap.connected ? Color.green : .secondary)
     }
 
@@ -165,11 +165,11 @@ struct EarbudControlsView: View {
                 .foregroundStyle(.secondary)
             Text("\(percent)%")
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
-                .foregroundStyle(percent <= 15 ? Color.orange : .white.opacity(0.85))
+                .foregroundStyle(percent <= 15 ? Color.orange : .primary.opacity(0.85))
         }
         .padding(.horizontal, 7)
         .padding(.vertical, 2)
-        .background(Capsule().fill(Color.white.opacity(0.06)))
+        .background(Capsule().fill(Color.primary.opacity(0.06)))
     }
 
     // MARK: - Noise
@@ -192,7 +192,7 @@ struct EarbudControlsView: View {
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 7)
-                            .background(snap.noiseMode == wire ? Color.accentColor : Color.white.opacity(0.1))
+                            .background(snap.noiseMode == wire ? Color.accentColor : Color.primary.opacity(0.1))
                             .foregroundColor(snap.noiseMode == wire ? .white : .primary)
                             .clipShape(Capsule())
                         }
@@ -243,10 +243,10 @@ struct EarbudControlsView: View {
                     .frame(height: 110)
                     .background(
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(.black.opacity(0.2))
+                            .fill(Color.primary.opacity(0.08))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                    .stroke(.white.opacity(0.1), lineWidth: 1)
+                                    .stroke(Color.primary.opacity(0.1), lineWidth: 1)
                             )
                     )
 
@@ -509,10 +509,10 @@ struct EarbudControlsView: View {
             .padding(.vertical, 4)
             .background(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color.white.opacity(0.05))
+                    .fill(Color.primary.opacity(0.05))
                     .overlay(
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                            .stroke(Color.primary.opacity(0.08), lineWidth: 1)
                     )
             )
         }

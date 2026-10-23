@@ -18,11 +18,11 @@ private struct UnavailableFeatureView: View {
 }
 
 struct SportsSettingsView: View {
-    var body: some View { UnavailableFeatureView(name: "Sports") }
+    var body: some View { CommunitySportsSettingsView() }
 }
 
 struct FinanceSettingsView: View {
-    var body: some View { UnavailableFeatureView(name: "Finance") }
+    var body: some View { CommunityFinanceSettingsView() }
 }
 
 struct AccountSettingsView: View {

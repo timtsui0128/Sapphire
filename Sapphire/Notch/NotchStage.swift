@@ -176,6 +176,13 @@ final class NotchStageCoordinator: ObservableObject {
         self.view = nil
     }
 
+    func containsMousePoint(_ point: NSPoint, in window: NSWindow) -> Bool {
+        // The native stage lives inside NSViewRepresentable's SwiftUI hosting
+        // hierarchy. The window container's immediate child is the hosting view.
+        guard let view, view.window === window else { return false }
+        return view.stagePointIsInsideInteractiveRegion(view.convert(point, from: nil))
+    }
+
     func receive(_ signal: NotchStageSignal, animation: Animation?) {
         switch signal {
         case .size(let size):

@@ -36,7 +36,7 @@ struct LayoutEditorView: View {
             TextField("Layout Name", text: $layout.name)
                 .textFieldStyle(.plain)
                 .padding()
-                .background(Color.black.opacity(0.2))
+                .background(Color(nsColor: .controlBackgroundColor))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
 
             ZStack {
@@ -62,9 +62,9 @@ struct LayoutEditorView: View {
                     }
                 }
                 .aspectRatio(16/10, contentMode: .fit)
-                .background(Color.black.opacity(0.2))
+                .background(Color(nsColor: .controlBackgroundColor))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1)))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.primary.opacity(0.1)))
             }
 
             HStack {
@@ -299,7 +299,7 @@ fileprivate struct EditorGridPattern: View {
                     path.addLine(to: CGPoint(x: geometry.size.width, y: yPos))
                 }
             }
-            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+            .stroke(Color.primary.opacity(0.1), lineWidth: 1)
         }
     }
 }

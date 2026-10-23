@@ -16,6 +16,8 @@ struct NotchWidgetPlaneInputs: Equatable {
     var notchBandHeight: CGFloat = 0
     var displayScale: CGFloat = 2
     var notchDisplayWidth: CGFloat = 0
+    var maximumContentSize = CGSize(width: 1408, height: 800)
+    var panelColorScheme: ColorScheme? = nil
     var presentationGeneration = 0
 }
 
@@ -59,9 +61,10 @@ struct NotchWidgetPlaneRoot: View {
     let inputs: NotchWidgetPlaneInputs
     let measuredSize: Binding<CGSize>
     @ObservedObject var state: NotchWidgetPlaneState
+    var onHorizontalOverflow: ((Bool) -> Void)? = nil
 
     var body: some View {
-        content
+        NotchPanelViewport(maximumSize: inputs.maximumContentSize, content: content, onHorizontalOverflow: onHorizontalOverflow)
             .environment(\.navigationStack, Binding(
                 get: { state.navigationStack },
                 set: { newValue in
@@ -90,6 +93,8 @@ struct NotchWidgetPlaneRoot: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .coordinateSpace(.notchDrag)
             .environment(\.notchDisplayWidth, inputs.notchDisplayWidth)
+            .appPanelAppearance()
+            .environment(\.expandedNotchColorScheme, inputs.panelColorScheme)
             .notchHostEnvironment(bandHeight: inputs.notchBandHeight, displayScale: inputs.displayScale)
             .modifier(NotchWidgetPlaneGraphProbe())
     }
@@ -131,6 +136,7 @@ final class NotchWidgetPlane: ObservableObject {
     private var resendScheduled = false
 
     var isConfigured: Bool { hostingView != nil }
+    private(set) var hasHorizontalOverflow = false
 
     func configure(
         content makeContent: () -> AnyView,
@@ -146,7 +152,7 @@ final class NotchWidgetPlane: ObservableObject {
         self.content = content
         self.inputs = inputs
         self.measuredSize = measuredSize
-        let host = NotchWidgetPlaneHostingView(rootView: NotchWidgetPlaneRoot(content: content, inputs: inputs, measuredSize: measuredSize, state: state))
+        let host = NotchWidgetPlaneHostingView(rootView: root(content: content, inputs: inputs))
         host.sizingOptions = []
         host.autoresizingMask = [.width, .height]
         host.frame = mountView.bounds
@@ -176,7 +182,12 @@ final class NotchWidgetPlane: ObservableObject {
     private func apply(_ newInputs: NotchWidgetPlaneInputs) {
         guard newInputs != inputs, let content, let hostingView else { return }
         inputs = newInputs
-        hostingView.rootView = NotchWidgetPlaneRoot(content: content, inputs: newInputs, measuredSize: measuredSize, state: state)
+        hostingView.rootView = root(content: content, inputs: newInputs)
+    }
+
+    private func root(content: AnyView, inputs: NotchWidgetPlaneInputs) -> NotchWidgetPlaneRoot {
+        NotchWidgetPlaneRoot(content: content, inputs: inputs, measuredSize: measuredSize, state: state,
+                            onHorizontalOverflow: { [weak self] in self?.hasHorizontalOverflow = $0 })
     }
 
     func setOuterView(_ view: NSView?) { outerView = view }
@@ -190,7 +201,9 @@ final class NotchWidgetPlane: ObservableObject {
 
     func setDisplay(of window: NSWindow) {
         let assigned = (window as? DynamicFocusWindow)?.displayID ?? 0
-        let screen = NSScreen.screens.first { assigned != 0 && $0.displayID == assigned } ?? window.screen
+        let screen = assigned != 0
+            ? NSScreen.screens.first { $0.displayID == assigned }
+            : window.screen
         guard let width = screen?.frame.width, width > 0 else { return }
         var next = inputs
         next.notchDisplayWidth = width

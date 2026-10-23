@@ -27,7 +27,7 @@ struct OnboardingView: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                gradient: Gradient(colors: [Color.indigo.opacity(0.3), Color.black]),
+                gradient: Gradient(colors: [Color.indigo.opacity(0.12), Color(nsColor: .windowBackgroundColor)]),
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -86,7 +86,7 @@ struct OnboardingView: View {
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .preferredColorScheme(.dark)
+        .appAppearance()
     }
 }
 
@@ -192,7 +192,7 @@ private struct HelperInstallationStepView: View {
 
             HelperStatusBanner(helperManager: helperManager)
                 .padding()
-                .roundedCard(fill: Color.black.opacity(0.15), cornerRadius: 20, stroke: Color.white.opacity(0.1))
+                .roundedCard(fill: Color(nsColor: .controlBackgroundColor), cornerRadius: 20, stroke: Color.primary.opacity(0.1))
                 .padding(.horizontal, 50)
 
             if !helperReady {
@@ -321,9 +321,9 @@ private struct PrivacyStepView: View {
                 }
                 .padding(20)
                 .padding(.vertical, 20)
-                .background(.black.opacity(0.2))
+                .background(Color(nsColor: .controlBackgroundColor))
                 .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(Color.white.opacity(0.1)))
+                .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(Color.primary.opacity(0.1)))
             }
             .frame(maxHeight: .infinity)
             .padding(.horizontal, 60)
@@ -423,7 +423,7 @@ private struct SpotifySetupStepView: View {
                     }
                     if let error = error { Text(error).font(.caption).foregroundColor(.red).padding(.top, 4) }
                 }
-            }.padding(25).background(.black.opacity(0.15)).clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous)).overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.white.opacity(0.1), lineWidth: 1)).padding(50)
+            }.padding(25).background(Color(nsColor: .controlBackgroundColor)).clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous)).overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.primary.opacity(0.1), lineWidth: 1)).padding(50)
             Spacer()
             if musicManager.isPrivateAPIAuthenticated { OnboardingButton(title: "Continue", action: onNext) } else if !isLoading { Button("Skip for Now", action: onNext).buttonStyle(.plain).foregroundColor(.secondary).padding(.bottom, 50) } else { OnboardingButton(title: "Continue", action: {}).hidden().padding(.bottom, 50) }
         }
@@ -595,7 +595,7 @@ private struct SubscriptionOverviewStepView: View {
                         .frame(width: 44, height: 44)
                     Image(systemName: subscriptionManager.isSignedIn ? "person.crop.circle.badge.checkmark" : "person.crop.circle")
                         .font(.system(size: 22))
-                        .foregroundStyle(.white.opacity(0.9))
+                        .foregroundStyle(.primary.opacity(0.9))
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
@@ -614,7 +614,7 @@ private struct SubscriptionOverviewStepView: View {
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
                     .stroke(
                         LinearGradient(
-                            colors: [Color.white.opacity(0.18), Color.white.opacity(0.04)],
+                            colors: [Color.primary.opacity(0.18), Color.primary.opacity(0.04)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -722,7 +722,7 @@ private struct OnboardingPlanCard: View {
                     HStack(spacing: 6) {
                         Text(SubscriptionFeatureCatalog.tierDisplayName(tier))
                             .font(.system(size: 17, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(.primary)
                         if isCurrent {
                             Text("CURRENT")
                                 .font(.system(size: 8, weight: .black))
@@ -766,7 +766,7 @@ private struct OnboardingPlanCard: View {
 
                         Text(perk)
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.78))
+                            .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -809,7 +809,7 @@ private struct OnboardingPlanCard: View {
                             LinearGradient(
                                 colors: [
                                     accent.opacity(isCurrent ? 0.14 : 0.06),
-                                    Color.black.opacity(0.08)
+                                    Color.primary.opacity(0.04)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -823,7 +823,7 @@ private struct OnboardingPlanCard: View {
                     LinearGradient(
                         colors: [
                             accent.opacity(isCurrent ? 0.75 : 0.28),
-                            Color.white.opacity(0.06)
+                            Color.primary.opacity(0.06)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -911,7 +911,7 @@ private struct ModernOnboardingRow<Content: View>: View {
             VStack(alignment: .leading, spacing: 3) { Text(title).font(.headline.weight(.bold)); Text(description).font(.callout).foregroundColor(.secondary) }
             Spacer()
             content
-        }.padding(16).background(.black.opacity(0.15)).clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous)).overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.white.opacity(0.1), lineWidth: 1))
+        }.padding(16).background(Color(nsColor: .controlBackgroundColor)).clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous)).overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.primary.opacity(0.1), lineWidth: 1))
     }
 }
 
@@ -934,9 +934,9 @@ private struct MusicServiceButton: View {
     @State private var isPressed = false
     @ViewBuilder private var iconView: some View {
         if icon.hasPrefix("sf:") {
-            Image(systemName: String(icon.dropFirst(3))).resizable().renderingMode(.template).foregroundColor(.white)
+            Image(systemName: String(icon.dropFirst(3))).resizable().renderingMode(.template).foregroundColor(.primary)
         } else if icon == "music.note" {
-            Image(systemName: icon).resizable().renderingMode(.template).foregroundColor(.white)
+            Image(systemName: icon).resizable().renderingMode(.template).foregroundColor(.primary)
         } else {
             Image(icon).resizable().renderingMode(.original)
         }
@@ -945,8 +945,8 @@ private struct MusicServiceButton: View {
         HStack {
             iconView.aspectRatio(contentMode: .fit).frame(width: 28, height: 28)
             Text(title).font(.system(size: 18, weight: .bold, design: .rounded)); Spacer()
-            Image(systemName: "checkmark.circle.fill").font(.title2).foregroundStyle(.white).opacity(isSelected ? 1.0 : 0.0).scaleEffect(isSelected ? 1.0 : 0.5)
-        }.padding(.horizontal, 20).frame(height: 65).background(ZStack { RoundedRectangle(cornerRadius: 20, style: .continuous).fill(.black.opacity(0.2)); RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.white.opacity(0.1), lineWidth: 1); if isSelected { RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.indigo, lineWidth: 3).shadow(color: .indigo.opacity(0.5), radius: 8) } })
+            Image(systemName: "checkmark.circle.fill").font(.title2).foregroundStyle(Color.accentColor).opacity(isSelected ? 1.0 : 0.0).scaleEffect(isSelected ? 1.0 : 0.5)
+        }.padding(.horizontal, 20).frame(height: 65).background(ZStack { RoundedRectangle(cornerRadius: 20, style: .continuous).fill(Color(nsColor: .controlBackgroundColor)); RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.primary.opacity(0.1), lineWidth: 1); if isSelected { RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.indigo, lineWidth: 3).shadow(color: .indigo.opacity(0.5), radius: 8) } })
         .scaleEffect(isPressed ? 0.97 : 1.0).contentShape(Rectangle()).onTapGesture { withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { action() } }
         .gesture(DragGesture(minimumDistance: 0).onChanged { _ in if !isPressed { withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { isPressed = true } } }.onEnded { _ in withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { isPressed = false } }).animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
     }
@@ -986,7 +986,7 @@ private struct PermissionRowView: View {
                 .clipShape(Capsule())
                 .shadow(color: .accentColor.opacity(0.4), radius: 5, y: 2)
             }
-        }.padding().background(.black.opacity(0.15)).clipShape(RoundedRectangle(cornerRadius: 20)).overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.1), lineWidth: 1))
+        }.padding().background(Color(nsColor: .controlBackgroundColor)).clipShape(RoundedRectangle(cornerRadius: 20)).overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.primary.opacity(0.1), lineWidth: 1))
     }
 }
 
