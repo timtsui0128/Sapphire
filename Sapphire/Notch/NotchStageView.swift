@@ -734,6 +734,12 @@ final class NotchStageView: NSView {
         guard let presentedFrame, let shape = surfaceStyle?.shape, presentedRect.width > 0, presentedRect.height > 0 else {
             return false
         }
+        if shape.isExternalIndicator {
+            // A screen-edge target must include the corridor above the visible
+            // line, including any native band inset. Keep its width bounded.
+            let topEdge = band.convert(CGPoint(x: bounds.midX, y: bounds.minY), from: self).y
+            return shape.externalIndicatorHitRect(in: presentedRect, topEdge: topEdge).contains(pointInBand)
+        }
         guard presentedRect.contains(pointInBand) else { return false }
         guard let path = NotchMorphGeometry.path(shape, values: presentedFrame.values, in: presentedRect) else { return false }
         return path.contains(pointInBand)

@@ -41,6 +41,8 @@ struct NotchSurfaceStyle: Equatable {
         var surfaceHeight: CGFloat = 0
         var expandedPanelSurface: ExpandedPanelSurface = .matchPanel
         var reduceTransparency = false
+        var systemColorScheme: ColorScheme = .dark
+        var isExternalIndicator = false
     }
 
     #if DEBUG
@@ -84,6 +86,32 @@ struct NotchSurfaceStyle: Equatable {
             animatesShadowOpacity: !input.isGeminiActive
         )
 
+        if input.isExternalIndicator {
+            // There is no painted capsule behind the resting indicator. Use
+            // system ink so this handle belongs to the menu bar, not the app theme.
+            let ink: NSColor = input.systemColorScheme == .dark ? .white : .black
+            let opacity = input.reduceTransparency ? 1.0 : input.notchState == .hoverExpanded ? 0.9 : 0.65
+            style.fill = .solid(ink.withAlphaComponent(opacity))
+            style.rim = (input.systemColorScheme == .dark ? NSColor.black : .white).withAlphaComponent(0.15)
+            return style
+        }
+
+        if config.usesExternalDisplayBar, input.notchState != .clickExpanded {
+            // Live content still needs its normal height. On external displays
+            // use a native translucent surface instead of the opaque black pill.
+            // Existing live-activity labels use white ink, so keep dark vibrancy.
+            if input.reduceTransparency {
+                style.fill = .solid(.black)
+            } else {
+                style.glass = Glass(
+                    backend: input.systemGlassAvailable && !profilingDisablesGlass ? .automatic : .visualEffect,
+                    material: .menu, tintColor: nil, blendingMode: .behindWindow,
+                    appearance: .dark, interaction: .normal, shadow: nativeShadow
+                )
+            }
+            return style
+        }
+
         if input.notchState == .clickExpanded {
             let canvas = expandedCanvas(for: input.expandedColorScheme)
             switch input.expandedPanelSurface {
@@ -95,7 +123,7 @@ struct NotchSurfaceStyle: Equatable {
                 } else {
                     style.glass = Glass(
                         backend: input.systemGlassAvailable && !profilingDisablesGlass ? .automatic : .visualEffect,
-                        material: .frosted, tintColor: nil, blendingMode: .behindWindow,
+                        material: config.usesExternalDisplayBar ? .menu : .frosted, tintColor: nil, blendingMode: .behindWindow,
                         appearance: input.expandedColorScheme == .light ? .light : .dark,
                         interaction: .normal, shadow: nativeShadow
                     )

@@ -2212,7 +2212,9 @@ class LiveActivityManager {
     }
 
     private func checkForFileShelf() -> (ActivityType, LiveActivityContent, TimeInterval?)? {
-        let count = FileShelfManager.shared.files.count + ScreenshotShelfManager.shared.items.count
+        // Screenshot history stays available in its shelf without holding the
+        // notch open forever or taking priority over music and other activities.
+        let count = FileShelfManager.shared.files.count
         guard settingsModel.current.fileShelfLiveActivityEnabled, count > 0 else {
             return nil
         }

@@ -86,18 +86,18 @@ private struct CheckAppearance {
                 .environment(\.colorScheme, .dark)
         }
         .padding(.vertical, 12)
-        .frame(width: 680, height: 440, alignment: .top)
+        .frame(width: 680, height: 1000, alignment: .top)
         .background(Color(nsColor: .windowBackgroundColor))
         .appAppearance()
         let host = NSHostingView(rootView: root)
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 680, height: 440),
+            contentRect: NSRect(x: 0, y: 0, width: 680, height: 1000),
             styleMask: [.borderless], backing: .buffered, defer: false
         )
         window.isReleasedWhenClosed = false
         window.appearance = NSAppearance(named: AppAppearance.shared.resolvedColorScheme == .dark ? .darkAqua : .aqua)
         window.contentView = host
-        host.frame = NSRect(x: 0, y: 0, width: 680, height: 440)
+        host.frame = NSRect(x: 0, y: 0, width: 680, height: 1000)
         host.layoutSubtreeIfNeeded()
         try await Task.sleep(for: .milliseconds(250))
         host.layoutSubtreeIfNeeded()
@@ -109,5 +109,26 @@ private struct CheckAppearance {
         try bitmap.representation(using: .png, properties: [:])!.write(to: file)
         print("Rendered \(file.lastPathComponent)")
         window.close()
+        manager.captureTiming = .immediate
+        let settings = ScreenshotShelfSettingsView(manager: manager)
+            .frame(width: 460, height: 500, alignment: .top)
+            .background(AppAppearance.shared.resolvedColorScheme == .dark ? Color.black : Color.white)
+            .appAppearance()
+        // Native pop-up buttons cannot be rendered with SwiftUI ImageRenderer.
+        let settingsHost = NSHostingView(rootView: settings)
+        let settingsFrame = NSRect(x: 0, y: 0, width: 460, height: 500)
+        let settingsWindow = NSWindow(contentRect: settingsFrame, styleMask: [.borderless], backing: .buffered, defer: false)
+        settingsWindow.isReleasedWhenClosed = false
+        settingsWindow.appearance = NSAppearance(named: AppAppearance.shared.resolvedColorScheme == .dark ? .darkAqua : .aqua)
+        settingsWindow.contentView = settingsHost
+        settingsHost.frame = settingsFrame
+        settingsHost.layoutSubtreeIfNeeded()
+        try await Task.sleep(for: .milliseconds(100))
+        guard let settingsBitmap = settingsHost.bitmapImageRepForCachingDisplay(in: settingsHost.bounds) else {
+            throw NSError(domain: "CaptureSettingsRender", code: 1)
+        }
+        settingsHost.cacheDisplay(in: settingsHost.bounds, to: settingsBitmap)
+        try settingsBitmap.representation(using: .png, properties: [:])!.write(to: output.appendingPathComponent("capture-settings-\(AppAppearance.shared.mode.rawValue).png"))
+        settingsWindow.close()
     }
 }

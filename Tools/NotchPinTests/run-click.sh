@@ -46,5 +46,5 @@ xcrun swiftc -swift-version 5 -parse-as-library \
   "$CHECK_ROOT/ProductionClickRouting.swift" \
   "$REPO_ROOT/Tools/NotchPinTests/ClickRoutingChecks.swift" \
   -o "$CHECK_ROOT/click-checks"
-"$CHECK_ROOT/click-checks" | tee "$CHECK_ROOT/results.log"
+"$CHECK_ROOT/click-checks" "$REPO_ROOT/output/edge-renders" | tee "$CHECK_ROOT/results.log"
 rg -q 'PASS: collapsed notch native clicks expand' "$CHECK_ROOT/results.log"

@@ -2,6 +2,13 @@ import AppKit
 import Darwin
 import Foundation
 
+private final class ThumbnailPreferencesFixture: ScreenshotThumbnailPreferences {
+    var showThumbnail: Bool?
+    var writes = 0
+    init(_ value: Bool?) { showThumbnail = value }
+    func synchronize() -> Bool { writes += 1; return true }
+}
+
 private enum CheckError: Error, CustomStringConvertible {
     case failed(String)
 
@@ -23,6 +30,8 @@ struct ScreenshotShelfChecks {
             try await checkStorageRetry()
             try await checkRetentionAndManualImports()
             try await checkMoveRollbackAndRecovery()
+            try await checkCaptureTiming()
+            try checkScreenshotActivitySuppression()
             try checkNativeDragPayload()
             print("PASS: all screenshot shelf checks")
         } catch {
@@ -482,6 +491,92 @@ struct ScreenshotShelfChecks {
         )
         try FileManager.default.moveItem(at: source, to: journal.destinationURL)
         return journal
+    }
+
+    @MainActor
+    private static func checkCaptureTiming() async throws {
+        for original: Bool? in [nil, true, false] {
+            let name = "ScreenshotTimingLease.\(UUID().uuidString)"
+            let defaults = UserDefaults(suiteName: name)!
+            defer { defaults.removePersistentDomain(forName: name) }
+            let preference = ThumbnailPreferencesFixture(original)
+            let lease = ScreenshotThumbnailLease(defaults: defaults, preferences: preference)
+            try check(preference.writes == 0, "An unused timing option changed macOS preferences")
+            try check(lease.apply(.immediate) && preference.showThumbnail == false, "Immediate mode did not skip the preview")
+            try check(lease.apply(.floatingPreview) && preference.showThumbnail == true, "Preview mode did not re-enable the preview")
+            lease.restore()
+            try check(preference.showThumbnail == original, "Stopping failed to restore the exact original value, including an absent key")
+            _ = lease.apply(.immediate)
+            let recovered = ScreenshotThumbnailLease(defaults: defaults, preferences: preference)
+            try check(preference.showThumbnail == original, "An interrupted run did not recover its thumbnail setting")
+            _ = recovered.apply(.immediate)
+            preference.showThumbnail = true
+            recovered.restore()
+            try check(preference.showThumbnail == true, "Restore overwrote a newer choice made in Screenshot.app")
+        }
+        print("PASS: immediate/preview choice, exact preference restoration, crash recovery and external preference changes (isolated stores only)")
+
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("sapphire-fast-check-\(UUID().uuidString)")
+        let source = root.appendingPathComponent("source")
+        try FileManager.default.createDirectory(at: source, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let name = "ScreenshotTimingWorker.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: name)!
+        defer { defaults.removePersistentDomain(forName: name) }
+        defaults.setVolatileDomain(["ScreenshotShelfFolderOverride": source.path, "ScreenshotShelfCaptureEnabled": true], forName: UserDefaults.argumentDomain)
+        let preference = ThumbnailPreferencesFixture(true)
+        let manager = ScreenshotShelfManager(storageURL: root.appendingPathComponent("owned"), defaults: defaults, thumbnailPreferences: preference)
+        manager.startMonitoring()
+        defer { manager.stopMonitoring() }
+        try await eventually("timing monitor starts") { manager.isMonitoring }
+        try check(preference.writes == 0, "Existing installations must keep their current thumbnail setting until choosing a timing")
+        manager.captureTiming = .immediate
+        var timings: [ScreenshotCaptureTiming: [Double]] = [:]
+        for timing in [ScreenshotCaptureTiming.immediate, .floatingPreview] {
+            manager.captureTiming = timing
+            for i in 0..<3 {
+                let expected = manager.items.count + 1
+                let start = Date()
+                try writeImage(to: source.appendingPathComponent("\(timing.rawValue)-\(i).png"), screenshotMetadata: true)
+                try await eventually("timed complete screenshot", timeout: 4) { manager.items.count == expected }
+                timings[timing, default: []].append(Date().timeIntervalSince(start))
+            }
+        }
+        let fast = timings[.immediate]!.sorted()[1]
+        let preview = timings[.floatingPreview]!.sorted()[1]
+        try check(fast < preview, "Immediate mode did not reduce collection latency after file creation")
+        manager.captureTiming = .immediate
+        let count = manager.items.count
+        let partial = source.appendingPathComponent("partial.png")
+        try Data([0x89, 0x50, 0x4e, 0x47]).write(to: partial)
+        let metadata = try PropertyListSerialization.data(fromPropertyList: true, format: .binary, options: 0)
+        _ = metadata.withUnsafeBytes { setxattr(partial.path, "com.apple.metadata:kMDItemIsScreenCapture", $0.baseAddress, metadata.count, 0, 0) }
+        try await pause(0.25)
+        try check(manager.items.count == count, "Immediate mode collected an incomplete screenshot")
+        try writeImage(to: partial, screenshotMetadata: true)
+        try await eventually("complete image replaces its partial write") { manager.items.count == count + 1 }
+        manager.setSessionSuppressed(true)
+        try check(preference.showThumbnail == true, "Privacy suspension must restore the original preview setting")
+        manager.setSessionSuppressed(false)
+        try check(preference.showThumbnail == false, "Resuming collection must reapply the saved timing choice")
+        manager.captureEnabled = false
+        try check(preference.showThumbnail == true, "Disabling collection must restore preview behavior")
+        print("PASS: saved-file collection median \(Int(fast * 1000))ms immediate / \(Int(preview * 1000))ms preview; privacy/disable restore preferences")
+    }
+
+    @MainActor
+    private static func checkScreenshotActivitySuppression() throws {
+        let fixture = FileShelfActivityFixture()
+        for screenshots in [0, 5, 50] {
+            FileShelfActivityFixture.ScreenshotShelfManager.shared.items = Array(repeating: 0, count: screenshots)
+            FileShelfActivityFixture.FileShelfManager.shared.files = []
+            try check(fixture.candidateCount() == nil, "Screenshot history recreated a permanent file-shelf capsule")
+            FileShelfActivityFixture.FileShelfManager.shared.files = [1, 2]
+            try check(fixture.candidateCount() == 2, "Screenshot history changed the ordinary file shelf count")
+        }
+        fixture.settingsModel.current.fileShelfLiveActivityEnabled = false
+        try check(fixture.candidateCount() == nil, "The file-shelf activity setting was ignored")
+        print("PASS: production file-shelf activity stays absent for 5/50 screenshots while ordinary file activities remain available")
     }
 
     @MainActor

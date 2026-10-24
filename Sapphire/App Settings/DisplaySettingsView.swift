@@ -208,6 +208,7 @@ private struct FullScreenSelectedActivitiesCard: View {
 // MARK: - Per display
 
 private struct PerDisplaySettingsCard: View {
+    @ObservedObject private var appearance = AppAppearance.shared
     @EditingSettings var settings: SettingsEditingSession
     let screen: NSScreen
     let canApplyToAll: Bool
@@ -272,7 +273,13 @@ private struct PerDisplaySettingsCard: View {
         sizeRow.padding()
         if !NotchConfiguration.hasHardwareNotch(on: screen) {
             Divider().padding(.leading, 20)
-            floatingIslandRows
+            if appearance.externalDisplayStyle.usesIndicator(isBuiltIn: isBuiltIn, hasHardwareNotch: false) {
+                SettingsRowLabel(title: "Menu Bar Line", description: "This external display uses the thin idle handle. Change this in Appearance → External display. Size settings above apply to live activities and panels.")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+            } else {
+                floatingIslandRows
+            }
         }
         Divider().padding(.leading, 20)
         HStack(spacing: 12) {
@@ -291,7 +298,7 @@ private struct PerDisplaySettingsCard: View {
     }
 
     private var sizeRow: some View {
-        let resolved = ResolvedNotchConfiguration(from: settings.settings.value, screen: screen)
+        let resolved = ResolvedNotchConfiguration(from: settings.settings.value, screen: screen, externalDisplayStyle: appearance.externalDisplayStyle)
         return HStack(spacing: 18) {
             Text("Notch Size")
                 .font(.system(size: 14, weight: .medium))
@@ -342,7 +349,7 @@ private struct PerDisplaySettingsCard: View {
 
             if showsIslandAdvanced {
                 VStack(spacing: 0) {
-                    FloatingIslandPreview(config: ResolvedNotchConfiguration(from: settings.settings.value, screen: screen))
+                    FloatingIslandPreview(config: ResolvedNotchConfiguration(from: settings.settings.value, screen: screen, externalDisplayStyle: appearance.externalDisplayStyle))
                         .padding(.horizontal)
                         .padding(.bottom)
 

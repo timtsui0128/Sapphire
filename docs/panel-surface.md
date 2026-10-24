@@ -1,6 +1,6 @@
 # 展开顶栏与面板材质
 
-交付为 `output/Sapphire Click.app`，压缩包为 `output/Sapphire-Notch-Click-Recovery-arm64.zip`。先退出旧版，再打开新版；**Settings → About** 显示 **Notch Click Recovery 5**。
+当前交付为 `output/Sapphire Blend.app`，压缩包为 `output/Sapphire-Adaptive-Glass-and-Capture-arm64.zip`。先退出旧版，再打开新版；**Settings → About** 显示 **Adaptive Glass and Capture 8**。
 
 打开 **Settings → Appearance → App appearance → Top bar & panel**：
 
@@ -13,7 +13,7 @@
 
 Sports／Stocks 的紧凑小组件和详情页现在直接透出所选材质，移除内部不透明底板；独立 Settings 预览仍保留正常画布。
 
-此选项调整软件绘制的展开表面。物理摄像头缺口本身不能变色。收起状态及实时活动原有的材质设置不变，屏幕适配、锁屏隐藏与截图收集逻辑保留。
+此选项调整软件绘制的展开表面。物理摄像头缺口本身不能变色。内置屏的收起状态及实时活动沿用原有材质；外接屏可使用新的[细条与半透明活动材质](external-display-bar.md)。屏幕适配、锁屏隐藏与截图收集逻辑保留。
 
 验证：
 

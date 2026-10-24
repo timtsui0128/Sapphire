@@ -14,6 +14,8 @@ struct CustomNotchShape: Shape, Hashable {
     var isFloatingIsland: Bool = false
     var floatingIslandCornerRadius: CGFloat = Self.floatingIslandExpandedCornerRadius
     var isNotchless: Bool = false
+    var isExternalIndicator: Bool = false
+    var externalIndicatorScale: CGFloat = 1
     var islandBarSize: CGSize = .zero
     var islandBarGap: CGFloat = 0
     var islandCollapsedHeight: CGFloat = 0
@@ -73,6 +75,9 @@ struct CustomNotchShape: Shape, Hashable {
     }
 
     private func mainPath(in rect: CGRect) -> Path {
+        if isExternalIndicator {
+            return Capsule().path(in: externalIndicatorRect(in: rect))
+        }
         if isFloatingIsland {
             return islandPath(in: rect)
         }
@@ -154,6 +159,27 @@ struct CustomNotchShape: Shape, Hashable {
     }
 
     // MARK: Floating island
+
+    func externalIndicatorRect(in rect: CGRect) -> CGRect {
+        let width = min(80, max(0, rect.width - 16))
+        let height = min(4, max(0, rect.height))
+        let scale = max(1, externalIndicatorScale)
+        return CGRect(
+            x: ((rect.midX - width / 2) * scale).rounded() / scale,
+            y: ((rect.midY - height / 2) * scale).rounded() / scale,
+            width: width, height: height
+        )
+    }
+
+    func externalIndicatorHitRect(in rect: CGRect, topEdge: CGFloat? = nil) -> CGRect {
+        let padded = externalIndicatorRect(in: rect).insetBy(dx: -6, dy: -6)
+        let top = min(rect.minY, topEdge ?? rect.minY)
+        return CGRect(
+            x: max(rect.minX, padded.minX), y: top,
+            width: min(rect.maxX, padded.maxX) - max(rect.minX, padded.minX),
+            height: min(rect.maxY, padded.maxY) - top
+        )
+    }
 
     func islandBarPresence(height: CGFloat) -> CGFloat {
         guard islandBarSize.width > 0, islandBarSize.height > 0 else { return 0 }

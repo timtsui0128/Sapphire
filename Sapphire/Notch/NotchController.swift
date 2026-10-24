@@ -31,6 +31,7 @@ private struct NotchRuntimeSettings: Equatable {
     let floatingIslandOnNotchlessDisplays: Bool
     let floatingIslandTopOffset: CGFloat
     let floatingIslandStyle: FloatingIslandStyle
+    let externalDisplayStyle: ExternalDisplayStyle
     let swipeToHideNotch: Bool
     let hideWhenInactive: Bool
     let hideInFullScreen: Bool
@@ -40,6 +41,7 @@ private struct NotchRuntimeSettings: Equatable {
 
 struct NotchController: View {
     @ObservedObject private var appAppearance = AppAppearance.shared
+    @ObservedObject private var menuBarTint = MenuBarWallpaperTint.shared
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let notchWindow: NSWindow?
     private let notchWidget: NotchWidgetView
@@ -109,6 +111,7 @@ struct NotchController: View {
 
     @MainActor
     private final class Scratch {
+        var menuBarTintOwner: AnyHashable?
         var expandedSizeByMode: [NotchWidgetMode: CGSize] = [:]
         var lastExpandedStagePass: CFTimeInterval = 0
         var lastActivityStagePass: CFTimeInterval = 0
@@ -218,6 +221,7 @@ struct NotchController: View {
             floatingIslandStyle: current.resolvedFloatingIslandStyle(
                 forDisplayID: displayKey
             ),
+            externalDisplayStyle: appAppearance.externalDisplayStyle,
             swipeToHideNotch: current.swipeToHideNotch,
             hideWhenInactive: current.resolvedHideNotchWhenInactive(
                 forDisplayID: displayKey
@@ -304,6 +308,9 @@ struct NotchController: View {
     }
 
     private var expandedPanelColorScheme: ColorScheme {
+        if config?.usesExternalDisplayBar == true, appAppearance.expandedPanelSurface == .liquidGlass {
+            return externalGlassColorScheme
+        }
         var glassScheme: ColorScheme?
         if activeAppearanceSettings.mode == .liquidGlass {
             switch activeAppearanceSettings.liquidGlassAppearance {
@@ -313,6 +320,14 @@ struct NotchController: View {
             }
         }
         return appAppearance.panelColorScheme(matchingGlass: glassScheme)
+    }
+
+    private var externalGlassColorScheme: ColorScheme {
+        let tint = assignedScreen.flatMap { menuBarTint.tint(for: $0.displayID) }
+        return appAppearance.externalGlassTone.resolve(
+            wallpaperColor: tint?.center ?? tint?.average,
+            fallback: appAppearance.systemColorScheme
+        )
     }
 
     private var isExpandedLiveActivity: Bool {
@@ -474,14 +489,17 @@ struct NotchController: View {
     }
 
     private var activeShape: CustomNotchShape {
+        let usesAttachedContour = config?.usesExternalDisplayBar == true
         var shape = CustomNotchShape(
             cornerRadius: animatedCornerRadius,
             bottomCornerRadius: animatedBottomCornerRadius,
             isMusicActivity: isDisplayingMusicLiveActivity,
             isFloatingIsland: config?.isFloatingIsland ?? false,
             floatingIslandCornerRadius: config?.floatingIslandCornerRadius ?? CustomNotchShape.floatingIslandExpandedCornerRadius,
-            isNotchless: config?.isNotchless ?? false
+            isNotchless: (config?.isNotchless ?? false) && !usesAttachedContour
         )
+        shape.isExternalIndicator = showsExternalDisplayIndicator
+        shape.externalIndicatorScale = config?.displayScale ?? 1
         if let config { shape.satelliteLayout = satelliteLayout(config: config) }
         if let config, config.isFloatingIsland, let barSize = islandBarShapeSize(config: config) {
             shape.islandBarSize = barSize
@@ -491,6 +509,11 @@ struct NotchController: View {
                 : config.initialSize.height
         }
         return shape
+    }
+
+    private var showsExternalDisplayIndicator: Bool {
+        config?.usesExternalDisplayBar == true && !isManuallyHidden
+            && (notchState == .initial || notchState == .hoverExpanded && !isLiveActivityActive)
     }
 
     // MARK: Satellites (extra live activities)
@@ -667,7 +690,7 @@ struct NotchController: View {
         } else {
             Color.clear
                 .onAppear {
-                    let initialConfig = ResolvedNotchConfiguration(from: settings.settings.value, screen: assignedScreen)
+                    let initialConfig = ResolvedNotchConfiguration(from: settings.settings.value, screen: assignedScreen, externalDisplayStyle: appAppearance.externalDisplayStyle)
                     self.config = initialConfig
                     self.animatedWidth = initialConfig.initialSize.width
                     self.animatedHeight = initialConfig.initialSize.height
@@ -749,7 +772,9 @@ struct NotchController: View {
             expandedColorScheme: expandedPanelColorScheme,
             surfaceHeight: targetSize.height,
             expandedPanelSurface: appAppearance.expandedPanelSurface,
-            reduceTransparency: reduceTransparency
+            reduceTransparency: reduceTransparency,
+            systemColorScheme: config.usesExternalDisplayBar ? externalGlassColorScheme : appAppearance.systemColorScheme,
+            isExternalIndicator: showsExternalDisplayIndicator
         ))
 
         var content = NotchStageContent(layout: layout, surface: surface)
@@ -925,6 +950,7 @@ struct NotchController: View {
             }
             .onChange(of: navigationStack, handleNavigationStackChange)
             .onChange(of: navigationStack) { _, _ in syncWidgetPlaneState() }
+            .onChange(of: expandedPanelColorScheme) { _, _ in syncWidgetPlaneState() }
             .onChange(of: activeDropZone) { _, _ in syncWidgetPlaneState() }
             .onChange(of: isCalendarHovered) { _, _ in syncWidgetPlaneState() }
             .onChange(of: dragManager.isDraggingInActivationZone, perform: handleDragActivationZoneChange)
@@ -1256,11 +1282,13 @@ struct NotchController: View {
     private func handleSettingsChange(_ runtimeSettings: NotchRuntimeSettings) {
         let newSettings = settings.settings.value
         if let targetScreen = assignedScreen,
-           case let newConfig = ResolvedNotchConfiguration(from: newSettings, screen: targetScreen),
+           case let newConfig = ResolvedNotchConfiguration(from: newSettings, screen: targetScreen, externalDisplayStyle: appAppearance.externalDisplayStyle),
            newConfig != config {
             self.config = newConfig
             self.expansionAnimation = newConfig.expandAnimation
             handleStateChange(from: notchState, to: notchState)
+            updateMenuBarTintSampling()
+            handleActivityChange(liveActivityManager.currentActivity)
         }
         if !runtimeSettings.swipeToHideNotch, completeHideReason == .manualSwipe {
             revealNotchFromCompleteHide()
@@ -1278,11 +1306,13 @@ struct NotchController: View {
         let input = NotchDisplayMetrics.Input(screen: targetScreen)
         let geometryChanged = input != displayInput
         displayInput = input
-        let newConfig = ResolvedNotchConfiguration(from: settings.settings.value, screen: targetScreen)
+        let newConfig = ResolvedNotchConfiguration(from: settings.settings.value, screen: targetScreen, externalDisplayStyle: appAppearance.externalDisplayStyle)
         if newConfig != config {
             self.config = newConfig
             self.expansionAnimation = newConfig.expandAnimation
             handleStateChange(from: notchState, to: notchState)
+            updateMenuBarTintSampling()
+            handleActivityChange(liveActivityManager.currentActivity)
         }
         if geometryChanged {
             // The same configuration can resolve on displays with different widths.
@@ -1500,10 +1530,27 @@ struct NotchController: View {
         updateMouseEventHandling(isInteractive: isInteractive)
         updateWindowSharingBehavior(shouldBeHidden: shouldHideWindowForSharing)
         scratch.lastActivityShapeSignature = liveActivityManager.notchShapeSignature
+        updateMenuBarTintSampling()
         evaluateInactiveNotchVisibility()
     }
 
+    private func updateMenuBarTintSampling() {
+        guard let window = notchWindow else { return }
+        let owner = AnyHashable(ObjectIdentifier(window))
+        if config?.usesExternalDisplayBar == true {
+            menuBarTint.start(owner: owner)
+            scratch.menuBarTintOwner = owner
+        } else if let previous = scratch.menuBarTintOwner {
+            menuBarTint.stop(owner: previous)
+            scratch.menuBarTintOwner = nil
+        }
+    }
+
     private func teardownMonitors() {
+        if let owner = scratch.menuBarTintOwner {
+            menuBarTint.stop(owner: owner)
+            scratch.menuBarTintOwner = nil
+        }
         setScreenshotShelfKeyboardFocus(false)
         if let window = notchWindow as? DynamicFocusWindow {
             guard !window.monitorsTornDown else { return }
@@ -1897,7 +1944,7 @@ struct NotchController: View {
     }
 
     private func handleActivityChange(_: ActivityType) {
-        let newActivity = liveActivityManager.effectiveActivity(onDisplayID: notchDisplayID)
+        let newActivity = effectiveActivity
         if newActivity != .none {
             scratch.inactiveHideUserOverride = false
             if completeHideReason == .inactive {

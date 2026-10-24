@@ -253,6 +253,7 @@ struct ResolvedNotchConfiguration: Equatable {
     let initialCornerRadius: CGFloat
     let topBuffer: CGFloat
     let isFloatingIsland: Bool
+    let usesExternalDisplayBar: Bool
     let isNotchless: Bool
     let floatingIslandCornerRadius: CGFloat
     let widgetMenuTopInset: CGFloat
@@ -354,14 +355,22 @@ struct ResolvedNotchConfiguration: Equatable {
         max(style.openPadding, islandCornerInset(radius: style.openCornerRadius, depth: rowTop) + 4)
     }
 
-    init(from settings: Settings, screen: NSScreen? = nil) {
+    init(from settings: Settings, screen: NSScreen? = nil, externalDisplayStyle: ExternalDisplayStyle = .menuBarLine) {
         let targetScreen = screen ?? CursorPosition.targetNotchScreen() ?? NSScreen.main
         let displayID = targetScreen?.displayIdentifier
         let metrics = targetScreen.map { NotchDisplayMetrics.current(for: $0) } ?? .fallback
         self.displayScale = metrics.scale
         self.cameraWidth = metrics.cameraWidth ?? 0
         self.isNotchless = !metrics.hasHardwareNotch
-        self.isFloatingIsland = settings.resolvedFloatingIsland(forDisplayID: displayID)
+        self.usesExternalDisplayBar = targetScreen.map {
+            externalDisplayStyle.usesIndicator(
+                isBuiltIn: CGDisplayIsBuiltin($0.displayID) != 0,
+                hasHardwareNotch: metrics.hasHardwareNotch
+            )
+        } ?? false
+        // The external handle expands into the original attached notch contour.
+        // Floating-island layout also changes its toolbar and top shoulders.
+        self.isFloatingIsland = !usesExternalDisplayBar && settings.resolvedFloatingIsland(forDisplayID: displayID)
             && !metrics.hasHardwareNotch
 
         self.activityContentHorizontalPadding = 15
@@ -377,7 +386,7 @@ struct ResolvedNotchConfiguration: Equatable {
             self.autoExpandedCornerRadius = 13
             self.autoExpandedTallHeight = 80
             self.autoExpandedContentVerticalPadding = NotchConfiguration.autoExpandedContentVerticalPadding
-            self.clickExpandedCornerRadius = isNotchless
+            self.clickExpandedCornerRadius = isNotchless && !usesExternalDisplayBar
                 ? Self.notchlessClickExpandedCornerRadius
                 : NotchConfiguration.clickExpandedCornerRadius
             self.liveActivityBottomCornerRadius = 18
@@ -388,7 +397,7 @@ struct ResolvedNotchConfiguration: Equatable {
             self.expandedShadowColor = isNotchless ? Color.black.opacity(0.5) : NotchConfiguration.expandedShadowColor
             self.expandedShadowRadius = isNotchless ? 28 : NotchConfiguration.expandedShadowRadius
             self.expandedShadowOffsetY = isNotchless ? 14 : NotchConfiguration.expandedShadowOffset.y
-            self.restingShadowOpacity = isFloatingIsland ? 0.32 : 0
+            self.restingShadowOpacity = isFloatingIsland && !usesExternalDisplayBar ? 0.32 : 0
             self.restingShadowRadius = 7
             self.restingShadowOffsetY = 3
             self.contentTopPadding = isFloatingIsland ? islandStyle.openPadding : 10
@@ -419,11 +428,11 @@ struct ResolvedNotchConfiguration: Equatable {
         self.universalWidth = closedSize.width
         self.universalHeight = closedSize.height
         self.initialCornerRadius = isFloatingIsland ? closedSize.height / 2 : NotchConfiguration.initialCornerRadius
-        self.activityCenterGap = isFloatingIsland ? islandStyle.centerGap : max(universalWidth, cameraWidth)
+        self.activityCenterGap = isFloatingIsland || usesExternalDisplayBar ? islandStyle.centerGap : max(universalWidth, cameraWidth)
         self.barMinimumSpacerWidth = (!isFloatingIsland && metrics.hasHardwareNotch)
             ? max(universalWidth, cameraWidth)
             : 0
-        self.topInset = isFloatingIsland
+        self.topInset = usesExternalDisplayBar ? 0 : isFloatingIsland
             ? NotchDisplayMetrics.floatingIslandTopInset(
                 userOffset: settings.resolvedFloatingIslandTopOffset(forDisplayID: displayID),
                 islandHeight: closedSize.height,

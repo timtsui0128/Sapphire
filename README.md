@@ -13,11 +13,11 @@ This is an unofficial personal fork of Sapphire, originally created by Shariq Ch
 
 ## 本分支增加与修改了什么
 
-以下是相对于上游提交 [`2e8085676209cbbb424bc60fd7ea2f11bfd625aa`](https://github.com/cshariq/Sapphire/commit/2e8085676209cbbb424bc60fd7ea2f11bfd625aa) 的个人修改，记录日期为 **2026-10-23**。
+以下是相对于上游提交 [`2e8085676209cbbb424bc60fd7ea2f11bfd625aa`](https://github.com/cshariq/Sapphire/commit/2e8085676209cbbb424bc60fd7ea2f11bfd625aa) 的个人修改，记录日期为 **2026-10-24**。
 
 | 功能 | 本分支的行为 | 使用说明 |
 | --- | --- | --- |
-| 截图暂存架 | 收集新保存的系统截图，在原有 File Shelf 的 Screenshots 页面显示；多选后一次拖出多张图片 | [截图与文件保存](docs/screenshot-shelf.md) |
+| 截图暂存架 | 收集系统截图，多选后一次拖出多张；可选立即收集或保留系统浮动预览；截图历史不触发常驻胶囊 | [截图与文件保存](docs/screenshot-shelf.md) |
 | 截图保存策略 | 自动收集后移入 Sapphire 专用目录；可选手动移除、24 小时清理、成功拖出后清理；支持手动导入 | [保存策略与限制](docs/screenshot-shelf.md#保存与收集范围) |
 | 足球与 F1 | 足球赛程、比分和关注球队；F1 赛历、赛后结果、排名、圈数、关注车手／车队和刘海状态卡 | [Sports / F1](docs/community-sports.md) |
 | 股票关注列表 | 默认关注 AAPL、MSFT、NVDA，支持搜索增删、报价、历史图表和刘海小组件 | [Stocks / Finance](docs/community-finance-and-appearance.md) |
@@ -25,13 +25,14 @@ This is an unofficial personal fork of Sapphire, originally created by Shariq Ch
 | 蓝牙提示静音 | 默认关闭 Sapphire 的蓝牙连接／断开提示音，并提供设置开关 | [蓝牙声音](docs/community-finance-and-appearance.md#蓝牙连接静音) |
 | 锁屏隐私 | 锁屏和用户会话切换时隐藏界面、阻止重新弹窗并暂停截图／剪贴板收集；解锁后不补收锁屏期间内容 | [锁屏行为](docs/session-privacy.md) |
 | 内外接屏适配 | 切换显示器后约束设置窗口和展开刘海尺寸，支持内容溢出滚动 | [窗口与刘海适配](docs/window-fit.md) |
+| 外接屏细条 | 顶部细条支持顶边点击；展开时保留原版弧形过渡，Liquid Glass 可匹配壁纸明暗或指定浅色／深色 | [外接屏样式](docs/external-display-bar.md) |
 | Pin 与点击修复 | 固定后图标点亮，详情页可取消，Esc 可解除固定并收起；修正 SwiftUI hosting 层级下的点击范围查询 | [Pin 与输入](docs/pin-and-input.md) |
 
 截图主入口为 **File Shelf → Screenshots**，保存策略可通过截图页齿轮调整。Sports、Finance 和 Appearance 分别在对应设置页中配置。
 
 ## 当前源码版本与运行范围
 
-- 本次上传的是已在本机完成构建的源码快照，应用内的本地构建标记为 **Notch Click Recovery 5**。
+- 当前源码的构建标记为 **Adaptive Glass and Capture 8**，已在本机完成完整应用构建和签名复检。
 - 个人开发分支为 **`codex/personal-notched-tools`**。`main` 保留 Fork 时的上游状态；本分支基于上面标注的提交，尚未合并上游后续的 macOS 27 充电限制改动。
 - 最低部署目标为 macOS 14；当前完整构建与本地安装包在 Apple Silicon（arm64）Mac 上验证。Intel 机器和不同 macOS 版本尚未完整验收。
 - 上游未公开的付费模块继续使用公开占位或兼容实现。独立实现的 Sports／Finance 不依赖这些私有模块，也不连接或同步 Apple Sports／Stocks 账户。
@@ -80,7 +81,7 @@ bash Tools/NotchPinTests/run.sh
 bash Tools/NotchPinTests/run-click.sh
 ```
 
-当前快照已经完成完整应用构建、签名和安装包解压后签名复检。专项检查包括多截图拖放、保存策略、模拟行情、主题渲染、会话隐私、屏幕适配、80 次 Pin 动作，以及 SwiftUI hosting 层级中的 60 次原生鼠标按下／抬起回调检查。
+专项检查包括多截图拖放、保存策略、模拟行情、主题渲染、会话隐私、屏幕适配、80 次 Pin 动作，以及 SwiftUI hosting 层级中的 80 次原生鼠标按下／抬起回调检查。每次本地交付另做完整构建和签名复检。
 
 离屏检查使用了真实控件或生产方法，但不能替代完整 App 的日常运行验收。锁屏检查没有实际锁定用户电脑，玻璃图片检查不模拟桌面实时折射；F1 也尚未在真实比赛过程中完整操作验收。各模块文档说明了具体覆盖范围。
 

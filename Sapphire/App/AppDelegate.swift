@@ -1740,7 +1740,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     private func syncNotchWindowFrame(_ window: NSWindow, to screen: NSScreen) {
         if let window = window as? DynamicFocusWindow, window.hostSizer.reapply(on: screen) { return }
         let screenFrame = screen.frame
-        let initialConfig = ResolvedNotchConfiguration(from: settingsModel.settings, screen: screen)
+        let initialConfig = ResolvedNotchConfiguration(from: settingsModel.settings, screen: screen, externalDisplayStyle: AppAppearance.shared.externalDisplayStyle)
         let paddedWidth = ceil(screenFrame.width)
         let paddedHeight = ceil(max(initialConfig.initialSize.height + initialConfig.topInset + initialConfig.topBuffer + 24, screenFrame.height * 0.42))
         let targetRect = NSRect(
@@ -1765,7 +1765,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
     private func createNotchWindowForScreen(_ screen: NSScreen) {
         guard !SessionPrivacyState.shouldSuppressUI() else { return }
-        let initialConfig = ResolvedNotchConfiguration(from: settingsModel.settings, screen: screen)
+        let initialConfig = ResolvedNotchConfiguration(from: settingsModel.settings, screen: screen, externalDisplayStyle: AppAppearance.shared.externalDisplayStyle)
         let initialExtent = NotchHostWindowExtent(
             isFull: false,
             notchSize: initialConfig.initialSize,

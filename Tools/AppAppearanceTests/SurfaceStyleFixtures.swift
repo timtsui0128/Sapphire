@@ -1,9 +1,15 @@
 import AppKit
 import SwiftUI
 
+extension NSScreen {
+    var displayID: CGDirectDisplayID {
+        (deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value ?? 0
+    }
+}
+
 // Minimal dependency types for the unmodified production surface resolver.
 enum LiquidGlassBackend { case automatic, visualEffect }
-enum LiquidGlassMaterial { case frosted, hud }
+enum LiquidGlassMaterial { case frosted, hud, menu }
 enum LiquidGlassBlendingMode { case behindWindow }
 enum LiquidGlassAppearance { case dark, light, auto }
 enum LiquidGlassInteraction { case normal }
@@ -42,12 +48,12 @@ struct ResolvedNotchConfiguration {
     var expandedShadowOffsetY: CGFloat = 8
     var expandedShadowColor: Color = .black
     var isFloatingIsland = false
+    var usesExternalDisplayBar = false
     var initialSize = CGSize(width: 180, height: 32)
     var restingShadowOpacity: Double = 0
     var restingShadowRadius: CGFloat = 12
     var restingShadowOffsetY: CGFloat = 6
 }
-struct CustomNotchShape: Equatable {}
 enum NotchController {
     enum NotchState { case initial, hoverExpanded, autoExpanded, clickExpanded }
 }

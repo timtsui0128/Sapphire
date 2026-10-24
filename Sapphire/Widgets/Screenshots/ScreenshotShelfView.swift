@@ -89,6 +89,14 @@ struct ScreenshotShelfView: View {
                 .font(.caption)
                 .help("Move newly saved screenshots into Sapphire's storage folder.")
             Menu {
+                Picker("Collect screenshots", selection: $manager.captureTiming) {
+                    ForEach(ScreenshotCaptureTiming.allCases) { timing in
+                        Text(timing.title).tag(timing)
+                    }
+                }
+                .pickerStyle(.inline)
+                Text("Immediate collection skips the macOS floating preview.")
+                Divider()
                 Picker("Keep new screenshots", selection: $manager.retention) {
                     ForEach(ScreenshotShelfRetention.allCases) { retention in
                         Text(retention.title).tag(retention)
@@ -119,7 +127,7 @@ struct ScreenshotShelfView: View {
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
             .fixedSize()
-            .help("Screenshot retention, storage, and import settings")
+            .help("Screenshot collection timing, retention, storage, and import settings")
             .accessibilityLabel("Screenshot settings")
         }
     }

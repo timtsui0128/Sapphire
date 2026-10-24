@@ -38,7 +38,15 @@ final class ScreenshotShelfManager: ObservableObject {
     @Published private(set) var isMonitoring = false
     @Published private(set) var watchedFolder: URL?
     @Published private(set) var lastError: String?
+    @Published private(set) var captureTimingError: String?
     let storageFolderURL: URL
+    @Published var captureTiming: ScreenshotCaptureTiming {
+        didSet {
+            defaults.set(captureTiming.rawValue, forKey: Self.timingKey)
+            worker.setCaptureTiming(captureTiming)
+            applyCaptureTiming()
+        }
+    }
     @Published var retention: ScreenshotShelfRetention {
         didSet {
             defaults.set(retention.rawValue, forKey: Self.retentionKey)
@@ -55,13 +63,19 @@ final class ScreenshotShelfManager: ObservableObject {
     private static let enabledKey = "ScreenshotShelfCaptureEnabled"
     private static let folderKey = "ScreenshotShelfFolderOverride"
     private static let retentionKey = "ScreenshotShelfRetention"
+    private static let timingKey = "ScreenshotShelfCaptureTiming"
     private let defaults: UserDefaults
     private let worker: ScreenshotShelfWorker
+    private let thumbnailLease: ScreenshotThumbnailLease
     private(set) var isSessionSuppressed = false
 
     /// An isolated directory and defaults suite can be supplied by tests.
-    init(storageURL: URL? = nil, defaults: UserDefaults = .standard) {
+    init(storageURL: URL? = nil, defaults: UserDefaults = .standard,
+         thumbnailPreferences: ScreenshotThumbnailPreferences = SystemScreenshotThumbnailPreferences()) {
         self.defaults = defaults
+        thumbnailLease = ScreenshotThumbnailLease(defaults: defaults, preferences: thumbnailPreferences)
+        let timing = defaults.string(forKey: Self.timingKey).flatMap(ScreenshotCaptureTiming.init(rawValue:)) ?? .floatingPreview
+        captureTiming = timing
         captureEnabled = defaults.object(forKey: Self.enabledKey) as? Bool ?? true
         let initialRetention = defaults.string(forKey: Self.retentionKey)
             .flatMap(ScreenshotShelfRetention.init(rawValue:)) ?? .persistent
@@ -72,7 +86,7 @@ final class ScreenshotShelfManager: ObservableObject {
             .appendingPathComponent(Bundle.main.bundleIdentifier ?? "com.cshariq.sapphire", isDirectory: true)
             .appendingPathComponent("ScreenshotShelf", isDirectory: true)
         storageFolderURL = root.standardizedFileURL
-        worker = ScreenshotShelfWorker(storageURL: storageFolderURL, retention: initialRetention)
+        worker = ScreenshotShelfWorker(storageURL: storageFolderURL, retention: initialRetention, captureTiming: timing)
         worker.onItems = { [weak self] items in
             DispatchQueue.main.async {
                 MainActor.assumeIsolated { self?.items = items }
@@ -106,6 +120,7 @@ final class ScreenshotShelfManager: ObservableObject {
 
     func startMonitoring() {
         guard captureEnabled, !isSessionSuppressed else { return }
+        applyCaptureTiming()
         let override = defaults.string(forKey: Self.folderKey).map { URL(fileURLWithPath: $0, isDirectory: true) }
         worker.start(override: override, since: Date())
     }
@@ -113,6 +128,14 @@ final class ScreenshotShelfManager: ObservableObject {
     func stopMonitoring() {
         isMonitoring = false
         worker.stop()
+        thumbnailLease.restore()
+    }
+
+    private func applyCaptureTiming() {
+        guard captureEnabled, !isSessionSuppressed else { thumbnailLease.restore(); return }
+        guard defaults.string(forKey: Self.timingKey) != nil else { return }
+        captureTimingError = thumbnailLease.apply(captureTiming) ? nil
+            : "Could not change the macOS floating preview. Use Shift-Command-5 → Options → Show Floating Thumbnail."
     }
 
     func chooseFolder() {
@@ -211,7 +234,7 @@ private final class ScreenshotShelfWorker {
         let originalStamp: Stamp
     }
 
-    private let queue = DispatchQueue(label: "com.sapphire.screenshot-shelf", qos: .utility)
+    private let queue = DispatchQueue(label: "com.sapphire.screenshot-shelf", qos: .userInitiated)
     private let sessionGate = ScreenshotCaptureSessionGate()
     private var monitoringGeneration: UInt64?
     private let storageURL: URL
@@ -232,12 +255,14 @@ private final class ScreenshotShelfWorker {
     private var lastError: String?
     private var storageIsReady = false
     private var retention: ScreenshotShelfRetention
+    private var captureTiming: ScreenshotCaptureTiming
     private var expiryTimer: DispatchSourceTimer?
     private static let moveJournalName = ".pending-screenshot-move.json"
 
-    init(storageURL: URL, retention: ScreenshotShelfRetention) {
+    init(storageURL: URL, retention: ScreenshotShelfRetention, captureTiming: ScreenshotCaptureTiming) {
         self.storageURL = storageURL.standardizedFileURL
         self.retention = retention
+        self.captureTiming = captureTiming
         manifestURL = self.storageURL.appendingPathComponent("manifest.json")
     }
 
@@ -254,6 +279,10 @@ private final class ScreenshotShelfWorker {
 
     func setRetention(_ retention: ScreenshotShelfRetention) {
         queue.async { [weak self] in self?.retention = retention }
+    }
+
+    func setCaptureTiming(_ timing: ScreenshotCaptureTiming) {
+        queue.async { [weak self] in self?.captureTiming = timing }
     }
 
     private func loadFromDisk() {
@@ -553,7 +582,7 @@ private final class ScreenshotShelfWorker {
                 candidates[path] = candidate
                 continue
             }
-            guard now.timeIntervalSince(candidate.stableSince) >= 0.25,
+            guard now.timeIntervalSince(candidate.stableSince) >= captureTiming.settlingTime,
                   Self.isScreenshot(candidate.url) else { continue }
             candidate.isConfirmedScreenshot = true
             candidates[path] = candidate
@@ -589,7 +618,7 @@ private final class ScreenshotShelfWorker {
             self.processCandidates()
         }
         retry = work
-        queue.asyncAfter(deadline: .now() + 0.4, execute: work)
+        queue.asyncAfter(deadline: .now() + captureTiming.retryDelay, execute: work)
     }
 
     private func collect(_ source: URL, capturedAt: Date, moveSource: Bool, generation: UInt64) throws {
