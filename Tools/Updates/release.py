@@ -171,9 +171,14 @@ def publish(args):
     # Require the complete source to be publicly available before publishing binaries.
     gh(["api", f"repos/{CONFIG['repository']}/commits/{receipt['commit']}", "--jq", ".sha"])
     existing = json.loads(gh(["api", f"repos/{CONFIG['repository']}/releases?per_page=100"]))
+    pending_draft = None
     for release in existing:
         if release["tag_name"] == receipt["tag"]:
-            raise RuntimeError("This release tag already exists; never replace a published version")
+            if not release["draft"]:
+                raise RuntimeError("This release tag already exists; never replace a published version")
+            if pending_draft is not None or release["target_commitish"] != receipt["commit"]:
+                raise RuntimeError("The existing draft does not match the prepared source commit")
+            pending_draft = release
         if release["draft"] or release["prerelease"]:
             continue
         for asset in release.get("assets", []):
@@ -186,16 +191,31 @@ def publish(args):
                     old_build = prior.findtext("s:version", namespaces=NS)
                     if int(receipt["build"]) <= int(old_build):
                         raise RuntimeError("A new release must have a larger build number")
-    gh(["release", "create", receipt["tag"], *assets, "--repo", CONFIG["repository"],
-        "--target", receipt["commit"], "--title", f"Sapphire Personal {receipt['version']}",
-        "--notes-file", directory / "release-notes.md", "--draft"])
-    uploaded = json.loads(gh(["api", f"repos/{CONFIG['repository']}/releases/tags/{receipt['tag']}"]))
+    if pending_draft is None:
+        gh(["release", "create", receipt["tag"], *assets, "--repo", CONFIG["repository"],
+            "--target", receipt["commit"], "--title", f"Sapphire Personal {receipt['version']}",
+            "--notes-file", directory / "release-notes.md", "--draft"])
+    # A draft's Git tag may not exist until publication. Resolve its release ID
+    # from the authenticated listing, rather than GET /releases/tags/{tag}.
+    uploaded = find_prepared_draft(
+        json.loads(gh(["api", f"repos/{CONFIG['repository']}/releases?per_page=100"])), receipt)
     actual = {asset["name"]: asset for asset in uploaded["assets"]}
     for name, expected in receipt["assets"].items():
         if name not in actual or actual[name]["size"] != expected["size"] or actual[name].get("digest") != "sha256:" + expected["sha256"]:
             raise RuntimeError("Uploaded assets failed verification; the release remains a draft")
-    gh(["release", "edit", receipt["tag"], "--repo", CONFIG["repository"], "--draft=false", "--latest"])
+    with tempfile.TemporaryDirectory() as temp:
+        payload = Path(temp) / "publish.json"
+        payload.write_text(json.dumps({"draft": False, "make_latest": "true"}))
+        gh(["api", f"repos/{CONFIG['repository']}/releases/{uploaded['id']}",
+            "--method", "PATCH", "--input", payload])
     print(f"Published: https://github.com/{CONFIG['repository']}/releases/tag/{receipt['tag']}")
+
+
+def find_prepared_draft(releases, receipt):
+    matches = [release for release in releases if release["tag_name"] == receipt["tag"]]
+    if len(matches) != 1 or not matches[0]["draft"] or matches[0]["target_commitish"] != receipt["commit"]:
+        raise RuntimeError("The uploaded draft does not uniquely match the prepared release and source")
+    return matches[0]
 
 
 if __name__ == "__main__":

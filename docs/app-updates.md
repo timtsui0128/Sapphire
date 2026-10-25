@@ -45,7 +45,7 @@ Push that source commit to this repository using Git, then publish the prepared 
 python3 Tools/Updates/release.py publish output/releases/personal-v0.1.1
 ```
 
-`publish` verifies the unchanged source commit, hashes, signatures, remote source availability, and increasing build number. It uploads a draft Release, checks the uploaded asset sizes and GitHub SHA-256 digests, and only then publishes it as the latest release. It refuses to overwrite an existing tag. If a failed upload leaves a draft, inspect it before deleting/re-preparing it; do not replace an already published version. Publishing a Git commit alone does not release an app update. No separate paid server or background CI signing service is required.
+`publish` verifies the unchanged source commit, hashes, signatures, remote source availability, and increasing build number. It uploads a draft Release, checks the uploaded asset sizes and GitHub SHA-256 digests, and only then publishes it as the latest release. It refuses to overwrite an existing published tag. If a failed upload leaves a draft with the same source commit and identical verified assets, rerun `publish` to resume it. A mismatched or incomplete draft stops publication and must be inspected before deleting/re-preparing it. Publishing a Git commit alone does not release an app update. No separate paid server or background CI signing service is required.
 
 For now, each release provides a single current full-update feed. Older installed builds can update directly to it; rollout groups, beta channels, OS-specific branches, and deltas are future work.
 
@@ -53,6 +53,7 @@ For now, each release provides a single current full-update feed. Older installe
 
 ```sh
 python3 Tools/UpdateTests/run.py
+python3 Tools/UpdateTests/publisher_checks.py
 bash Tools/LocalizationTests/run.sh
 bash Tools/build-sapphire-public.sh
 ```
