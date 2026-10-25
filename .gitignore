@@ -30,6 +30,9 @@ Sapphire/App/GoogleService-Info.plist
 !/Tools/F1LiveTests/
 !/Tools/CommunityFinanceTests/
 !/Tools/AppAppearanceTests/
+!/Tools/LocalizationTests/
+!/Tools/Updates/
+!/Tools/UpdateTests/
 !/Tools/BluetoothSoundTests/
 !/Tools/SessionPrivacyTests/
 !/Tools/ClipboardPrivacyTests/
@@ -106,3 +109,6 @@ Sapphire.xcodeproj/xcuserdata/Shariq.xcuserdatad/xcschemes/xcschememanagement.pl
 /SapphireTests/AppStorageModelsTests.swift
 /SapphireTests/ClipboardPickerPositioningTests.swift
 /SapphireTests/ContinuityStatusProtocolTests.swift
+
+# Python tool caches
+__pycache__/

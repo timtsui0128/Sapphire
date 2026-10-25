@@ -305,13 +305,13 @@ struct BatteryDebugMenu: View {
     private func sectionTitle(_ title: String, systemImage: String, color: Color) -> some View {
         HStack(spacing: 6) {
             Image(systemName: systemImage).foregroundStyle(color)
-            Text(title).font(.headline)
+            Text(LocalizedStringKey(title)).font(.headline)
         }
     }
 
     private func gridRow(_ label: String, _ value: String) -> some View {
         GridRow {
-            Text(label).foregroundStyle(.secondary)
+            Text(LocalizedStringKey(label)).foregroundStyle(.secondary)
             Text(value).textSelection(.enabled)
         }
     }

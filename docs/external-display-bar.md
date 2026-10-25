@@ -1,6 +1,6 @@
 # 外接屏顶部细条
 
-本地构建：**Adaptive Glass and Capture 8**，产物 `output/Sapphire Blend.app`，压缩包 `output/Sapphire-Adaptive-Glass-and-Capture-arm64.zip`。先退出正在运行的 Sapphire，再打开新版。
+本地构建：**Language Switch 9**，产物 `output/Sapphire Bilingual.app`，压缩包 `output/Sapphire-Bilingual-English-Chinese-arm64.zip`。先退出正在运行的 Sapphire，再打开新版。
 
 入口：**Settings → Appearance → App appearance → External display**。
 

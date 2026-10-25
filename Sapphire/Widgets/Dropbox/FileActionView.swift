@@ -533,7 +533,7 @@ private struct ConversionButton: View {
             HStack(spacing: 4) {
                 Image(systemName: format.iconName)
                     .font(.system(size: 11, weight: .semibold))
-                Text(format.displayName)
+                Text(LocalizedStringKey(format.displayName))
                     .font(.system(size: 12, weight: .semibold))
             }
             .foregroundColor(.primary)

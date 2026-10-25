@@ -154,7 +154,7 @@ private struct AppWindowAppearanceModifier: ViewModifier {
     func body(content: Content) -> some View {
         // Resolve System explicitly so a legacy child view's preferred scheme
         // cannot turn the entire Settings window dark.
-        content.preferredColorScheme(appearance.resolvedColorScheme)
+        content.preferredColorScheme(appearance.resolvedColorScheme).appLanguage()
     }
 }
 
@@ -175,6 +175,7 @@ private struct AppContentAppearanceModifier: ViewModifier {
                 in: RoundedRectangle(cornerRadius: 14, style: .continuous)
             )
             .environment(\.colorScheme, colorScheme)
+            .appLanguage()
     }
 }
 
@@ -189,6 +190,7 @@ private struct AppPanelAppearanceModifier: ViewModifier {
             .foregroundStyle(.primary)
             .environment(\.colorScheme, colorScheme)
             .environment(\.expandedNotchColorScheme, colorScheme)
+            .appLanguage()
     }
 }
 

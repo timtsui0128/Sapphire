@@ -180,7 +180,7 @@ struct NotchPinButton: View {
                                  horizontalPadding: 6, isSelected: isPinned)
             }
         }
-        .help(help)
+        .help(Text(LocalizedStringKey(help)))
         .accessibilityIdentifier("notch-pin")
         .accessibilityLabel("Keep panel open")
         .accessibilityValue(isPinned ? "Pinned" : "Unpinned")

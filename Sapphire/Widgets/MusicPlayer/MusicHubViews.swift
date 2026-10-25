@@ -3613,7 +3613,7 @@ struct PlaylistView: View {
             Task { await musicManager.spotifyPrivateAPI.logSortTelemetry() }
         } label: {
             HStack(spacing: 3) {
-                Text(option.rawValue)
+                Text(LocalizedStringKey(option.rawValue))
                 if sortOption == option {
                     Image(systemName: sortDirection == .ascending ? "chevron.up" : "chevron.down")
                         .font(.system(size: 8, weight: .bold))

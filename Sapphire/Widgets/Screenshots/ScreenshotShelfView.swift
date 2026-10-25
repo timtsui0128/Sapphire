@@ -11,6 +11,7 @@ import UniformTypeIdentifiers
 /// A collection of screenshots with selectable retention and a multi-file macOS drag source.
 @MainActor
 struct ScreenshotShelfView: View {
+    @ObservedObject private var language = AppLanguageController.shared
     @ObservedObject private var manager: ScreenshotShelfManager
     @State private var selectedIDs: Set<UUID> = []
     @State private var knownIDs: Set<UUID> = []
@@ -91,7 +92,7 @@ struct ScreenshotShelfView: View {
             Menu {
                 Picker("Collect screenshots", selection: $manager.captureTiming) {
                     ForEach(ScreenshotCaptureTiming.allCases) { timing in
-                        Text(timing.title).tag(timing)
+                        Text(LocalizedStringKey(timing.title)).tag(timing)
                     }
                 }
                 .pickerStyle(.inline)
@@ -99,7 +100,7 @@ struct ScreenshotShelfView: View {
                 Divider()
                 Picker("Keep new screenshots", selection: $manager.retention) {
                     ForEach(ScreenshotShelfRetention.allCases) { retention in
-                        Text(retention.title).tag(retention)
+                        Text(LocalizedStringKey(retention.title)).tag(retention)
                     }
                 }
                 .pickerStyle(.inline)
@@ -160,7 +161,7 @@ struct ScreenshotShelfView: View {
             Button {
                 let count = selectedItems.count
                 if manager.copyItems(ids: selectedIDs) {
-                    copyMessage = count == 1 ? "Copied 1 screenshot." : "Copied \(count) screenshots."
+                    copyMessage = count == 1 ? L10n.string("Copied 1 screenshot.") : L10n.format("Copied %lld screenshots.", count)
                 } else {
                     copyMessage = nil
                     NSSound.beep()
@@ -193,10 +194,17 @@ struct ScreenshotShelfView: View {
 
     private var batchDragHandle: some View {
         let count = selectedItems.count
-        return Label(
-            count == 0 ? "Select screenshots to drag" : "Drag \(count) screenshot\(count == 1 ? "" : "s")",
-            systemImage: "hand.draw"
-        )
+        return Label {
+            if count == 0 {
+                Text("Select screenshots to drag")
+            } else if count == 1 {
+                Text("Drag 1 screenshot")
+            } else {
+                Text("Drag \(count) screenshots")
+            }
+        } icon: {
+            Image(systemName: "hand.draw")
+        }
         .font(.caption.weight(.semibold))
         .foregroundStyle(count == 0 ? Color.secondary : Color.accentColor)
         .padding(.horizontal, 10)
@@ -243,21 +251,21 @@ struct ScreenshotShelfView: View {
             }
             .font(.caption2)
             .foregroundStyle(.secondary)
-            .help(manager.watchedFolder?.path ?? "Choose a screenshot folder to collect captures.")
+            .help(manager.watchedFolder?.path ?? L10n.string("Choose a screenshot folder to collect captures."))
         }
     }
 
     private var monitoringStatus: String {
-        guard manager.captureEnabled else { return "Auto-collect paused" }
-        guard manager.isMonitoring else { return "Waiting for screenshot folder" }
-        return "Collecting from \(manager.watchedFolder?.lastPathComponent ?? "screenshot folder")"
+        guard manager.captureEnabled else { return L10n.string("Auto-collect paused") }
+        guard manager.isMonitoring else { return L10n.string("Waiting for screenshot folder") }
+        return L10n.format("Collecting from %@", manager.watchedFolder?.lastPathComponent ?? L10n.string("screenshot folder"))
     }
 
     private var newScreenshotRetentionStatus: String {
         switch manager.retention {
-        case .persistent: return "New: keep until removed"
-        case .twentyFourHours: return "New: keep for 24 hours"
-        case .afterSuccessfulDrag: return "New: remove after drop"
+        case .persistent: return L10n.string("New: keep until removed")
+        case .twentyFourHours: return L10n.string("New: keep for 24 hours")
+        case .afterSuccessfulDrag: return L10n.string("New: remove after drop")
         }
     }
 
@@ -279,8 +287,8 @@ struct ScreenshotShelfView: View {
 
     private func importScreenshots() {
         let panel = NSOpenPanel()
-        panel.title = "Add screenshots"
-        panel.prompt = "Add"
+        panel.title = L10n.string("Add screenshots")
+        panel.prompt = L10n.string("Add")
         panel.allowedContentTypes = [.image, .pdf]
         panel.allowsMultipleSelection = true
         panel.canChooseDirectories = false
@@ -296,6 +304,7 @@ struct ScreenshotShelfView: View {
 
 @MainActor
 private struct ScreenshotShelfCard: View {
+    @ObservedObject private var language = AppLanguageController.shared
     let item: ScreenshotShelfItem
     let isSelected: Bool
     let onToggle: () -> Void
@@ -343,7 +352,7 @@ private struct ScreenshotShelfCard: View {
         .help("\(item.name)\n\(item.capturedAt.formatted(date: .abbreviated, time: .shortened))\n\(retentionDescription)")
         .accessibilityLabel(item.name)
         .accessibilityValue(isSelected ? "Selected" : "Not selected")
-        .accessibilityHint("Click to \(isSelected ? "deselect" : "select") this screenshot. \(retentionDescription)")
+        .accessibilityHint("Click to \(L10n.string(isSelected ? "deselect" : "select")) this screenshot. \(retentionDescription)")
         .task(id: item.fileURL) {
             image = nil
             let thumbnail = await ScreenshotShelfThumbnails.shared.thumbnail(for: item.fileURL)
@@ -354,12 +363,12 @@ private struct ScreenshotShelfCard: View {
 
     private var retentionDescription: String {
         if item.removeAfterSuccessfulDrag == true {
-            return "Removed after a successful drop."
+            return L10n.string("Removed after a successful drop.")
         }
         if let expiresAt = item.expiresAt {
-            return "Removed \(expiresAt.formatted(date: .abbreviated, time: .shortened))."
+            return L10n.format("Removed %@.", expiresAt.formatted(.dateTime.locale(L10n.locale)))
         }
-        return "Kept until you remove it."
+        return L10n.string("Kept until you remove it.")
     }
 }
 

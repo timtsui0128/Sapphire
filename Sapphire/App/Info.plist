@@ -2,8 +2,31 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>SUFeedURL</key>
+	<string>https://github.com/timtsui0128/Sapphire/releases/latest/download/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>gqG5oDYgka/iCoAFnzNBhyOmA8u1J9lyaLaDVpFaN9I=</string>
+	<key>SUDefaultsDomain</key>
+	<string>com.timtsui0128.sapphire.updates</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUScheduledCheckInterval</key>
+	<integer>18000</integer>
+	<key>SUAutomaticallyUpdate</key>
+	<false/>
+	<key>SUAllowsAutomaticUpdates</key>
+	<false/>
+	<key>SUVerifyUpdateBeforeExtraction</key>
+	<true/>
+	<key>SURequireSignedFeed</key>
+	<true/>
+	<key>SUSignedFeedFailureExpirationInterval</key>
+	<integer>0</integer>
+	<key>SUEnableSystemProfiling</key>
+	<false/>
+
 	<key>SapphireLocalBuild</key>
-	<string>Adaptive Glass and Capture 8</string>
+	<string>Personal Updates $(CURRENT_PROJECT_VERSION)</string>
 	<key>NSDesktopFolderUsageDescription</key>
 	<string>Collect newly saved screenshots and keep them ready in the file shelf for multi-file dragging.</string>
 	<key>NSDocumentsFolderUsageDescription</key>

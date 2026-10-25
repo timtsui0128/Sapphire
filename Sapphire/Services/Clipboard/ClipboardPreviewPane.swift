@@ -52,7 +52,7 @@ struct ClipboardPreviewPane: View {
     private func details(for item: ClipboardItem) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             HStack(spacing: 6) {
-                Text(item.kind.displayName)
+                Text(LocalizedStringKey(item.kind.displayName))
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(item.kind.spec.color.opacity(0.95))
                 if item.isPinned {

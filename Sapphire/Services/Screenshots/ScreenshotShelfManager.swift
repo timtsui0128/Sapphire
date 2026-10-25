@@ -135,19 +135,19 @@ final class ScreenshotShelfManager: ObservableObject {
         guard captureEnabled, !isSessionSuppressed else { thumbnailLease.restore(); return }
         guard defaults.string(forKey: Self.timingKey) != nil else { return }
         captureTimingError = thumbnailLease.apply(captureTiming) ? nil
-            : "Could not change the macOS floating preview. Use Shift-Command-5 → Options → Show Floating Thumbnail."
+            : L10n.string("Could not change the macOS floating preview. Use Shift-Command-5 → Options → Show Floating Thumbnail.")
     }
 
     func chooseFolder() {
         guard !isSessionSuppressed else { return }
         let panel = NSOpenPanel()
-        panel.title = "Choose Screenshot Folder"
-        panel.message = "Choose the folder where macOS saves your screenshots."
+        panel.title = L10n.string("Choose Screenshot Folder")
+        panel.message = L10n.string("Choose the folder where macOS saves your screenshots.")
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
         panel.directoryURL = watchedFolder
-        panel.prompt = "Watch Folder"
+        panel.prompt = L10n.string("Watch Folder")
         panel.begin { [weak self] response in
             MainActor.assumeIsolated {
                 guard response == .OK, let self, !self.isSessionSuppressed, let url = panel.url else { return }
@@ -253,6 +253,7 @@ private final class ScreenshotShelfWorker {
     private var retry: DispatchWorkItem?
     private var lastPreferenceCheck = Date.distantPast
     private var lastError: String?
+    private var hasFolderError = false
     private var storageIsReady = false
     private var retention: ScreenshotShelfRetention
     private var captureTiming: ScreenshotCaptureTiming
@@ -309,7 +310,7 @@ private final class ScreenshotShelfWorker {
         } catch {
             // Do not replace a history we could not read with an empty manifest.
             storageIsReady = false
-            report(error: "Could not load screenshot collection: \(error.localizedDescription)")
+            report(error: L10n.format("Could not load screenshot collection: %@", error.localizedDescription))
         }
     }
 
@@ -419,7 +420,7 @@ private final class ScreenshotShelfWorker {
             } catch {
                 failures += 1
                 failedImports.insert(url)
-                report(error: "Could not add \(url.lastPathComponent): \(error.localizedDescription)")
+                report(error: L10n.format("Could not add %@: %@", url.lastPathComponent, error.localizedDescription))
             }
         }
         if failures == 0 { report(error: nil) }
@@ -469,7 +470,7 @@ private final class ScreenshotShelfWorker {
             }
             return true
         } catch {
-            report(error: "Could not remove screenshots: \(error.localizedDescription)")
+            report(error: L10n.format("Could not remove screenshots: %@", error.localizedDescription))
             return false
         }
     }
@@ -552,10 +553,10 @@ private final class ScreenshotShelfWorker {
                 candidates[path] = Candidate(url: url, firstSeen: now, lastStamp: nil, stableSince: now)
             }
             processCandidates()
-            if lastError?.hasPrefix("Cannot watch ") == true { report(error: nil) }
+            if hasFolderError { report(error: nil) }
             else { onState?(true, folder, lastError) }
         } catch {
-            report(error: "Cannot watch \(folder.lastPathComponent): \(error.localizedDescription). Choose the screenshot folder to grant access.")
+            report(error: L10n.format("Cannot watch %@: %@. Choose the screenshot folder to grant access.", folder.lastPathComponent, error.localizedDescription), isFolderError: true)
         }
     }
 
@@ -602,7 +603,7 @@ private final class ScreenshotShelfWorker {
                 }
                 // Retry incomplete writes; surface an error if a confirmed screenshot stays unreadable.
                 if now.timeIntervalSince(candidate.firstSeen) > 10 {
-                    report(error: "Could not save \(candidate.url.lastPathComponent): \(error.localizedDescription)")
+                    report(error: L10n.format("Could not save %@: %@", candidate.url.lastPathComponent, error.localizedDescription))
                 }
             }
         }
@@ -789,9 +790,10 @@ private final class ScreenshotShelfWorker {
         try data.write(to: manifestURL, options: .atomic)
     }
 
-    private func report(error: String?) {
+    private func report(error: String?, isFolderError: Bool = false) {
         lastError = error
-        onState?(startedAt != nil && error?.hasPrefix("Cannot watch ") != true, folder, error)
+        hasFolderError = error != nil && isFolderError
+        onState?(startedAt != nil && !hasFolderError, folder, error)
     }
 
     private func isInsideStorage(_ url: URL) -> Bool {

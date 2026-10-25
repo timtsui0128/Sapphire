@@ -27,29 +27,51 @@ enum SapphireStandardMenu {
         let appMenu = NSMenu()
         appMenuItem.submenu = appMenu
         appMenu.addItem(
-            withTitle: "Quit Sapphire",
+            withTitle: L10n.string("Quit Sapphire"),
             action: #selector(NSApplication.terminate(_:)),
             keyEquivalent: "q"
         )
 
-        let editMenuItem = NSMenuItem(title: "Edit", action: nil, keyEquivalent: "")
+        let editMenuItem = NSMenuItem(title: L10n.string("Edit"), action: nil, keyEquivalent: "")
         mainMenu.addItem(editMenuItem)
-        let editMenu = NSMenu(title: "Edit")
+        let editMenu = NSMenu(title: L10n.string("Edit"))
         editMenuItem.submenu = editMenu
 
-        editMenu.addItem(withTitle: "Undo", action: Selector("undo:"), keyEquivalent: "z")
-        editMenu.addItem(withTitle: "Redo", action: Selector("redo:"), keyEquivalent: "Z")
+        editMenu.addItem(withTitle: L10n.string("Undo"), action: Selector("undo:"), keyEquivalent: "z")
+        editMenu.addItem(withTitle: L10n.string("Redo"), action: Selector("redo:"), keyEquivalent: "Z")
         editMenu.addItem(.separator())
-        editMenu.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
-        editMenu.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
-        editMenu.addItem(withTitle: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
-        editMenu.addItem(withTitle: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        editMenu.addItem(withTitle: L10n.string("Cut"), action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        editMenu.addItem(withTitle: L10n.string("Copy"), action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        editMenu.addItem(withTitle: L10n.string("Paste"), action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        editMenu.addItem(withTitle: L10n.string("Select All"), action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
 
         NSApp.mainMenu = mainMenu
     }
 
     private static var hasEditMenu: Bool {
-        NSApp.mainMenu?.items.contains { $0.title == "Edit" } == true
+        NSApp.mainMenu?.items.contains { item in
+            item.submenu?.items.contains { $0.action == Selector("undo:") } == true
+        } == true
+    }
+
+    static func refreshLanguage() {
+        let titles = ["terminate:": "Quit Sapphire", "undo:": "Undo", "redo:": "Redo",
+                      "cut:": "Cut", "copy:": "Copy", "paste:": "Paste", "selectAll:": "Select All"]
+        func refresh(_ menu: NSMenu) {
+            for item in menu.items {
+                if let action = item.action, let key = titles[NSStringFromSelector(action)] {
+                    item.title = L10n.string(key)
+                }
+                if let submenu = item.submenu {
+                    if submenu.items.contains(where: { $0.action == Selector("undo:") }) {
+                        item.title = L10n.string("Edit")
+                        submenu.title = item.title
+                    }
+                    refresh(submenu)
+                }
+            }
+        }
+        if let menu = NSApp.mainMenu { refresh(menu) }
     }
 }
 
@@ -356,15 +378,15 @@ enum HelperAlertPresenter {
         host.makeKeyAndOrderFront(nil)
 
         let alert = NSAlert()
-        alert.messageText = messageText
-        alert.informativeText = informativeText
+        alert.messageText = L10n.string(messageText)
+        alert.informativeText = L10n.string(informativeText)
         alert.alertStyle = alertStyle
         if let accessoryView {
             alert.accessoryView = accessoryView
             alert.window.initialFirstResponder = accessoryView
         }
         for title in buttonTitles {
-            alert.addButton(withTitle: title)
+            alert.addButton(withTitle: L10n.string(title))
         }
 
         activeModalCount += 1
@@ -403,7 +425,7 @@ enum HelperAlertPresenter {
             backing: .buffered,
             defer: false
         )
-        window.title = "Sapphire"
+        window.title = L10n.string("Sapphire")
         window.isOpaque = false
         window.backgroundColor = .clear
         window.alphaValue = 0.001

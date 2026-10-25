@@ -361,7 +361,7 @@ struct FocusSessionDetailView: View {
                     }
                 } label: {
                     HStack(spacing: 4) {
-                        Text(settings.settings.focusAmbientSoundType.displayName)
+                        Text(LocalizedStringKey(settings.settings.focusAmbientSoundType.displayName))
                             .font(.system(size: 11, weight: .medium))
                             .lineLimit(1)
                         Image(systemName: "chevron.up.chevron.down")

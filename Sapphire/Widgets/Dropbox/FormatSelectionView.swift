@@ -72,7 +72,7 @@ private struct FormatButton: View {
                 Image(systemName: format.iconName)
                     .font(.largeTitle)
                     .foregroundStyle(.primary)
-                Text(format.displayName)
+                Text(LocalizedStringKey(format.displayName))
                     .fontWeight(.semibold)
                     .foregroundStyle(.primary.opacity(0.8))
             }

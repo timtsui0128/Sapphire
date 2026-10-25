@@ -164,7 +164,7 @@ struct ClipboardPlayerView: View {
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                 HStack(spacing: 6) {
-                    Text(item.kind.displayName)
+                    Text(LocalizedStringKey(item.kind.displayName))
                         .font(.system(size: 10, weight: .semibold, design: .rounded))
                         .foregroundStyle(tint.opacity(0.9))
                     Text("·")

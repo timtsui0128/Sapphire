@@ -149,7 +149,7 @@ struct EQBandCountPicker: View {
     var body: some View {
         Picker("EQ Bands", selection: $selection) {
             ForEach(AudioEQBandLayout.allCases) { layout in
-                Text(layout.displayName).tag(layout.rawValue)
+                Text(LocalizedStringKey(layout.displayName)).tag(layout.rawValue)
             }
         }
         .pickerStyle(.menu)

@@ -89,7 +89,7 @@ class AuthLoginCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = "\(serviceName) Login"
+        window.title = L10n.format("%@ Login", serviceName)
         window.contentView = popup
         window.isReleasedWhenClosed = false
         window.center()

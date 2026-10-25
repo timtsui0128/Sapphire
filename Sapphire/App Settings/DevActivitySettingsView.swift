@@ -203,7 +203,7 @@ private struct DevTaskRow: View {
                 Text(task.title)
                     .font(.system(size: 13, weight: .medium))
                 HStack(spacing: 6) {
-                    Text(task.kind.displayName)
+                    Text(LocalizedStringKey(task.kind.displayName))
                     if !task.detail.isEmpty {
                         Text("·")
                         Text(task.detail)

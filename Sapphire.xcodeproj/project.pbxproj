@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F61000000000000000000003 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = F61000000000000000000002 /* Sparkle */; };
 		3EA625D8CDF343379815DBE6 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 350EC0B0ACC04131989F6CB6 /* FirebaseAppCheck */; };
 		A17D00000000000000000007 /* SapphireAndroidWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17D00000000000000000003 /* SapphireAndroidWidgets.swift */; };
 		A17D00000000000000000008 /* AndroidWidgetSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17D00000000000000000006 /* AndroidWidgetSnapshotStore.swift */; };
@@ -632,6 +633,7 @@
 		DA46CF732DCBCA0000F00EC5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				F61000000000000000000003 /* Sparkle in Frameworks */,
 				F3A600000000000000000003 /* Yams in Frameworks */,
 				DA8FB0482E7CBE9400C9BD1A /* IMSharedUtilities.framework in Frameworks */,
 				DABC6CE32E1749CA00A5CF83 /* CoreGraphics.framework in Frameworks */,
@@ -1165,6 +1167,7 @@
 			);
 			name = Sapphire;
 			packageProductDependencies = (
+				F61000000000000000000002 /* Sparkle */,
 				F3A600000000000000000002 /* Yams */,
 				DA48B01A2E93DF9B0099BF74 /* SQLite */,
 				DA5E1009304CBB63003D1D37 /* FirebaseAnalytics */,
@@ -1304,11 +1307,13 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				"zh-Hans",
 				Base,
 			);
 			mainGroup = DA46CF6D2DCBCA0000F00EC5;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				F61000000000000000000001 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				F3A600000000000000000001 /* XCRemoteSwiftPackageReference "Yams" */,
 				DAD47CD22E13C3DB001B70C8 /* XCRemoteSwiftPackageReference "SwiftECC" */,
 				DA7C49A62E15D3660049937A /* XCRemoteSwiftPackageReference "swift-protobuf" */,
@@ -2020,7 +2025,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_SWIFT_FLAGS = "-DSAPPHIRE_IS_BETA_BUILD";
 				SDKROOT = macosx;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -2082,7 +2087,7 @@
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "-DSAPPHIRE_IS_BETA_BUILD";
 				SDKROOT = macosx;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 5.0;
@@ -2100,7 +2105,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 10;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = KVQFWJ7C7S;
@@ -2152,7 +2157,7 @@
 					"$(PROJECT_DIR)/Sapphire/Services/Music",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 3.5;
+				MARKETING_VERSION = 0.1.0;
 				OTHER_CODE_SIGN_FLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "";
@@ -2186,7 +2191,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 10;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = KVQFWJ7C7S;
 				ENABLE_APP_SANDBOX = NO;
@@ -2236,7 +2241,7 @@
 					"$(PROJECT_DIR)/Sapphire/Services/Music",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 3.5;
+				MARKETING_VERSION = 0.1.0;
 				OTHER_CODE_SIGN_FLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "";
@@ -2528,6 +2533,11 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		F61000000000000000000001 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = { kind = exactVersion; version = 2.10.1; };
+		};
 		DA48B0192E93DF9B0099BF74 /* XCRemoteSwiftPackageReference "SQLite" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/stephencelis/SQLite.swift";
@@ -2603,6 +2613,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		F61000000000000000000002 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F61000000000000000000001 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
 		350EC0B0ACC04131989F6CB6 /* FirebaseAppCheck */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DA5E1008304CBB63003D1D37 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

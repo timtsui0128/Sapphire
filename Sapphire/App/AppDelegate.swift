@@ -451,6 +451,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         SystemMutationRecovery.restoreAfterUnexpectedExit()
 
         SapphireStandardMenu.installIfNeeded()
+        SapphireStandardMenu.refreshLanguage()
+        NotificationCenter.default.publisher(for: .sapphireLanguageDidChange)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                self.settingsWindow?.title = L10n.string("Settings")
+                self.lyricsWindow?.title = L10n.string("Lyrics")
+                if let menu = self.statusItem?.menu {
+                    for item in menu.items {
+                        if item.action == #selector(self.showLaunchpadAction) { item.title = L10n.string("Show Launchpad") }
+                        if item.action == #selector(NSApplication.terminate(_:)) { item.title = L10n.string("Quit Sapphire") }
+                    }
+                }
+                SapphireStandardMenu.refreshLanguage()
+            }
+            .store(in: &cancellables)
         ContinuityServicesProvider.shared.install()
         NotificationCenter.default.addObserver(
             self,
@@ -784,7 +800,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             window.standardWindowButton(.closeButton)?.isHidden = true
             window.standardWindowButton(.miniaturizeButton)?.isHidden = true
             window.standardWindowButton(.zoomButton)?.isHidden = true
-            window.title = "Sapphire Onboarding"
+            window.title = L10n.string("Sapphire Onboarding")
             window.isMovableByWindowBackground = true
             window.isOpaque = false
             window.backgroundColor = .clear
@@ -1608,9 +1624,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                     accessibilityDescription: "Sapphire Launchpad"
                 )
                 let menu = NSMenu()
-                menu.addItem(NSMenuItem(title: "Show Launchpad", action: #selector(showLaunchpadAction), keyEquivalent: ""))
+                menu.addItem(NSMenuItem(title: L10n.string("Show Launchpad"), action: #selector(showLaunchpadAction), keyEquivalent: ""))
                 menu.addItem(.separator())
-                menu.addItem(NSMenuItem(title: "Quit Sapphire", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+                menu.addItem(NSMenuItem(title: L10n.string("Quit Sapphire"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
                 for item in menu.items { item.target = self }
                 statusItem?.menu = menu
             }
@@ -1867,6 +1883,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
     private func applyNotchEnvironment<V: View>(to view: V) -> some View {
         view
+            .appLanguage()
             .environmentObject(lockScreenState)
             .environmentObject(systemHUDManager)
             .environment(liveActivityManager)
@@ -2001,7 +2018,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             backing: .buffered,
             defer: false
         )
-        window.title = "Settings"
+        window.title = L10n.string("Settings")
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
         window.titlebarSeparatorStyle = .none
@@ -2056,7 +2073,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             backing: .buffered,
             defer: false
         )
-        window.title = "Lyrics"
+        window.title = L10n.string("Lyrics")
         window.isMovableByWindowBackground = false
         window.backgroundColor = .clear
         window.isOpaque = false

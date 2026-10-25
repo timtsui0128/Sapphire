@@ -293,7 +293,7 @@ struct StatCard: View {
             Text(value)
                 .font(.title2.bold())
 
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -321,7 +321,7 @@ struct MonitorTypeDataRow: View {
                 Image(systemName: monitorType.icon)
                     .foregroundStyle(.blue)
 
-                Text(monitorType.displayName)
+                Text(LocalizedStringKey(monitorType.displayName))
                     .font(.subheadline)
 
                 Spacer()

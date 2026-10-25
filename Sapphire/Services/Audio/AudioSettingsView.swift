@@ -60,7 +60,7 @@ struct AudioSettingsView: View {
                         Spacer()
                         Picker("Equalizer Bands", selection: $displayedBandCount) {
                             ForEach(AudioEQBandLayout.allCases) { layout in
-                                Text(layout.displayName).tag(layout.rawValue)
+                                Text(LocalizedStringKey(layout.displayName)).tag(layout.rawValue)
                             }
                         }
                         .labelsHidden()

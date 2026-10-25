@@ -95,7 +95,7 @@ final class DebugTestDisplay: NSObject, ObservableObject {
             defer: false
         )
         window.isReleasedWhenClosed = false
-        window.title = "Test Display (\(Self.size.width) × \(Self.size.height), no notch)"
+        window.title = L10n.format("Test Display (%@ × %@, no notch)", String(describing: Self.size.width), String(describing: Self.size.height))
         window.contentAspectRatio = contentSize
         window.delegate = self
 

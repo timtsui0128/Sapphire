@@ -44,7 +44,7 @@ PY
 xcrun swiftc -swift-version 5 -parse-as-library \
   -target "$(uname -m)-apple-macosx14.0" \
   -module-cache-path "$REPO_ROOT/output/swift-module-cache" \
-  "$REPO_ROOT/Sapphire/Services/AppAppearance/AppAppearance.swift" \
+  "$REPO_ROOT"/Sapphire/Services/AppAppearance/*.swift \
   "$REPO_ROOT/Sapphire/Services/Menubar/MenuBarWallpaperTint.swift" \
   "$REPO_ROOT/Sapphire/Notch/CustomNotchShape.swift" \
   "$REPO_ROOT/Sapphire/App Settings/AppAppearanceSettingsSection.swift" \

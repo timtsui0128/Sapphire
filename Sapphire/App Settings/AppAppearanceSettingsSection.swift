@@ -14,7 +14,7 @@ struct AppAppearanceSettingsSection: View {
             Text("App appearance").font(.title2.bold())
             Picker("App appearance", selection: $appearance.mode) {
                 ForEach(AppAppearanceMode.allCases) { mode in
-                    Text(mode.title).tag(mode)
+                    Text(LocalizedStringKey(mode.title)).tag(mode)
                 }
             }
             .pickerStyle(.segmented)
@@ -35,7 +35,7 @@ struct AppAppearanceSettingsSection: View {
             Text("External display").font(.headline)
             Picker("External display style", selection: $appearance.externalDisplayStyle) {
                 ForEach(ExternalDisplayStyle.allCases) { style in
-                    Text(style.title).tag(style)
+                    Text(LocalizedStringKey(style.title)).tag(style)
                 }
             }
             .pickerStyle(.segmented)
@@ -45,7 +45,7 @@ struct AppAppearanceSettingsSection: View {
                 .foregroundStyle(.secondary)
             Picker("External glass tone", selection: $appearance.externalGlassTone) {
                 ForEach(ExternalGlassTone.allCases) { tone in
-                    Text(tone.title).tag(tone)
+                    Text(LocalizedStringKey(tone.title)).tag(tone)
                 }
             }
             .pickerStyle(.segmented)
@@ -57,7 +57,7 @@ struct AppAppearanceSettingsSection: View {
             Text("Top bar & panel").font(.headline)
             Picker("Top bar & panel surface", selection: $appearance.expandedPanelSurface) {
                 ForEach(ExpandedPanelSurface.allCases) { surface in
-                    Text(surface.title).tag(surface)
+                    Text(LocalizedStringKey(surface.title)).tag(surface)
                 }
             }
             .pickerStyle(.segmented)

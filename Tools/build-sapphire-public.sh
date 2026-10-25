@@ -17,6 +17,10 @@ if [[ $# -gt 0 ]]; then
   exit 2
 fi
 
+VERSION_ARGS=()
+if [[ -n "${SAPPHIRE_VERSION:-}" ]]; then VERSION_ARGS+=("MARKETING_VERSION=$SAPPHIRE_VERSION"); fi
+if [[ -n "${SAPPHIRE_BUILD_NUMBER:-}" ]]; then VERSION_ARGS+=("CURRENT_PROJECT_VERSION=$SAPPHIRE_BUILD_NUMBER"); fi
+
 # Building the explicit target also avoids resolving an upstream self-referencing
 # scheme back to the original project, whose newer file format Xcode 26.3 cannot open.
 xcodebuild \
@@ -38,6 +42,7 @@ xcodebuild \
   SWIFT_OPTIMIZATION_LEVEL=-Onone \
   GCC_OPTIMIZATION_LEVEL=0 \
   DEBUG_INFORMATION_FORMAT=dwarf \
+  ${VERSION_ARGS[@]+"${VERSION_ARGS[@]}"} \
   build
 
 APP_PATH="$BUILD_ROOT/Build/Products/Debug/Sapphire.app"

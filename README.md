@@ -15,7 +15,7 @@ Personal features and fixes are developed with AI assistance. This is not an off
 
 ## Features and changes
 
-These personal changes are relative to upstream commit [`2e8085676209cbbb424bc60fd7ea2f11bfd625aa`](https://github.com/cshariq/Sapphire/commit/2e8085676209cbbb424bc60fd7ea2f11bfd625aa), documented on **2026-10-24**. This README is available in English and Chinese; the detailed module notes linked below are currently in Chinese.
+These personal changes are relative to upstream commit [`2e8085676209cbbb424bc60fd7ea2f11bfd625aa`](https://github.com/cshariq/Sapphire/commit/2e8085676209cbbb424bc60fd7ea2f11bfd625aa), documented on **2026-10-25**. This README is available in English and Chinese; the detailed module notes linked below are currently in Chinese.
 
 | Feature | Behavior in this fork | Details |
 | --- | --- | --- |
@@ -23,6 +23,8 @@ These personal changes are relative to upstream commit [`2e8085676209cbbb424bc60
 | Screenshot storage | Move automatically collected screenshots into Sapphire's dedicated folder; choose manual removal, cleanup after 24 hours, or cleanup after a successful drag; manual import is also supported | [Storage and retention](docs/screenshot-shelf.md#保存与收集范围) |
 | Football and F1 | Football schedules, scores, and followed teams; F1 calendar, results, positions, lap counts, followed drivers/constructors, and notch activity cards | [Sports / F1](docs/community-sports.md) |
 | Stock watchlist | AAPL, MSFT, and NVDA by default, with search, add/remove controls, quotes, historical charts, and notch widgets | [Stocks / Finance](docs/community-finance-and-appearance.md) |
+| In-app updates | Check this fork’s GitHub Releases, verify signed feeds/packages, and install/relaunch; optional background preparation | [App updates](docs/app-updates.md) |
+| App language | Follow System (default), English, or Simplified Chinese; changes apply immediately and persist across launches | [Language settings](docs/app-language.md) |
 | Appearance and glass | Follow the system or choose light/dark mode; expanded top bar and panel support Match Panel, Liquid Glass, White, and Black; Sports/Stocks show the panel material underneath | [Panel materials](docs/panel-surface.md) |
 | Silent Bluetooth alerts | Sapphire's Bluetooth connect/disconnect sounds are off by default, with a settings toggle | [Bluetooth sounds](docs/community-finance-and-appearance.md#蓝牙连接静音) |
 | Lock screen privacy | Hide the interface, prevent reopening, and pause screenshot/clipboard collection when locked or switching user sessions; do not collect missed locked-session content after unlocking | [Session privacy](docs/session-privacy.md) |
@@ -34,11 +36,15 @@ Open **File Shelf → Screenshots** for screenshots, and use its gear menu to ch
 
 ## Current version and supported scope
 
-- The current source build is labeled **Adaptive Glass and Capture 8**. A complete local app build and signature verification have been completed.
+- The current source build is labeled **Personal Updates 10** (version **0.1.0**, build **10**). A complete local app build and signature verification have been completed.
 - Personal development takes place on **`codex/personal-notched-tools`**. `main` retains the upstream state from the fork; this branch is based on the commit above and has not merged the later upstream macOS 27 charging-limit changes.
 - The minimum deployment target is macOS 14. Complete builds and local packages have been verified on Apple Silicon (arm64); Intel hardware and other macOS versions have not been fully validated.
 - Upstream paid modules whose source is not public continue to use public placeholders or compatibility implementations. The independently implemented Sports/Finance features do not require those private modules and do not connect or sync with Apple Sports/Stocks accounts.
 - This is a personal experimental project. Regression checks are included, but they do not cover every device, permission state, or interaction. Implementation and validation notes are in `docs/`.
+
+## Download and updates
+
+Download the Apple Silicon app from [Personal Releases](https://github.com/timtsui0128/Sapphire/releases). Install the first update-enabled version once, then use **Settings → About → Updates**. Releases include a signed feed, signed app archive, checksums, and the exact source commit. See [update and release instructions](docs/app-updates.md).
 
 ## Build from source
 
@@ -60,7 +66,7 @@ The script generates an isolated Xcode project in `output/` for the current tool
 
 Local ad-hoc signing is not Developer ID signing or Apple notarization; privileged services that require developer signing may be unavailable. Screenshot collection only needs access to the screenshot save folder and does not request screen recording permission. Other app features request their own system permissions as needed.
 
-Quit any upstream or older Sapphire instance before opening this build. The fork currently uses the upstream Bundle ID and settings/data directories, so keep backups of data you need. Installing an official release through the upstream updater will replace a personal build; automatic update checks can be disabled under Settings → About → Updates. The inherited upstream `Sapphire.pkg` is also not a build of this fork.
+Quit any upstream or older Sapphire instance before opening this build. The fork currently uses the upstream Bundle ID and settings/data directories, so keep backups of data you need. Personal Updates 10 replaces the public build’s upstream updater with a signed channel for this fork; configure it under Settings → About → Updates. Install this first update-enabled version once, then update inside the app. Automatic preparation is a separate opt-in and may install a prepared update when you next quit. The inherited upstream `Sapphire.pkg` is also not a build of this fork.
 
 ## Checks and validation
 
@@ -71,6 +77,8 @@ bash Tools/ScreenshotShelfTests/run.sh
 bash Tools/CommunitySportsTests/run.sh
 bash Tools/F1LiveTests/run.sh
 bash Tools/CommunityFinanceTests/run.sh
+bash Tools/LocalizationTests/run.sh
+python3 Tools/UpdateTests/run.py
 bash Tools/AppAppearanceTests/run.sh
 bash Tools/AppAppearanceTests/run-surface.sh
 bash Tools/BluetoothSoundTests/run.sh

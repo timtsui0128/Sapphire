@@ -217,7 +217,7 @@ private struct SettingsEntryRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.displayTitle).font(.callout)
                 if let section = entry.section {
-                    Text(section.label).font(.caption2).foregroundStyle(.secondary)
+                    Text(LocalizedStringKey(section.label)).font(.caption2).foregroundStyle(.secondary)
                 }
             }
             Spacer(minLength: 8)

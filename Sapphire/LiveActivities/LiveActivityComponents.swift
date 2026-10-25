@@ -1212,9 +1212,8 @@ struct UpdateAvailableWidgetView: View {
     @ObservedObject private var updateChecker = UpdateChecker.shared
 
     private var availableVersion: String? {
-        if case .available(let version, _) = updateChecker.status {
-            return version
-        }
+        if case .available(let version, _) = updateChecker.status { return version }
+        if case .readyToInstall = updateChecker.status { return updateChecker.releaseNotesVersion }
         return nil
     }
 
@@ -1943,7 +1942,7 @@ struct PowerStateActivityView {
 
     static func right(for state: BatterySystemState, batteryLevel: Int) -> some View {
         HStack(spacing: 6) {
-            Text(state.managementState.rawValue)
+            Text(LocalizedStringKey(state.managementState.rawValue))
                 .font(.system(size: 13, weight: .semibold))
                 .lineLimit(1)
 

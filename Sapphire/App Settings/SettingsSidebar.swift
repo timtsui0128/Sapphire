@@ -38,7 +38,11 @@ struct SettingsSidebarView: View {
         return SettingsSection.sidebarGroups.compactMap { group in
             let matches = group.sections.filter { section in
                 let haystacks = [section.label, section.shortDescription] + section.searchTokens
-                return haystacks.contains { $0.localizedCaseInsensitiveContains(query) }
+                let languageKeywords = section == .general ? ["language", "English", "中文", "简体", "语言"] : []
+                let screenshotKeywords = section == .fileShelf ? ["screenshot", "screenshots", "截图"] : []
+                return (haystacks + languageKeywords + screenshotKeywords).contains {
+                    $0.localizedCaseInsensitiveContains(query) || L10n.string($0).localizedCaseInsensitiveContains(query)
+                }
             }
             return matches.isEmpty ? nil : SettingsSidebarGroup(title: group.title, sections: matches)
         }
@@ -100,7 +104,7 @@ struct SettingsSidebarView: View {
                             .tag(section)
                         }
                     } header: {
-                        Text(group.title)
+                        Text(LocalizedStringKey(group.title))
                             .font(.system(size: 11, weight: .semibold))
                             .foregroundStyle(.secondary)
                     }
@@ -221,7 +225,7 @@ fileprivate struct SidebarRowView: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: section.systemImage).font(.system(size: 11, weight: .bold)).foregroundStyle(.white).frame(width: 22, height: 22).background(LinearGradient(colors: section.iconGradientColors, startPoint: .topLeading, endPoint: .bottomTrailing).opacity(0.8)).clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-            Text(section.label).font(.system(size: 13, weight: .medium)).foregroundStyle(.primary)
+            Text(LocalizedStringKey(section.label)).font(.system(size: 13, weight: .medium)).foregroundStyle(.primary)
             if section.isBeta {
                 Text("BETA")
                     .font(.system(size: 8, weight: .bold))

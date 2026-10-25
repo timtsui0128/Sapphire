@@ -99,8 +99,8 @@ struct MusicPlayerFeaturesCard: View {
         let available = services.contains(.appleMusic) || isSpotifyAvailable
         return HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 5) {
-                Text(title)
-                Text(description)
+                Text(LocalizedStringKey(title))
+                Text(LocalizedStringKey(description))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

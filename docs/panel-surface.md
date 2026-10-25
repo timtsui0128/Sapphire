@@ -1,6 +1,6 @@
 # 展开顶栏与面板材质
 
-当前交付为 `output/Sapphire Blend.app`，压缩包为 `output/Sapphire-Adaptive-Glass-and-Capture-arm64.zip`。先退出旧版，再打开新版；**Settings → About** 显示 **Adaptive Glass and Capture 8**。
+当前交付为 `output/Sapphire Bilingual.app`，压缩包为 `output/Sapphire-Bilingual-English-Chinese-arm64.zip`。先退出旧版，再打开新版；**Settings → About** 显示 **Language Switch 9**。
 
 打开 **Settings → Appearance → App appearance → Top bar & panel**：
 

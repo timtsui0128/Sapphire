@@ -16,7 +16,7 @@ struct ScreenshotShelfSettingsView: View {
             Toggle("Collect new screenshots into Sapphire", isOn: $manager.captureEnabled)
             Picker("Collect screenshots", selection: $manager.captureTiming) {
                 ForEach(ScreenshotCaptureTiming.allCases) { timing in
-                    Text(timing.title).tag(timing)
+                    Text(LocalizedStringKey(timing.title)).tag(timing)
                 }
             }
             .pickerStyle(.menu)
@@ -31,7 +31,7 @@ struct ScreenshotShelfSettingsView: View {
                 .fixedSize(horizontal: false, vertical: true)
             Picker("Keep new screenshots", selection: $manager.retention) {
                 ForEach(ScreenshotShelfRetention.allCases) { retention in
-                    Text(retention.title).tag(retention)
+                    Text(LocalizedStringKey(retention.title)).tag(retention)
                 }
             }
             .pickerStyle(.menu)

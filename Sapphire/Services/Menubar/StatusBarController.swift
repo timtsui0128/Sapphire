@@ -204,6 +204,10 @@ final class StatusBarController {
     }
 
     private func setupObservers() {
+        NotificationCenter.default.publisher(for: .sapphireLanguageDidChange)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.updateAllItemVisuals() }
+            .store(in: &cancellables)
         SettingsModel.shared.changes(of: StatusBarSettings.init)
             .sink { [weak self] settings in self?.handleSettingsChange(settings) }
             .store(in: &cancellables)
@@ -1054,33 +1058,33 @@ final class StatusBarController {
 
     private func createChevronContextMenu() -> NSMenu {
         let menu = NSMenu()
-        menu.addItem(withTitle: "Edit Menu Bar Items", action: #selector(enterEditMode), keyEquivalent: "").target = self
-        menu.addItem(withTitle: "Search Menu Bar Items…", action: #selector(openItemSearch), keyEquivalent: "").target = self
-        let zenItem = NSMenuItem(title: "Zen Mode", action: #selector(toggleZenMode), keyEquivalent: "")
+        menu.addItem(withTitle: L10n.string("Edit Menu Bar Items"), action: #selector(enterEditMode), keyEquivalent: "").target = self
+        menu.addItem(withTitle: L10n.string("Search Menu Bar Items…"), action: #selector(openItemSearch), keyEquivalent: "").target = self
+        let zenItem = NSMenuItem(title: L10n.string("Zen Mode"), action: #selector(toggleZenMode), keyEquivalent: "")
         zenItem.target = self
         zenItem.state = isZenModeActive ? .on : .off
         menu.addItem(zenItem)
         menu.addItem(.separator())
-        menu.addItem(withTitle: "Open Sapphire Setting", action: #selector(openPreferences), keyEquivalent: ",").target = self
+        menu.addItem(withTitle: L10n.string("Open Sapphire Setting"), action: #selector(openPreferences), keyEquivalent: ",").target = self
         menu.addItem(.separator())
-        menu.addItem(withTitle: "Quit Sapphire", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        menu.addItem(withTitle: L10n.string("Quit Sapphire"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         return menu
     }
 
     private func createAppContextMenu() -> NSMenu {
         let menu = NSMenu()
         if statusSettings.hideMenuBarIcon {
-            menu.addItem(withTitle: "Edit Menu Bar Items", action: #selector(enterEditMode), keyEquivalent: "").target = self
-            menu.addItem(withTitle: "Search Menu Bar Items…", action: #selector(openItemSearch), keyEquivalent: "").target = self
-            let zenItem = NSMenuItem(title: "Zen Mode", action: #selector(toggleZenMode), keyEquivalent: "")
+            menu.addItem(withTitle: L10n.string("Edit Menu Bar Items"), action: #selector(enterEditMode), keyEquivalent: "").target = self
+            menu.addItem(withTitle: L10n.string("Search Menu Bar Items…"), action: #selector(openItemSearch), keyEquivalent: "").target = self
+            let zenItem = NSMenuItem(title: L10n.string("Zen Mode"), action: #selector(toggleZenMode), keyEquivalent: "")
             zenItem.target = self
             zenItem.state = isZenModeActive ? .on : .off
             menu.addItem(zenItem)
             menu.addItem(.separator())
         }
-        menu.addItem(withTitle: "Preferences", action: #selector(openPreferences), keyEquivalent: ",").target = self
+        menu.addItem(withTitle: L10n.string("Preferences"), action: #selector(openPreferences), keyEquivalent: ",").target = self
         menu.addItem(.separator())
-        menu.addItem(withTitle: "Quit Sapphire", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        menu.addItem(withTitle: L10n.string("Quit Sapphire"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         return menu
     }
 

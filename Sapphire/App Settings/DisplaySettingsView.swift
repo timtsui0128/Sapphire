@@ -55,7 +55,7 @@ struct DisplaySettingsView: View {
                     Spacer(minLength: 8)
                     Picker("Show Notch On", selection: $settings.settings.notchDisplayTarget) {
                         ForEach(NotchDisplayTarget.allCases) { target in
-                            Text(target.displayName).tag(target)
+                            Text(LocalizedStringKey(target.displayName)).tag(target)
                         }
                     }
                     .labelsHidden()
@@ -145,7 +145,7 @@ private struct FullScreenBehaviorEditor: View {
             SettingsRowLabel(title: "In Full Screen", description: visibility.detail)
             Picker("In Full Screen", selection: $visibility) {
                 ForEach(FullScreenActivityVisibility.allCases) { visibility in
-                    Text(visibility.displayName).tag(visibility)
+                    Text(LocalizedStringKey(visibility.displayName)).tag(visibility)
                 }
             }
             .pickerStyle(.segmented)
@@ -189,7 +189,7 @@ private struct FullScreenSelectedActivitiesCard: View {
         SettingsCard(title: "Hide Selected", description: "Activities hidden in full screen on displays set to Hide Selected.") {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: 12, alignment: .leading)], alignment: .leading, spacing: 10) {
                 ForEach(LiveActivityType.allCases) { type in
-                    Toggle(type.displayName, isOn: binding(for: type))
+                    Toggle(LocalizedStringKey(type.displayName), isOn: binding(for: type))
                         .toggleStyle(.checkbox)
                 }
             }
@@ -474,7 +474,7 @@ private struct PerDisplaySettingsCard: View {
 
     private func sizeControl(label: String, value: Binding<Double>, range: ClosedRange<Double>) -> some View {
         HStack(spacing: 6) {
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: true, vertical: false)
                 .lineLimit(1)
@@ -556,7 +556,7 @@ private struct FloatingIslandPreview: View {
     private func labelled<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             content()
-            Text(title).font(.caption2).foregroundStyle(.secondary)
+            Text(LocalizedStringKey(title)).font(.caption2).foregroundStyle(.secondary)
         }
     }
 

@@ -1,6 +1,12 @@
 # Acknowledgments & Third-Party Licenses
 ---
 
+## Sparkle (personal fork updater)
+
+- **Project**: [sparkle-project/Sparkle](https://github.com/sparkle-project/Sparkle), version 2.10.1.
+- **Authors**: Andy Matuschak and the Sparkle contributors; full copyright notices are preserved below.
+- **License**: MIT, with bundled third-party notices. See [Sparkle-LICENSE.txt](docs/licenses/Sparkle-LICENSE.txt). The framework also includes its original license resources in distributed apps.
+
 ## KBPulse
 
 -   **Author**: EthanRDoesMC

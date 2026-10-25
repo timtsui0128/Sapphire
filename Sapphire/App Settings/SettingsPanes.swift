@@ -106,7 +106,7 @@ struct LockedSettingsSectionView: View {
                 .font(.system(size: 34, weight: .semibold))
                 .foregroundStyle(.secondary)
 
-            Text("\(section.label) requires Sapphire \(requiredTierName)")
+            Text("\(Text(LocalizedStringKey(section.label))) requires Sapphire \(requiredTierName)")
                 .font(.title2.bold())
                 .multilineTextAlignment(.center)
 
@@ -185,8 +185,8 @@ struct PermissionStatusRowView: View {
         HStack(spacing: 15) {
             Image(systemName: permission.iconName).font(.system(size: 18, weight: .medium)).foregroundColor(permission.iconColor).frame(width: 36, height: 36).background(permission.iconColor.opacity(0.15)).clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
-                Text(permission.title).font(.system(size: 14, weight: .medium))
-                Text(permission.description).font(.caption).foregroundColor(.secondary)
+                Text(LocalizedStringKey(permission.title)).font(.system(size: 14, weight: .medium))
+                Text(LocalizedStringKey(permission.description)).font(.caption).foregroundColor(.secondary)
             }
             Spacer()
             let status = permissionsManager.status(for: permission.type)
@@ -229,7 +229,7 @@ struct PermissionFeatureInfoPopover: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Label {
-                Text(permission.title)
+                Text(LocalizedStringKey(permission.title))
             } icon: {
                 Image(systemName: permission.iconName)
                     .foregroundStyle(permission.iconColor)
@@ -239,7 +239,7 @@ struct PermissionFeatureInfoPopover: View {
             Divider()
 
             if features.isEmpty {
-                Text(permission.description)
+                Text(LocalizedStringKey(permission.description))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -254,7 +254,7 @@ struct PermissionFeatureInfoPopover: View {
                             .font(.system(size: 12))
                             .foregroundStyle(section.iconBackgroundColor)
                             .frame(width: 16)
-                        Text(section.label)
+                        Text(LocalizedStringKey(section.label))
                             .font(.subheadline)
                     }
                 }
@@ -272,7 +272,7 @@ struct NotchAppearanceEditorView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if !title.isEmpty {
-                Text(title).font(.headline).padding([.top, .horizontal])
+                Text(LocalizedStringKey(title)).font(.headline).padding([.top, .horizontal])
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
@@ -281,7 +281,7 @@ struct NotchAppearanceEditorView: View {
                 Spacer()
                 Picker("", selection: $appearance.mode) {
                     ForEach(NotchAppearanceMode.allCases) { mode in
-                        Text(mode.displayName).tag(mode)
+                        Text(LocalizedStringKey(mode.displayName)).tag(mode)
                     }
                 }
                 .labelsHidden()
@@ -322,7 +322,7 @@ struct NotchAppearanceEditorView: View {
                     Spacer()
                     Picker("", selection: $appearance.backgroundStyle) {
                         ForEach(NotchBackgroundStyle.allCases) { style in
-                            Text(style.displayName).tag(style)
+                            Text(LocalizedStringKey(style.displayName)).tag(style)
                         }
                     }.labelsHidden().frame(width: 150)
                 }.padding()
@@ -825,7 +825,7 @@ struct AppsSettingsView: View {
 
             Picker("Update filter", selection: $updateFilter) {
                 ForEach(AppUpdateFilter.allCases) { filter in
-                    Text(filter.rawValue).tag(filter)
+                    Text(LocalizedStringKey(filter.rawValue)).tag(filter)
                 }
             }
             .labelsHidden()
@@ -1021,7 +1021,7 @@ private struct AppsMetricCard: View {
                 .frame(width: 24, height: 24)
                 .background(tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 7))
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.caption).foregroundStyle(.secondary)
+                Text(LocalizedStringKey(title)).font(.caption).foregroundStyle(.secondary)
                 Text(value).font(.subheadline.weight(.semibold)).lineLimit(1)
                 Text(detail).font(.caption2).foregroundStyle(.tertiary).lineLimit(1)
             }
@@ -1535,7 +1535,7 @@ private struct IndexingPill: View {
             ProgressView(value: progress)
                 .progressViewStyle(.linear)
                 .frame(width: 130)
-            Text(label).font(.caption.weight(.medium)).lineLimit(1)
+            Text(LocalizedStringKey(label)).font(.caption.weight(.medium)).lineLimit(1)
             Text("\(Int(progress * 100))%")
                 .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
         }
@@ -1574,7 +1574,7 @@ private struct StoragePieSlice: View {
     }
 
     private var sliceLabel: some View {
-        Text(label)
+        Text(LocalizedStringKey(label))
             .font(.system(size: fraction < 0.06 ? 8 : 10, weight: .semibold))
             .lineLimit(1)
             .truncationMode(.middle)
@@ -1611,6 +1611,8 @@ struct GeneralSettingsView: View {
                 Text("General")
                     .font(.largeTitle.bold())
                     .padding(.bottom)
+
+                AppLanguageSettingsSection()
 
                 VStack(alignment: .leading, spacing: 0) {
                     SettingsSectionHeader(title: "Behavior")
@@ -1873,9 +1875,9 @@ fileprivate struct AnimationSliderRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     VStack(alignment: .leading) {
-                        Text(title)
+                        Text(LocalizedStringKey(title))
                         if !description.isEmpty {
-                            Text(description)
+                            Text(LocalizedStringKey(description))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -2702,7 +2704,7 @@ struct MirrorSettingsView: View {
                         Spacer()
                         Picker("", selection: $settings.settings.mirrorRotationMode) {
                             ForEach(MirrorRotationMode.allCases) { mode in
-                                Text(mode.displayName).tag(mode)
+                                Text(LocalizedStringKey(mode.displayName)).tag(mode)
                             }
                         }
                         .labelsHidden()
@@ -2997,7 +2999,7 @@ struct LiveActivitiesSettingsView: View {
                         Spacer()
                         Picker("Persistent Activity", selection: persistentActivityBinding) {
                             ForEach(PersistentActivitySelection.allCases) { option in
-                                Text(option.rawValue).tag(option)
+                                Text(LocalizedStringKey(option.rawValue)).tag(option)
                             }
                         }
                         .labelsHidden()
@@ -3105,7 +3107,7 @@ struct StatThresholdRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Toggle(isOn: $threshold.isEnabled) {
-                Text(label)
+                Text(LocalizedStringKey(label))
             }
             .toggleStyle(.switch)
 
@@ -3180,7 +3182,7 @@ fileprivate struct SensorSelectionView: View {
                     List {
                         ForEach(SensorGroup.allCases, id: \.self) { group in
                             if let groupSensors = groupedSensors[group], !groupSensors.isEmpty {
-                                Section(header: Text(group.rawValue).font(.headline)) {
+                                Section(header: Text(LocalizedStringKey(group.rawValue)).font(.headline)) {
                                     ForEach(groupSensors, id: \.key) { sensor in
                                         Toggle(sensor.name, isOn: Binding<Bool>(
                                             get: { selectedSensorKeys.contains(sensor.key) },
@@ -3855,7 +3857,7 @@ struct LockScreenSettingsView: View {
                             Spacer()
                             Picker("Scaling", selection: $settings.settings.liveWallpaperScaling) {
                                 ForEach(WallpaperScaling.allCases) { scaling in
-                                    Text(scaling.displayName).tag(scaling)
+                                    Text(LocalizedStringKey(scaling.displayName)).tag(scaling)
                                 }
                             }
                             .labelsHidden()
@@ -3875,7 +3877,7 @@ struct LockScreenSettingsView: View {
                             Spacer()
                             Picker("Video Playback", selection: $settings.settings.liveWallpaperPlaybackMode) {
                                 ForEach(LiveWallpaperPlaybackMode.allCases) { mode in
-                                    Text(mode.displayName).tag(mode)
+                                    Text(LocalizedStringKey(mode.displayName)).tag(mode)
                                 }
                             }
                             .labelsHidden()
@@ -4000,7 +4002,7 @@ private struct WallpaperFileRow: View {
         let panel = NSOpenPanel()
         panel.title = panelTitle
         panel.message = panelMessage
-        panel.prompt = "Choose"
+        panel.prompt = L10n.string("Choose")
         panel.allowedContentTypes = WallpaperMedia.allowedContentTypes
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
@@ -4099,7 +4101,7 @@ struct SnapZonesSettingsView: View {
                             Spacer()
                             Picker("Reposition & Resize", selection: $settings.settings.snapWindowAnimation) {
                                 ForEach(SnapWindowAnimation.allCases) { animation in
-                                    Text(animation.displayName).tag(animation)
+                                    Text(LocalizedStringKey(animation.displayName)).tag(animation)
                                 }
                             }
                             .pickerStyle(.segmented)
@@ -4122,7 +4124,7 @@ struct SnapZonesSettingsView: View {
                         Spacer()
                         Picker("Widget View Style", selection: $settings.settings.snapZoneViewMode) {
                             ForEach(SnapZoneViewMode.allCases) { mode in
-                                Text(mode.displayName).tag(mode)
+                                Text(LocalizedStringKey(mode.displayName)).tag(mode)
                             }
                         }
                         .pickerStyle(.segmented)
@@ -5278,7 +5280,7 @@ struct ProximityUnlockSettingsView: View {
 
             Picker("Face ID works", selection: $settings.settings.faceIDLocationPolicy) {
                 ForEach(FaceIDLocationPolicy.allCases) { policy in
-                    Text(policy.displayName).tag(policy)
+                    Text(LocalizedStringKey(policy.displayName)).tag(policy)
                 }
             }
             .pickerStyle(.segmented)
@@ -6564,7 +6566,7 @@ fileprivate struct PickerButton: View {
     let action: () -> Void
 
     var body: some View {
-        Text(label)
+        Text(LocalizedStringKey(label))
             .font(.subheadline.weight(.bold))
             .padding(.vertical, 8)
             .padding(.horizontal, 16)
@@ -6658,7 +6660,7 @@ struct SpecRow: View {
     }
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .foregroundColor(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Text(value)
@@ -6863,7 +6865,7 @@ struct PowerShareRow: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(color)
                     .frame(width: 18)
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(.primary)
                 Spacer()
@@ -7045,7 +7047,7 @@ private struct BatteryMetricGraphCard<Value: Plottable & Comparable>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text(title).font(.system(size: 15, weight: .semibold, design: .rounded))
+                Text(LocalizedStringKey(title)).font(.system(size: 15, weight: .semibold, design: .rounded))
                 Spacer()
                 Text(currentValue)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
@@ -7383,7 +7385,7 @@ struct BatteryHistoryView: View {
             Capsule()
                 .fill(color)
                 .frame(width: 14, height: 3)
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .font(.system(size: 11, weight: .medium, design: .rounded))
                 .foregroundStyle(MaterialChartPalette.onSurfaceVariant)
                 .lineLimit(1)
@@ -7529,7 +7531,7 @@ struct StatPill: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .font(.caption2)
                 .foregroundColor(.secondary)
                 .lineLimit(1)
@@ -7723,7 +7725,7 @@ private struct BatteryAlignedDetailRow: View {
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(color)
                 .frame(width: 18, alignment: .center)
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundStyle(MaterialChartPalette.onSurfaceVariant)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -7827,7 +7829,7 @@ fileprivate struct PowerAdapterSpecRow: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .font(.system(size: 12, design: .rounded))
                 .foregroundColor(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -7891,7 +7893,7 @@ struct HealthStatRow: View {
     let label: String, value: String, percentage: Int
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(label).font(.caption).foregroundColor(.secondary)
+            Text(LocalizedStringKey(label)).font(.caption).foregroundColor(.secondary)
             Spacer()
             Text(value).font(.caption.weight(.semibold)).multilineTextAlignment(.trailing)
             Text("\(percentage)%").font(.caption.weight(.semibold)).frame(width: 35, alignment: .trailing)
@@ -7902,7 +7904,7 @@ struct SimpleHealthStatRow: View {
     let label: String, value: String
     var body: some View {
         HStack {
-            Text(label).font(.caption).foregroundColor(.secondary)
+            Text(LocalizedStringKey(label)).font(.caption).foregroundColor(.secondary)
             Spacer()
             Text(value).font(.caption.weight(.semibold))
         }
@@ -7913,7 +7915,7 @@ struct PowerRow: View {
     let label: String, value: String, color: Color?
     var body: some View {
         HStack {
-            Text(label).font(.caption).foregroundColor(.secondary)
+            Text(LocalizedStringKey(label)).font(.caption).foregroundColor(.secondary)
             Spacer()
             Text(value).font(.caption.weight(.semibold)).foregroundColor(color ?? .primary)
         }
@@ -8202,7 +8204,7 @@ struct TaskRowView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
-                Text(task.action.displayName).font(.headline)
+                Text(LocalizedStringKey(task.action.displayName)).font(.headline)
 
                 switch task.action {
                 case .setChargeLimit, .dischargeTo:
@@ -8607,7 +8609,7 @@ struct HUDSettingsView: View {
                         Spacer(minLength: 8)
                         Picker("Brightness Key Steps", selection: $settings.settings.brightnessKeyStep) {
                             ForEach(BrightnessKeyStep.allCases) { step in
-                                Text(step.displayName).tag(step)
+                                Text(LocalizedStringKey(step.displayName)).tag(step)
                             }
                         }
                         .pickerStyle(.segmented)
@@ -8726,7 +8728,7 @@ struct MusicSettingsView: View {
                         Text("Media Source")
                         Spacer()
                         Picker("", selection: $settings.settings.mediaSource) {
-                            ForEach(MediaSource.allCases) { source in Text(source.displayName).tag(source) }
+                            ForEach(MediaSource.allCases) { source in Text(LocalizedStringKey(source.displayName)).tag(source) }
                         }
                         .labelsHidden().frame(width: 180)
                     }.padding()
@@ -8757,7 +8759,7 @@ struct MusicSettingsView: View {
                         Spacer()
                         Picker("", selection: $settings.settings.defaultMusicPlayer) {
                             ForEach(DefaultMusicPlayer.allCases) { player in
-                                Text(player.displayName)
+                                Text(LocalizedStringKey(player.displayName))
                                     .tag(player)
                                     .disabled(!player.isAppInstalled && player.webURL == nil)
                             }
@@ -8838,7 +8840,7 @@ struct MusicSettingsView: View {
                             .foregroundStyle(.secondary)
                         Picker("", selection: $settings.settings.musicLiveActivityRightTextMode) {
                             ForEach(MusicLiveActivityRightTextMode.allCases) { mode in
-                                Text(mode.displayName).tag(mode)
+                                Text(LocalizedStringKey(mode.displayName)).tag(mode)
                             }
                         }
                         .labelsHidden()
@@ -8880,7 +8882,7 @@ struct MusicSettingsView: View {
                                     $0 != .off || settings.settings.musicLiveActivityRightTextMode == .always
                                 }
                             ) { mode in
-                                Text(mode.displayName).tag(mode)
+                                Text(LocalizedStringKey(mode.displayName)).tag(mode)
                             }
                         }
                         .labelsHidden()
@@ -8898,7 +8900,7 @@ struct MusicSettingsView: View {
                         Spacer()
                         Picker("", selection: $settings.settings.musicLiveActivityWaveformStyle) {
                             ForEach(MusicLiveActivityWaveformStyle.allCases) { style in
-                                Text(style.displayName).tag(style)
+                                Text(LocalizedStringKey(style.displayName)).tag(style)
                             }
                         }
                         .labelsHidden()
@@ -8931,7 +8933,7 @@ struct MusicSettingsView: View {
                         Spacer()
                         Picker("", selection: $settings.settings.spotifyAPIMode) {
                             ForEach(SpotifyAPIMode.allCases) { mode in
-                                Text(mode.displayName).tag(mode)
+                                Text(LocalizedStringKey(mode.displayName)).tag(mode)
                             }
                         }
                         .labelsHidden()
@@ -9079,7 +9081,7 @@ struct MusicSettingsView: View {
                             Text("Lyric Delay"); Spacer()
                             let offset = settings.settings.lyricOffset
                             let label = offset == 0 ? "On time" : String(format: "%+.1fs", offset)
-                            Text(label).font(.caption).foregroundColor(.secondary)
+                            Text(LocalizedStringKey(label)).font(.caption).foregroundColor(.secondary)
                             Stepper("", value: $settings.settings.lyricOffset, in: -5.0...5.0, step: 0.1)
                                 .labelsHidden()
                         }.padding()
@@ -9204,7 +9206,7 @@ fileprivate struct MusicLongPressActionPickerRow: View {
             Spacer()
             Picker("", selection: selection) {
                 ForEach(target.pickerOptions) { action in
-                    Text(action.displayName).tag(action)
+                    Text(LocalizedStringKey(action.displayName)).tag(action)
                 }
             }
             .labelsHidden()
@@ -9234,7 +9236,7 @@ fileprivate struct PlayerButtonSettingsRow: View {
                 .font(.system(size: 16, weight: .medium))
                 .frame(width: 30)
 
-            Text(buttonType.displayName)
+            Text(LocalizedStringKey(buttonType.displayName))
                 .font(.system(size: 14, weight: .medium))
 
             Spacer()
@@ -9459,9 +9461,9 @@ struct EyeBreakRecommendationsView: View {
                 .clipShape(Circle())
 
             VStack(alignment: .leading, spacing: 5) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.headline)
-                Text(description)
+                Text(LocalizedStringKey(description))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -9968,7 +9970,7 @@ struct MetricCardView: View {
             HStack(spacing: 4) {
                 Image(systemName: icon)
                     .font(.system(size: 10))
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.system(size: 10))
             }
             .foregroundColor(.secondary)
@@ -10389,10 +10391,12 @@ struct AboutSettingsView: View {
             if enabled { updateChecker.requestNotificationAuthorization() }
         }
         .onChange(of: settingsModel.settings.automaticallyDownloadSapphireUpdates) { _, enabled in
+#if SAPPHIRE_FULL_BUILD
             guard enabled,
                   settingsModel.settings.automaticUpdateChecksEnabled,
                   case .available(_, let asset) = updateChecker.status else { return }
             updateChecker.downloadUpdate(asset: asset)
+#endif
         }
         .fileExporter(
             isPresented: $isExportingSettings,
@@ -10556,6 +10560,7 @@ struct AboutSettingsView: View {
                     .foregroundStyle(.orange)
             }
 
+#if SAPPHIRE_FULL_BUILD
             VStack(alignment: .leading, spacing: 0) {
                 Text("Release Channel")
                     .font(.headline)
@@ -10593,16 +10598,31 @@ struct AboutSettingsView: View {
             }
             .modifier(SettingsContainerModifier())
 
+#else
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Personal fork updates", systemImage: "checkmark.shield")
+                    .font(.headline)
+                Text("Updates come from timtsui0128/Sapphire and are verified before installation.")
+                    .font(.caption).foregroundStyle(.secondary)
+                Link("View Releases on GitHub", destination: PersonalUpdateChannel.releasesURL)
+                    .font(.caption)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+            .modifier(SettingsContainerModifier())
+#endif
+
             VStack(alignment: .leading, spacing: 0) {
                 Text("Update Preferences")
                     .font(.headline)
                     .padding([.horizontal, .top])
                 ToggleRow(
                     title: "Automatic update checks",
-                    description: "Check after launch, wake, network recovery, and on a recurring schedule.",
+                    description: "Check periodically while Sapphire is running.",
                     isOn: $settingsModel.settings.automaticUpdateChecksEnabled
                 )
                 Divider().padding(.leading)
+#if SAPPHIRE_FULL_BUILD
                 ToggleRow(
                     title: "Download verified updates automatically",
                     description: "Download in the background. Installation always waits for you.",
@@ -10610,6 +10630,15 @@ struct AboutSettingsView: View {
                 )
                 .disabled(!settingsModel.settings.automaticUpdateChecksEnabled)
                 .opacity(settingsModel.settings.automaticUpdateChecksEnabled ? 1 : 0.5)
+#else
+                ToggleRow(
+                    title: "Prepare updates automatically",
+                    description: "Download and verify in the background. Restart when ready, or install when you next quit Sapphire.",
+                    isOn: Binding(get: { updateChecker.automaticallyDownloadsUpdates }, set: updateChecker.setAutomaticDownloadsEnabled)
+                )
+                .disabled(!settingsModel.settings.automaticUpdateChecksEnabled)
+                .opacity(settingsModel.settings.automaticUpdateChecksEnabled ? 1 : 0.5)
+#endif
                 Divider().padding(.leading)
                 ToggleRow(
                     title: "Update notifications",
@@ -10670,7 +10699,7 @@ struct ModernUpdateStatusView: View {
 
     private var canShowReleaseNotes: Bool {
         switch updateChecker.status {
-        case .upToDate, .available, .downloading, .downloaded:
+        case .upToDate, .available, .downloading, .downloaded, .readyToInstall:
             return updateChecker.releaseNotes != nil || updateChecker.releaseNotesURL != nil
         default:
             return false
@@ -10725,27 +10754,43 @@ struct ModernUpdateStatusView: View {
                     if canShowReleaseNotes {
                         releaseNotesButton
                     }
+#if SAPPHIRE_FULL_BUILD
                     Button("Check Again") {
                         updateChecker.checkForUpdatesMatchingCurrentChannel()
                     }
                     .buttonStyle(.link)
                     .font(.caption)
+#else
+                    Button("Remind Me Later") { updateChecker.cancelDownload() }
+                        .buttonStyle(.link).font(.caption)
+#endif
                 }
                 .transition(.opacity.combined(with: .scale(scale: 0.9)))
             case .downloading(let progress):
                 VStack(spacing: 12) {
-                    DownloadingView(progress: progress, onCancel: {
-                        updateChecker.cancelDownload()
-                    })
+#if !SAPPHIRE_FULL_BUILD
+                    if updateChecker.isExtracting {
+                        ProgressView("Verifying and preparing update…")
+                    } else {
+                        DownloadingView(progress: progress, onCancel: { updateChecker.cancelDownload() })
+                    }
+#else
+                    DownloadingView(progress: progress, onCancel: { updateChecker.cancelDownload() })
+#endif
                     if canShowReleaseNotes {
                         releaseNotesButton
                     }
                 }
                 .transition(.opacity)
-            case .downloaded:
+            case .downloaded, .readyToInstall:
                 VStack(spacing: 12) {
-                    Text("Download Complete!")
+                    Text("Update is ready to install")
                         .font(.system(size: 16, weight: .bold))
+#if !SAPPHIRE_FULL_BUILD
+                    Text("Restart now, or the prepared update will install when you quit Sapphire.")
+                        .font(.caption).foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+#endif
                     Button(action: { updateChecker.installAndRelaunch() }) {
                         HStack(spacing: 8) {
                             Image(systemName: "sparkles")
@@ -10764,8 +10809,20 @@ struct ModernUpdateStatusView: View {
                     if canShowReleaseNotes {
                         releaseNotesButton
                     }
+#if !SAPPHIRE_FULL_BUILD
+                    Button("Cancel Prepared Update") { updateChecker.cancelDownload() }
+                        .buttonStyle(.link).font(.caption)
+#endif
                 }
                 .transition(.opacity.combined(with: .scale(scale: 0.9)))
+            case .deferred(let version):
+                VStack(spacing: 10) {
+                    Label("Update postponed", systemImage: "clock")
+                        .font(.headline)
+                    Text("Version \(version) can be checked again when you're ready.")
+                        .font(.caption).foregroundStyle(.secondary)
+                    checkForUpdatesButton
+                }
             case .installing:
                 HStack(spacing: 8) {
                     ProgressView().controlSize(.small)
@@ -11017,7 +11074,7 @@ fileprivate struct NotchButtonRowView: View {
                     .font(.system(size: 16, weight: .medium))
                     .frame(width: 30)
 
-                Text(buttonType.displayName)
+                Text(LocalizedStringKey(buttonType.displayName))
                     .font(.system(size: 14, weight: .medium))
             }
 
@@ -11292,10 +11349,10 @@ private struct MenuBarHotkeysSettingsSection: View {
             ? "Not Set"
             : "\(KeyboardShortcutHelper.description(for: shortcut.wrappedValue.modifiers))\(shortcut.wrappedValue.key)"
         return HStack {
-            Text(title).font(.system(size: 14, weight: .medium))
+            Text(LocalizedStringKey(title)).font(.system(size: 14, weight: .medium))
             Spacer()
             if !isRecording {
-                Text(label)
+                Text(LocalizedStringKey(label))
                     .font(.caption.monospaced())
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
@@ -11543,7 +11600,7 @@ private struct MenuBarRevealConditionEditor: View {
         HStack(spacing: 8) {
             Picker("", selection: $condition.kind) {
                 ForEach(MenuBarRevealConditionKind.allCases) { kind in
-                    Text(kind.displayName).tag(kind)
+                    Text(LocalizedStringKey(kind.displayName)).tag(kind)
                 }
             }
             .pickerStyle(.menu)
@@ -12141,7 +12198,7 @@ struct ControlItemIconPreview: View {
                         )
                 )
 
-            Text(iconStyle.displayName)
+            Text(LocalizedStringKey(iconStyle.displayName))
                 .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
                 .foregroundColor(isSelected ? .primary : .secondary)
                 .lineLimit(2)
@@ -12652,7 +12709,7 @@ struct FocusSessionSettingsView: View {
             HStack(spacing: 8) {
                 Image(systemName: on ? "checkmark.circle.fill" : "circle")
                     .foregroundStyle(on ? Color.purple : Color.secondary)
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
@@ -12859,7 +12916,7 @@ struct FocusSessionSettingsView: View {
                 Divider().opacity(0.3).padding(.horizontal, 16)
                 Picker("Blocking mode", selection: $settings.settings.focusBlockingMode) {
                     ForEach(FocusBlockingMode.allCases) { mode in
-                        Text(mode.displayName).tag(mode)
+                        Text(LocalizedStringKey(mode.displayName)).tag(mode)
                     }
                 }
                 .padding(.horizontal, 16).padding(.vertical, 10)
@@ -12905,7 +12962,7 @@ struct FocusSessionSettingsView: View {
                                 .padding(.top, 2)
                             VStack(alignment: .leading, spacing: 2) {
                                 HStack(spacing: 6) {
-                                    Text(level.displayName)
+                                    Text(LocalizedStringKey(level.displayName))
                                         .font(.system(size: 13, weight: .semibold))
                                         .foregroundColor(.primary)
                                     if settings.settings.focusIntensity == level {
@@ -13194,7 +13251,7 @@ struct FocusSessionSettingsView: View {
                 Divider().opacity(0.3).padding(.horizontal, 16)
                 Picker("Sync mode", selection: $settings.settings.focusShortcutSyncMode) {
                     ForEach(FocusShortcutSyncMode.allCases) { mode in
-                        Text(mode.displayName).tag(mode)
+                        Text(LocalizedStringKey(mode.displayName)).tag(mode)
                     }
                 }
                 .padding(.horizontal, 16).padding(.vertical, 10)
@@ -13228,7 +13285,7 @@ struct FocusSessionSettingsView: View {
     }
 
     private func sectionLabel(_ title: String) -> some View {
-        Text(title)
+        Text(LocalizedStringKey(title))
             .font(.system(size: 14, weight: .semibold))
             .padding(.top, 12).padding(.horizontal, 16).padding(.bottom, 6)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -13338,7 +13395,7 @@ private struct AddFocusScheduleView: View {
 
                 Picker("Repeat:", selection: $repeatInterval) {
                     ForEach(FocusScheduleRepeat.allCases) { interval in
-                        Text(interval.displayName).tag(interval)
+                        Text(LocalizedStringKey(interval.displayName)).tag(interval)
                     }
                 }
 

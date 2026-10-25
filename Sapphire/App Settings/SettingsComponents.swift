@@ -20,7 +20,7 @@ struct InfoContainer: View {
                 .foregroundColor(color)
                 .padding(.top, 2)
 
-            Text(text)
+            Text(LocalizedStringKey(text))
                 .font(.system(size: 13))
                 .foregroundStyle(.primary)
                 .lineSpacing(4)
@@ -37,7 +37,7 @@ struct SettingsSwitch: View {
     @Binding var isOn: Bool
 
     var body: some View {
-        Toggle(title, isOn: $isOn)
+        Toggle(LocalizedStringKey(title), isOn: $isOn)
             .labelsHidden()
             .toggleStyle(.switch)
     }
@@ -50,10 +50,10 @@ struct SettingsRowLabel: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(titleFont)
             if !description.isEmpty {
-                Text(description)
+                Text(LocalizedStringKey(description))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -142,7 +142,7 @@ struct IconToggleRow: View {
         HStack(spacing: 15) {
             SettingsIconBadge(systemImage: systemImage, color: color)
 
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.primary)
 
@@ -210,7 +210,7 @@ struct WidgetRowView: View {
         } else {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(widgetType.displayName)
+                    Text(LocalizedStringKey(widgetType.displayName))
                         .font(.system(size: 14, weight: .medium))
                         .foregroundStyle(.primary)
                     if isAtCapacity {
@@ -266,7 +266,7 @@ struct LiveActivityRowView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text(activityType.displayName)
+                Text(LocalizedStringKey(activityType.displayName))
                     .font(.system(size: 14, weight: .medium))
                 Spacer()
                 SettingsSwitch(isOn: baseEnabledBinding.lockedOff(when: isPremiumLocked))
@@ -313,9 +313,9 @@ struct LiveActivityRowView: View {
     private func optionToggle(_ title: String, detail: String, isOn: Binding<Bool>) -> some View {
         Toggle(isOn: isOn) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.system(size: 12, weight: .semibold))
-                Text(detail)
+                Text(LocalizedStringKey(detail))
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
             }
@@ -529,7 +529,7 @@ struct AppTogglesListView: View {
     @ViewBuilder
     private func appSection(_ title: String, apps: [SystemApp]) -> some View {
         if !apps.isEmpty {
-            Text(title).font(.caption).foregroundStyle(.secondary).padding(.vertical, 5)
+            Text(LocalizedStringKey(title)).font(.caption).foregroundStyle(.secondary).padding(.vertical, 5)
             ForEach(apps) { app in
                 SystemAppRowView(app: app, isEnabled: isEnabled(app))
                 if app.id != apps.last?.id {
@@ -633,7 +633,7 @@ struct CustomSliderRowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(label)
+                Text(LocalizedStringKey(label))
                 Spacer()
                 Text(String(format: specifier, draft))
             }
@@ -856,7 +856,7 @@ struct StatusCapsuleLabel: View {
         HStack(spacing: 5) {
             Image(systemName: icon)
                 .font(.system(size: 10, weight: .bold))
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
         }
         .foregroundStyle(color)
@@ -877,7 +877,7 @@ struct SettingsDetailRow<Content: View>: View {
 
     var body: some View {
         HStack {
-            Text(title)
+            Text(LocalizedStringKey(title))
             Spacer()
             HStack { content }
                 .foregroundStyle(.secondary)
@@ -895,13 +895,13 @@ struct SettingsMultiSelectList<Option: Identifiable & Equatable>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.caption.weight(.medium))
                 .foregroundColor(.secondary)
                 .padding(.top, 8)
 
             ForEach(options) { option in
-                Toggle(label(option), isOn: $selection.membership(of: option))
+                Toggle(LocalizedStringKey(label(option)), isOn: $selection.membership(of: option))
             }
         }
         .padding(.horizontal)
@@ -969,7 +969,7 @@ struct SwipeActionPickerRow<Action: Hashable & Identifiable>: View {
             Spacer()
             Picker("", selection: $selection) {
                 ForEach(options) { option in
-                    Text(label(option)).tag(option)
+                    Text(LocalizedStringKey(label(option))).tag(option)
                 }
             }
             .labelsHidden()
@@ -991,7 +991,7 @@ struct LiquidGlassStylePickerRow: View {
                 stepButton(systemName: "chevron.left", help: "Previous Style", offset: -1)
                 Picker("", selection: $selection) {
                     ForEach(LiquidGlassMaterial.allCases) { style in
-                        Text(style.displayName).tag(style)
+                        Text(LocalizedStringKey(style.displayName)).tag(style)
                     }
                 }
                 .labelsHidden()
@@ -1016,7 +1016,7 @@ struct LiquidGlassStylePickerRow: View {
         }
         .buttonStyle(.plain)
         .foregroundStyle(.secondary)
-        .help(help)
+        .help(Text(LocalizedStringKey(help)))
         .accessibilityLabel(help)
     }
 }
@@ -1133,7 +1133,7 @@ struct LiquidGlassOptionsEditor: View {
             Spacer()
             Picker("", selection: $options.appearance) {
                 ForEach([LiquidGlassAppearance.auto, .light, .dark]) { appearance in
-                    Text(appearance.displayName).tag(appearance)
+                    Text(LocalizedStringKey(appearance.displayName)).tag(appearance)
                 }
             }
             .labelsHidden()

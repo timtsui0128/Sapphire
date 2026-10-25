@@ -104,7 +104,7 @@ struct CommunitySportsBoardView: View {
             Spacer()
             Picker("Competition", selection: $store.selectedLeague) {
                 ForEach(CommunitySportsLeague.allCases) { league in
-                    Text(league.title).tag(league)
+                    Text(LocalizedStringKey(league.title)).tag(league)
                 }
             }
             .labelsHidden()

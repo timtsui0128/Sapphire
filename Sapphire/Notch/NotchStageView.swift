@@ -242,6 +242,7 @@ final class NotchStageView: NSView {
         guard let layoutModel else { return view }
         return AnyView(
             view.notchHostEnvironment(bandHeight: layoutModel.bandHeight, displayScale: layoutModel.displayScale)
+                .appLanguage()
         )
     }
 

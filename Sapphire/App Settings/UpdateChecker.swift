@@ -204,13 +204,17 @@ enum UpdateStatus: Equatable {
     case upToDate
     case available(version: String, asset: GitHubReleaseAsset)
     case downloading(progress: Double)
+    case readyToInstall
+    case deferred(version: String)
     case downloaded(path: URL)
     case installing
     case error(String)
 
     var isUpdateAvailable: Bool {
-        if case .available = self { return true }
-        return false
+        switch self {
+        case .available, .downloaded, .readyToInstall: return true
+        default: return false
+        }
     }
 }
 
@@ -277,6 +281,7 @@ private enum UpdateMetadataError: LocalizedError {
     }
 }
 
+#if SAPPHIRE_FULL_BUILD
 @MainActor
 class UpdateChecker: NSObject, ObservableObject, @preconcurrency URLSessionDownloadDelegate {
     static let shared = UpdateChecker()
@@ -1616,3 +1621,4 @@ class UpdateChecker: NSObject, ObservableObject, @preconcurrency URLSessionDownl
         }
     }
 }
+#endif // SAPPHIRE_FULL_BUILD: personal builds use SparkleUpdateChecker.swift.
