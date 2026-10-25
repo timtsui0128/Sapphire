@@ -23,7 +23,7 @@ This first channel publishes full Apple Silicon ZIP updates for macOS 14+. Delta
 - The feed URL is fixed by the updater delegate to this fork's release channel. Archive URLs must belong to this repository's `personal-v…` GitHub Release path over HTTPS. No user-defaults feed override is used.
 - Sparkle validates signatures and candidate bundles and performs installation. The inherited custom updater is compiled only for the original full-build configuration; public personal builds cannot use its upstream download/install path.
 - Sparkle preferences use a separate defaults domain. The older download-only preference is deliberately not migrated into automatic preparation, which can install on quit.
-- Every binary release names its complete source commit. Original attribution, AGPLv3, and third-party notices remain in the repository. Sparkle's notices are preserved in `CREDITS.md`, `docs/licenses/`, and its embedded framework.
+- Every binary release names its complete source commit. Original attribution, AGPLv3, and third-party notices remain in the repository. Sparkle's notices are preserved in `CREDITS.md`, `docs/licenses/`, and its embedded framework. The build script also bundles the original AGPLv3 license, credits, and Sparkle notices under `Contents/Resources/Legal` before code signing.
 
 Keep the signing Keychain backed up. Losing this key prevents existing installs from accepting new signed feeds; it may require another manual bootstrap installation. Do not generate a replacement key for an existing channel casually. Anyone making a separate fork should create their own key and feed before distributing it.
 

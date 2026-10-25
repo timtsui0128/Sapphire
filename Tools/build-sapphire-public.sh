@@ -46,6 +46,13 @@ xcodebuild \
   build
 
 APP_PATH="$BUILD_ROOT/Build/Products/Debug/Sapphire.app"
+# Include the original license/attribution and updater notices in the distributed app.
+APP_LEGAL="$APP_PATH/Contents/Resources/Legal"
+mkdir -p "$APP_LEGAL"
+cp "$REPO_ROOT/LICENSE" "$APP_LEGAL/LICENSE-AGPLv3.txt"
+cp "$REPO_ROOT/CREDITS.md" "$APP_LEGAL/CREDITS.md"
+cp "$REPO_ROOT/docs/licenses/Sparkle-LICENSE.txt" "$APP_LEGAL/Sparkle-LICENSE.txt"
+
 # Local ad-hoc signing makes the resulting app launchable without a developer account.
 codesign --force --deep --sign - "$APP_PATH"
 codesign --verify --deep --strict "$APP_PATH"
