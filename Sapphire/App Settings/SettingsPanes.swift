@@ -2108,6 +2108,9 @@ struct FileShelfSettingsView: View {
                 ScreenshotShelfSettingsView()
                     .modifier(SettingsContainerModifier())
 
+                QuickAirDropSettingsView()
+                    .modifier(SettingsContainerModifier())
+
                 VStack(alignment: .leading, spacing: 0) {
                     ToggleRow(
                         title: "Expand Shelf on Hover",

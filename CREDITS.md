@@ -1,6 +1,11 @@
 # Acknowledgments & Third-Party Licenses
 ---
 
+## Menu Drop (interaction inspiration)
+
+- **App and author**: [Menu Drop by Sindre Sorhus](https://sindresorhus.com/menu-drop).
+- **Relationship**: Inspiration for dropping files onto a menu-bar AirDrop destination. Sapphire's Quick AirDrop implementation uses public AppKit APIs independently; no Menu Drop code, icon, or binary is included. No license for Menu Drop itself is asserted here.
+
 ## Sparkle (personal fork updater)
 
 - **Project**: [sparkle-project/Sparkle](https://github.com/sparkle-project/Sparkle), version 2.10.1.

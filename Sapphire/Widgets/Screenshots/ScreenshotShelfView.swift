@@ -13,6 +13,7 @@ import UniformTypeIdentifiers
 struct ScreenshotShelfView: View {
     @ObservedObject private var language = AppLanguageController.shared
     @ObservedObject private var manager: ScreenshotShelfManager
+    @ObservedObject private var airDrop = QuickAirDrop.shared
     @State private var selectedIDs: Set<UUID> = []
     @State private var knownIDs: Set<UUID> = []
     @State private var copyMessage: String?
@@ -172,6 +173,14 @@ struct ScreenshotShelfView: View {
             .disabled(selectedItems.isEmpty)
             .keyboardShortcut("c", modifiers: .command)
             .help("Copy selected screenshot files. File paste support depends on the destination app.")
+
+            Button {
+                airDrop.share(selectedItems.map { .file($0.fileURL) })
+            } label: {
+                Label("AirDrop", systemImage: QuickAirDrop.symbolName)
+            }
+            .disabled(selectedItems.isEmpty || airDrop.isPreparing)
+            .help("AirDrop all selected screenshots together. Choose a device in the system window.")
 
             Button {
                 manager.removeItems(ids: selectedIDs)
@@ -531,6 +540,7 @@ private final class ScreenshotBatchDragView: NSView, NSDraggingSource {
         mouseDownEvent = nil
         completedDrag?.onStateChanged?(false)
         if let completedDrag {
+            guard !QuickAirDrop.shared.consumeDeferredScreenshotDrag(session.draggingSequenceNumber) else { return }
             completedDrag.onEnded?(
                 completedDrag.batch.ids,
                 ScreenshotShelfDragPayload.accepted(operation)

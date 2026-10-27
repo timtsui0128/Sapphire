@@ -33,6 +33,7 @@ Sapphire/App/GoogleService-Info.plist
 !/Tools/LocalizationTests/
 !/Tools/Updates/
 !/Tools/UpdateTests/
+!/Tools/QuickAirDropTests/
 !/Tools/BluetoothSoundTests/
 !/Tools/SessionPrivacyTests/
 !/Tools/ClipboardPrivacyTests/

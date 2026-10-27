@@ -53635,6 +53635,295 @@
           }
         }
       }
+    },
+    "AirDrop Settings…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop Settings…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隔空投送设置…"
+          }
+        }
+      }
+    },
+    "AirDrop all selected screenshots together. Choose a device in the system window.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop all selected screenshots together. Choose a device in the system window."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将所有选中截图一起隔空投送，在系统窗口中选择接收设备。"
+          }
+        }
+      }
+    },
+    "AirDrop from Clipboard": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop from Clipboard"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隔空投送剪贴板内容"
+          }
+        }
+      }
+    },
+    "AirDrop in the Menu Bar": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop in the Menu Bar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "菜单栏隔空投送"
+          }
+        }
+      }
+    },
+    "AirDrop is not available for these items on this Mac.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop is not available for these items on this Mac."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台 Mac 无法通过隔空投送分享这些内容。"
+          }
+        }
+      }
+    },
+    "Choose Files for AirDrop…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Files for AirDrop…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择文件以隔空投送…"
+          }
+        }
+      }
+    },
+    "Choose files, an image, a web link, or text to share.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose files, an image, a web link, or text to share."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请选择要分享的文件、图片、网页链接或文字。"
+          }
+        }
+      }
+    },
+    "Choose items to AirDrop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose items to AirDrop"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择隔空投送的内容"
+          }
+        }
+      }
+    },
+    "Couldn’t open AirDrop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t open AirDrop"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法打开隔空投送"
+          }
+        }
+      }
+    },
+    "Drop files, images, links, or text onto Sapphire’s AirDrop icon to choose a nearby device.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drop files, images, links, or text onto Sapphire’s AirDrop icon to choose a nearby device."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将文件、图片、链接或文字拖到 Sapphire 的隔空投送图标上，即可选择附近设备。"
+          }
+        }
+      }
+    },
+    "Drop files, images, links, or text onto this icon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drop files, images, links, or text onto this icon."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将文件、图片、链接或文字拖到此图标上。"
+          }
+        }
+      }
+    },
+    "Preparing AirDrop…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparing AirDrop…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在准备隔空投送…"
+          }
+        }
+      }
+    },
+    "Sapphire AirDrop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sapphire AirDrop"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sapphire 隔空投送"
+          }
+        }
+      }
+    },
+    "Sapphire AirDrop — drop files, images, links, or text here": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sapphire AirDrop — drop files, images, links, or text here"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sapphire 隔空投送 — 将文件、图片、链接或文字拖到这里"
+          }
+        }
+      }
+    },
+    "The file %@ is no longer available.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file %@ is no longer available."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件 %@ 已无法访问。"
+          }
+        }
+      }
+    },
+    "This clipboard or drag contains too much data. Save it as a file and share that file instead.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This clipboard or drag contains too much data. Save it as a file and share that file instead."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剪贴板或拖入内容过大。请先保存为文件，再分享该文件。"
+          }
+        }
+      }
+    },
+    "You choose the recipient in the macOS AirDrop window. You can also select several screenshots in the shelf and click AirDrop.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You choose the recipient in the macOS AirDrop window. You can also select several screenshots in the shelf and click AirDrop."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 macOS 隔空投送窗口中选择接收设备。也可以在截图架多选截图，再点 AirDrop 一起分享。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

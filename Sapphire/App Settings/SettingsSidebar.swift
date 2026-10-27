@@ -39,7 +39,7 @@ struct SettingsSidebarView: View {
             let matches = group.sections.filter { section in
                 let haystacks = [section.label, section.shortDescription] + section.searchTokens
                 let languageKeywords = section == .general ? ["language", "English", "中文", "简体", "语言"] : []
-                let screenshotKeywords = section == .fileShelf ? ["screenshot", "screenshots", "截图"] : []
+                let screenshotKeywords = section == .fileShelf ? ["screenshot", "screenshots", "截图", "AirDrop", "Menu Drop", "分享", "隔空投送"] : []
                 return (haystacks + languageKeywords + screenshotKeywords).contains {
                     $0.localizedCaseInsensitiveContains(query) || L10n.string($0).localizedCaseInsensitiveContains(query)
                 }
