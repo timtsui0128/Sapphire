@@ -39,6 +39,7 @@ final class ScreenshotShelfManager: ObservableObject {
     @Published private(set) var watchedFolder: URL?
     @Published private(set) var lastError: String?
     @Published private(set) var captureTimingError: String?
+    @Published private(set) var pendingScreenshotOpenIDs: Set<UUID> = []
     let storageFolderURL: URL
     @Published var captureTiming: ScreenshotCaptureTiming {
         didSet {
@@ -89,7 +90,20 @@ final class ScreenshotShelfManager: ObservableObject {
         worker = ScreenshotShelfWorker(storageURL: storageFolderURL, retention: initialRetention, captureTiming: timing)
         worker.onItems = { [weak self] items in
             DispatchQueue.main.async {
-                MainActor.assumeIsolated { self?.items = items }
+                MainActor.assumeIsolated {
+                    guard let self else { return }
+                    self.items = items
+                    self.pendingScreenshotOpenIDs.formIntersection(items.map(\.id))
+                }
+            }
+        }
+        worker.onAutomaticCapture = { [weak self] id, generation in
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    guard let self, !self.isSessionSuppressed, self.captureEnabled,
+                          self.worker.isCurrentSession(generation), self.items.contains(where: { $0.id == id }) else { return }
+                    self.pendingScreenshotOpenIDs.insert(id)
+                }
             }
         }
         worker.onState = { [weak self] monitoring, folder, error in
@@ -111,6 +125,7 @@ final class ScreenshotShelfManager: ObservableObject {
         isSessionSuppressed = suppressed
         worker.setSessionSuppressed(suppressed)
         if suppressed {
+            markScreenshotsViewed()
             stopMonitoring()
         } else {
             // A new start date excludes files created during the locked/inactive session.
@@ -185,6 +200,20 @@ final class ScreenshotShelfManager: ObservableObject {
         worker.removeItemsAfterSuccessfulDrag(ids)
     }
 
+    /// A new saved system screenshot gets one explicit notch click ahead of
+    /// Now Playing/remembered navigation. History and imports never set this.
+    @discardableResult
+    func consumeScreenshotOpenRequest() -> Bool {
+        guard !isSessionSuppressed, !pendingScreenshotOpenIDs.isEmpty else { return false }
+        markScreenshotsViewed()
+        defaults.set("screenshots", forKey: "ScreenshotShelfSelectedTab")
+        return true
+    }
+
+    func markScreenshotsViewed() {
+        if !pendingScreenshotOpenIDs.isEmpty { pendingScreenshotOpenIDs.removeAll() }
+    }
+
     @discardableResult
     func copyItems(ids: Set<UUID>) -> Bool {
         guard !isSessionSuppressed else { return false }
@@ -200,6 +229,9 @@ final class ScreenshotShelfManager: ObservableObject {
 private final class ScreenshotShelfWorker {
     var onItems: (([ScreenshotShelfItem]) -> Void)?
     var onState: ((Bool, URL?, String?) -> Void)?
+    var onAutomaticCapture: ((UUID, UInt64) -> Void)?
+
+    func isCurrentSession(_ generation: UInt64) -> Bool { sessionGate.allows(generation) }
 
     private struct FileIdentity: Hashable, Codable {
         let device: Int32
@@ -681,6 +713,7 @@ private final class ScreenshotShelfWorker {
             collectedIdentities.insert(before.identity)
             if moveSource { try? FileManager.default.removeItem(at: journalURL) }
             onItems?(updated)
+            if moveSource { onAutomaticCapture?(id, generation) }
             scheduleExpiry()
         } catch {
             if sourceWasMoved {

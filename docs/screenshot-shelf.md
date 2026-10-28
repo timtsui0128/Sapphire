@@ -96,3 +96,10 @@ bash Tools/run-screenshot-ui-test.sh
 - `Sapphire/Services/Dropbox/FileShelfManager.swift`：文件架中的 Screenshots / Files 页签。
 - `Sapphire/App/AppDelegate.swift`：随 Sapphire 启停收集服务。
 - `Sapphire/LiveActivities/LiveActivityManager.swift`、`Sapphire/Notch/NotchController.swift`：刘海数量提示和文件架入口。
+
+
+## 新截图的点击优先级（0.1.3）
+
+新的系统截图保存并收进 Sapphire 后，下一次普通点击刘海会优先打开“文件架 → 截图”，即使此时正显示音乐，或文件架上次停在 Files／AirDrop。多张新截图合并为一次打开请求，旧文件预览不会挡在截图前面。打开后按原来的导航设置继续运行，不会让历史截图一直抢占音乐。手动点截图标签或操作截图页也会清除这次请求。
+
+只收集不自动弹开刘海，也不创建截图常驻胶囊。手动导入、重启后加载历史、锁屏期间的内容不触发新截图优先级；锁屏会清除尚未使用的请求。Pin、进行中的拖放、Command 点击仍保留其原有行为。若选择保留 macOS 浮动预览，需等截图实际保存并收集后才生效。

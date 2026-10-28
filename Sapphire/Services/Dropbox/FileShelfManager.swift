@@ -473,6 +473,9 @@ struct FileShelfView: View {
             .pickerStyle(.segmented)
             .padding(.horizontal, 16)
             .padding(.top, 12)
+            .onChange(of: selectedTab) { _, tab in
+                if tab == "screenshots" { screenshots.markScreenshotsViewed() }
+            }
 
             if selectedTab == "airdrop" {
                 AirDropShelfView()
@@ -487,6 +490,7 @@ struct FileShelfView: View {
                 })
                 .contentShape(Rectangle())
                 .simultaneousGesture(TapGesture().onEnded {
+                    screenshots.markScreenshotsViewed()
                     setScreenshotKeyboardFocus(true)
                 })
                 .onDisappear {

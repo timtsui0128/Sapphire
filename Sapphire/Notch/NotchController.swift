@@ -1767,10 +1767,9 @@ struct NotchController: View {
         guard !isManuallyHidden else { return }
         guard !shouldBlockNotchExpansionWhileLocked else { return }
         guard let config = config else { return }
-        if notchState == .clickExpanded { return }
-
         let flags = NSEvent.modifierFlags
         if flags.contains(.command) {
+            guard notchState != .clickExpanded else { return }
             scratch.collapseTask?.cancel()
             scratch.isCollapseTimerActive = false
             measuredClickContentSize = .zero
@@ -1778,6 +1777,9 @@ struct NotchController: View {
             notchState = .clickExpanded
             return
         }
+
+        if openPendingScreenshots(config: config, screenshotManager: .shared) { return }
+        if notchState == .clickExpanded { return }
 
         scratch.collapseTask?.cancel()
         scratch.isCollapseTimerActive = false
@@ -1832,6 +1834,21 @@ struct NotchController: View {
         case .clickExpanded:
             return
         }
+    }
+
+    private func openPendingScreenshots(config: ResolvedNotchConfiguration, screenshotManager: ScreenshotShelfManager) -> Bool {
+        guard notchState != .clickExpanded || currentMode == .musicPlayer || currentMode == .defaultWidgets else { return false }
+        guard !isPinned, !isFileDragSessionInProgress, !dragManager.isDraggingInActivationZone,
+              screenshotManager.consumeScreenshotOpenRequest() else { return false }
+        scratch.collapseTask?.cancel()
+        scratch.isCollapseTimerActive = false
+        cancelHoverExpandTask()
+        expansionAnimation = config.expandAnimation
+        measuredClickContentSize = .zero
+        fileShelfState.selectedItemForPreview = nil
+        navigationStack = [.fileShelf]
+        notchState = .clickExpanded
+        return true
     }
 
     private func receivePointerHover(_ hovering: Bool) {

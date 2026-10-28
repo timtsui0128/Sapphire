@@ -26,6 +26,20 @@ wrapper = '''
     }
 '''
 (scratch/'FileShelfCandidate.swift').write_text('import Foundation\nextension FileShelfActivityFixture {\n'+method+wrapper+'\n}')
+controller = (root/'Sapphire/Notch/NotchController.swift').read_text()
+start = controller.index('    private func openPendingScreenshots(')
+end = controller.index('\n    private func receivePointerHover(', start)
+method = controller[start:end]
+wrapper = '''
+    func clickScreenshotPriority(_ manager: ScreenshotShelfManager) -> Bool {
+        openPendingScreenshots(config: ResolvedNotchConfiguration(), screenshotManager: manager)
+    }
+'''
+(scratch/'ScreenshotClickRouting.swift').write_text('import AppKit\nimport SwiftUI\nextension ScreenshotClickFixture {\n'+method+wrapper+'\n}')
+tap = controller[controller.index('    private func handleTap()'):start]
+assert tap.index('flags.contains(.command)') < tap.index('if openPendingScreenshots(')
+assert tap.index('if openPendingScreenshots(') < tap.index('if notchState == .clickExpanded')
+assert tap.index('if openPendingScreenshots(') < tap.index('if activityType == .music')
 PY
 
 xcrun swiftc \
@@ -40,6 +54,8 @@ xcrun swiftc \
   "$REPO_ROOT/Sapphire/Services/QuickAirDrop/QuickAirDrop.swift" \
   "$REPO_ROOT/Sapphire/Services/SessionPrivacy/SessionPrivacyState.swift" \
   "$REPO_ROOT/Tools/QuickAirDropTests/AlertFixture.swift" \
+  "$CHECK_ROOT/ScreenshotClickRouting.swift" \
+  "$REPO_ROOT/Tools/ScreenshotShelfTests/ScreenshotClickFixture.swift" \
   "$REPO_ROOT/Tools/ScreenshotShelfTests/FileShelfActivityFixture.swift" \
   "$CHECK_ROOT/FileShelfCandidate.swift" \
   "$REPO_ROOT/Tools/ScreenshotShelfTests/ScreenshotShelfChecks.swift" \

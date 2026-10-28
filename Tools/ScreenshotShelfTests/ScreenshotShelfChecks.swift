@@ -110,6 +110,31 @@ struct ScreenshotShelfChecks {
         try check(FileManager.default.fileExists(atPath: ordinaryImage.path), "Collector moved an ordinary image")
         print("PASS: five new screenshots move into ordered owned storage; old and unrelated files stay")
 
+        try await eventually("new screenshot batch requests one notch click") { manager.pendingScreenshotOpenIDs.count == 5 }
+        defaults.set("airdrop", forKey: "ScreenshotShelfSelectedTab")
+        let click = ScreenshotClickFixture()
+        click.isPinned = true
+        try check(!click.clickScreenshotPriority(manager), "Pinning must retain the current view")
+        click.isPinned = false
+        click.isFileDragSessionInProgress = true
+        try check(!click.clickScreenshotPriority(manager), "An in-progress drag must not switch views")
+        click.isFileDragSessionInProgress = false
+        click.notchState = .clickExpanded
+        click.navigationStack = [.fileShelf]
+        try check(!click.clickScreenshotPriority(manager), "An already open screenshot/AirDrop tool should retain its controls")
+        click.notchState = .hoverExpanded
+        click.navigationStack = [.musicPlayer]
+        try check(manager.pendingScreenshotOpenIDs.count == 5, "Blocked input consumed screenshot priority")
+        try check(click.clickScreenshotPriority(manager), "The next ordinary notch click should prefer new screenshots")
+        try check(click.navigationStack == [.fileShelf] && click.notchState == .clickExpanded, "Music did not route directly to the screenshot shelf")
+        try check(click.fileShelfState.selectedItemForPreview == nil && click.measuredClickContentSize == .zero,
+                  "A stale file preview or old music size survived screenshot routing")
+        try check(defaults.string(forKey: "ScreenshotShelfSelectedTab") == "screenshots", "The AirDrop tab was not changed to Screenshots")
+        click.navigationStack = [.musicPlayer]
+        try check(!click.clickScreenshotPriority(manager) && click.navigationStack == [.musicPlayer],
+                  "Existing screenshot history kept overriding music after one click")
+        print("PASS: actual notch click routing opens Screenshots ahead of music once, resets the shelf tab, and preserves pin/drag guards")
+
         // Repeated write/attribute notifications must not add the same capture again.
         try FileManager.default.setAttributes([.modificationDate: Date()], ofItemAtPath: ordinaryImage.path)
         try await pause(2.6)
@@ -128,6 +153,8 @@ struct ScreenshotShelfChecks {
         let reloaded = ScreenshotShelfManager(storageURL: storage, defaults: defaults)
         try await eventually("persisted screenshot collection reloads") { reloaded.items.count == 5 }
         try check(reloaded.items == captured, "Reload changed screenshot IDs, paths, or order")
+        try check(reloaded.pendingScreenshotOpenIDs.isEmpty && !reloaded.consumeScreenshotOpenRequest(),
+                  "Reloading history armed an unwanted screenshot shortcut")
         print("PASS: all five captures and their order survive manager reload")
 
         let removed = captured[0]
@@ -192,6 +219,7 @@ struct ScreenshotShelfChecks {
         try writeImage(to: retained, screenshotMetadata: true)
         try await eventually("pre-lock capture is retained") { manager.items.count == 1 }
         let originalItems = manager.items
+        try await eventually("pre-lock capture has click priority") { !manager.pendingScreenshotOpenIDs.isEmpty }
         let queued = source.appendingPathComponent("Pending when locked.png")
         try writeImage(to: queued, screenshotMetadata: true)
         manager.setSessionSuppressed(true)
@@ -204,6 +232,7 @@ struct ScreenshotShelfChecks {
         try await pause(1)
         try check(!manager.isMonitoring && manager.captureEnabled, "Privacy pause changed the saved capture setting or restarted")
         try check(manager.items == originalItems, "Locked session captured or removed items")
+        try check(manager.pendingScreenshotOpenIDs.isEmpty && !manager.consumeScreenshotOpenRequest(), "Locking retained or consumed a screenshot navigation request")
         try check(!manager.copyItems(ids: Set(originalItems.map(\.id))), "Locked shelf wrote to the clipboard")
         try check(FileManager.default.fileExists(atPath: locked.path), "Locked capture was moved")
         manager.setSessionSuppressed(false)
@@ -211,6 +240,7 @@ struct ScreenshotShelfChecks {
         manager.retryFailedOperations()
         try await pause(2.6)
         try check(manager.items == originalItems, "Unlock replayed a locked or queued screenshot")
+        try check(manager.pendingScreenshotOpenIDs.isEmpty, "Unlock replayed screenshot click priority")
         try check(FileManager.default.fileExists(atPath: queued.path), "A pending capture moved after unlock")
         let resumed = source.appendingPathComponent("Created after unlock.png")
         try writeImage(to: resumed, screenshotMetadata: true)
@@ -291,6 +321,7 @@ struct ScreenshotShelfChecks {
         try writeImage(to: permanentSource, screenshotMetadata: false)
         manager.importFiles(from: [permanentSource])
         try await eventually("permanent manual import") { manager.items.count == 1 }
+        try check(manager.pendingScreenshotOpenIDs.isEmpty && !manager.consumeScreenshotOpenRequest(), "Manual imports should not override music navigation")
         let permanent = manager.items[0]
         try check(permanent.expiresAt == nil && permanent.removeAfterSuccessfulDrag != true,
                   "Persistent import has an automatic removal policy")
