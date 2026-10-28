@@ -468,12 +468,16 @@ struct FileShelfView: View {
             Picker("Shelf", selection: $selectedTab) {
                 Text("Screenshots (\(screenshots.items.count))").tag("screenshots")
                 Text("Files (\(manager.files.count))").tag("files")
+                Text("AirDrop").tag("airdrop")
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, 16)
             .padding(.top, 12)
 
-            if selectedTab == "files" {
+            if selectedTab == "airdrop" {
+                AirDropShelfView()
+                    .appContentAppearance()
+            } else if selectedTab == "files" {
                 ShelfContentView(files: manager.files)
             } else {
                 ScreenshotShelfView(onDragStateChanged: { dragging in

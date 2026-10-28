@@ -40,12 +40,9 @@ struct AirDropScreenshotReference {
 final class QuickAirDrop: ObservableObject {
     static let shared = QuickAirDrop()
     static let symbolName = NSImage(systemSymbolName: "airdrop", accessibilityDescription: nil) != nil ? "airdrop" : "square.and.arrow.up"
-    static let enabledKey = "SapphireQuickAirDropMenuBarEnabled"
-    @Published var menuBarEnabled: Bool { didSet { defaults.set(menuBarEnabled, forKey: Self.enabledKey) } }
     @Published private(set) var isPreparing = false
     @Published private(set) var lastError: String?
 
-    private let defaults: UserDefaults
     private let cache: URL
     private let factory: @MainActor () -> AirDropSharingSession?
     private let screenshots: @MainActor () -> [AirDropScreenshotReference]
@@ -64,7 +61,7 @@ final class QuickAirDrop: ObservableObject {
     }
     private var transfers: [UUID: Transfer] = [:]
 
-    init(defaults: UserDefaults = .standard, cache: URL? = nil,
+    init(cache: URL? = nil,
          factory: @escaping @MainActor () -> AirDropSharingSession? = { SystemAirDropSession() },
          screenshots: @escaping @MainActor () -> [AirDropScreenshotReference] = {
              ScreenshotShelfManager.shared.items.map { AirDropScreenshotReference(id: $0.id, url: $0.fileURL) }
@@ -74,7 +71,6 @@ final class QuickAirDrop: ObservableObject {
              HelperAlertPresenter.presentModal(messageText: "Couldn’t open AirDrop", informativeText: message,
                                                alertStyle: .warning, buttonTitles: ["OK"]) { _ in }
          }) {
-        self.defaults = defaults
         self.cache = cache ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
             .appendingPathComponent(Bundle.main.bundleIdentifier ?? "com.cshariq.sapphire", isDirectory: true)
             .appendingPathComponent("QuickAirDrop", isDirectory: true)
@@ -82,7 +78,6 @@ final class QuickAirDrop: ObservableObject {
         self.screenshots = screenshots
         self.didShareScreenshots = didShareScreenshots
         self.errorPresenter = errorPresenter
-        menuBarEnabled = defaults.object(forKey: Self.enabledKey) as? Bool ?? true
         privacy = SessionPrivacyState.shared.$isSuppressed.sink { [weak self] suppressed in
             if suppressed { self?.cancelPreparation() }
         }

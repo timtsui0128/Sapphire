@@ -16,11 +16,3 @@ enum L10n {
     static func string(_ value: String) -> String { value }
     static func format(_ value: String, _ args: CVarArg...) -> String { String(format: value, arguments: args) }
 }
-@MainActor final class AppDelegate: NSObject, NSApplicationDelegate { func openSettingsWindow() {} }
-enum SettingsSection: String { case fileShelf }
-extension Notification.Name { static let sapphireLanguageDidChange = Notification.Name("sapphireLanguageDidChange") }
-struct ToggleRow: View {
-    let title: String; let description: String
-    @Binding var isOn: Bool
-    var body: some View { Toggle(title, isOn: $isOn) }
-}

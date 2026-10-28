@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import SwiftUI
 
 @MainActor private final class TestSession: AirDropSharingSession {
     var supported = true
@@ -10,13 +11,6 @@ import Foundation
         received = items
         reply = completion
     }
-}
-
-private final class TestDefaults: UserDefaults {
-    private var values: [String: Any] = [:]
-    init() { super.init(suiteName: "SapphireAirDropTest.\(UUID().uuidString)")! }
-    override func object(forKey key: String) -> Any? { values[key] }
-    override func set(_ value: Any?, forKey key: String) { values[key] = value }
 }
 
 private func check(_ condition: @autoclosure () throws -> Bool, _ message: String) throws {
@@ -103,18 +97,13 @@ private func check(_ condition: @autoclosure () throws -> Bool, _ message: Strin
         try FileManager.default.removeItem(at: external.temporaryDirectory)
         print("PASS: same-name screenshots remain separate; external files and folders are forwarded without unnecessary copying")
 
-        let defaults = TestDefaults()
         let session = TestSession()
         let cache = root.appendingPathComponent("sharing-cache")
         let references = files.enumerated().map { AirDropScreenshotReference(id: UUID(), url: $0.element) }
         var completed: [Set<UUID>] = []
         var errors: [String] = []
-        let share = QuickAirDrop(defaults: defaults, cache: cache, factory: { session }, screenshots: { references },
+        let share = QuickAirDrop(cache: cache, factory: { session }, screenshots: { references },
                                 didShareScreenshots: { completed.append($0) }, errorPresenter: { errors.append($0) })
-        try check(share.menuBarEnabled, "The requested menu-bar feature should be enabled initially")
-        share.menuBarEnabled = false
-        let reloaded = QuickAirDrop(defaults: defaults, cache: root.appendingPathComponent("reload-cache"), factory: { nil }, errorPresenter: { _ in })
-        try check(!reloaded.menuBarEnabled, "The menu-bar preference must persist")
         try check(share.share(decoded, dragSequence: 123), "Accept a screenshot batch")
         try check(share.consumeDeferredScreenshotDrag(123), "The source must defer its normal drag-retention callback")
         try check(!share.consumeDeferredScreenshotDrag(123), "A sequence is consumed only once")
@@ -152,7 +141,7 @@ private func check(_ condition: @autoclosure () throws -> Bool, _ message: Strin
         try check(session.received.isEmpty && errors.count == 1, "Missing files must fail without opening AirDrop")
         print("PASS: lock suppresses new sharing and cancels queued work; a missing file reports an error safely")
 
-        let unsupported = QuickAirDrop(defaults: defaults, cache: cache, factory: { nil }, screenshots: { references },
+        let unsupported = QuickAirDrop(cache: cache, factory: { nil }, screenshots: { references },
                                        didShareScreenshots: { completed.append($0) }, errorPresenter: { errors.append($0) })
         let priorCompletions = completed.count
         try check(unsupported.share([.file(files[0])]), "Unavailable services should be detected after preparing safely")
@@ -162,9 +151,9 @@ private func check(_ condition: @autoclosure () throws -> Bool, _ message: Strin
         try check((try FileManager.default.contentsOfDirectory(at: cache, includingPropertiesForKeys: nil)).isEmpty, "Cancelled, failed and completed transfers must clean temporary files")
         print("PASS: unavailable services report an error, concurrent preparation is rejected, and staging files are cleaned")
 
-        let view = AirDropMenuDropView(frame: NSRect(x: 0, y: 0, width: 24, height: 24), sharing: share)
+        let view = AirDropDropView(frame: NSRect(x: 0, y: 0, width: 24, height: 24), sharing: share)
         board.clearContents(); board.writeObjects([files[0] as NSURL])
-        try check(view.accepts(board, operations: .copy), "The native status view accepts supported copy drags")
+        try check(view.accepts(board, operations: .copy), "The native shelf view accepts supported copy drags")
         try check(!view.accepts(board, operations: .move), "It must not claim destructive move drags")
         SessionPrivacyState.shared.isSuppressed = true
         try check(!view.accepts(board, operations: .copy), "Locked native destinations must refuse drags")
@@ -172,12 +161,44 @@ private func check(_ condition: @autoclosure () throws -> Bool, _ message: Strin
         view.onClick = { clicks += 1 }
         let event = NSEvent.mouseEvent(with: .leftMouseDown, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: 0, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)!
         view.mouseDown(with: event)
-        try check(clicks == 0, "Locked menu clicks must be ignored")
+        try check(clicks == 0, "Locked shelf clicks must be ignored")
         SessionPrivacyState.shared.isSuppressed = false
         view.mouseDown(with: event)
-        try check(clicks == 1, "The drag overlay must still forward clicks once")
+        try check(clicks == 1, "The drag overlay must still forward file-chooser clicks once")
         try check(NSImage(systemSymbolName: QuickAirDrop.symbolName, accessibilityDescription: nil) != nil, "The menu symbol must exist on the supported system")
-        print("PASS: native drag target is copy-only, privacy gated, and forwards normal menu clicks")
+        print("PASS: native drag target is copy-only, privacy gated, and forwards normal shelf clicks")
+        if let path = CommandLine.arguments.dropFirst().first {
+            let output = URL(fileURLWithPath: path)
+            try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
+            for locale in ["en", "zh-Hans"] {
+                for dark in [false, true] {
+                    let content = VStack(spacing: 12) {
+                        AirDropShelfView(sharing: share)
+                        Divider()
+                        QuickAirDropSettingsView()
+                    }
+                    .frame(width: 680, height: 460, alignment: .top)
+                    .background(dark ? Color.black : Color.white)
+                    .environment(\.locale, Locale(identifier: locale))
+                    .environment(\.colorScheme, dark ? .dark : .light)
+                    let host = NSHostingView(rootView: content)
+                    let frame = NSRect(x: 0, y: 0, width: 680, height: 460)
+                    let window = NSWindow(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
+                    window.isReleasedWhenClosed = false
+                    window.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+                    window.contentView = host
+                    host.frame = frame
+                    host.layoutSubtreeIfNeeded()
+                    try await Task.sleep(nanoseconds: 80_000_000)
+                    host.layoutSubtreeIfNeeded()
+                    let bitmap = host.bitmapImageRepForCachingDisplay(in: host.bounds)!
+                    host.cacheDisplay(in: host.bounds, to: bitmap)
+                    try bitmap.representation(using: .png, properties: [:])!.write(to: output.appendingPathComponent("airdrop-\(locale)-\(dark ? "dark" : "light").png"))
+                    window.close()
+                }
+            }
+            print("PASS: internal AirDrop shelf and settings render in English/Chinese, light/dark")
+        }
         print("All Quick AirDrop checks passed; no real transfer was started.")
     }
 }

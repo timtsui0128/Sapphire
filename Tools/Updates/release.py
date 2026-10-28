@@ -16,12 +16,14 @@ import tempfile
 import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = json.loads((Path(__file__).parent / "sparkle-tools.json").read_text())
 TOOLS = ROOT / "output/updater-tools"
 FEED = f"https://github.com/{CONFIG['repository']}/releases/latest/download/appcast.xml"
 NS = {"s": "http://www.andymatuschak.org/xml-namespaces/sparkle"}
+MAXIMUM_DELTA_BASES = 2
 
 
 def run(args, **kwargs):
@@ -75,6 +77,55 @@ def gh(args):
     return run([binary, *args], env=env, stdout=subprocess.PIPE, text=True).stdout.strip()
 
 
+def delta_bases(build, public_key):
+    """Only opt-in releases understand .delta URLs; builds 10/11 reject them.
+
+    Receipts and unchanged signed assets are retained locally by prepare().
+    Never rebuild an old baseline: the patch must match the distributed app.
+    """
+    candidates = []
+    for path in (ROOT / "output/releases").glob("personal-v*/release.json"):
+        old = json.loads(path.read_text())
+        if (old.get("supports_delta_updates") is not True or old.get("repository") != CONFIG["repository"]
+                or old.get("public_key") != public_key or not str(old.get("build", "")).isdigit()
+                or int(old["build"]) >= int(build)):
+            continue
+        candidates.append((int(old["build"]), path.parent, old))
+    bases = []
+    for _, directory, old in sorted(candidates, key=lambda value: value[0], reverse=True)[:MAXIMUM_DELTA_BASES]:
+        feed = directory / "appcast.xml"
+        expected_feed = old["assets"]["appcast.xml"]
+        if sha256(feed) != expected_feed["sha256"]:
+            raise RuntimeError("A previous signed feed changed; cannot use it as a delta baseline")
+        item = ET.parse(feed).find("channel/item")
+        if item.findtext("s:version", namespaces=NS) != str(old["build"]):
+            raise RuntimeError("A delta baseline feed has the wrong build number")
+        name = Path(urlsplit(item.find("enclosure").get("url")).path).name
+        archive = directory / name
+        if not name.endswith(".zip") or sha256(archive) != old["assets"][name]["sha256"]:
+            raise RuntimeError("A previous distributed archive changed; cannot generate a delta")
+        bases.append({"build": str(old["build"]), "archive": archive, "directory": directory})
+    return bases
+
+
+def signed_enclosures(directory, tag, assets):
+    item = ET.parse(directory / "appcast.xml").find("channel/item")
+    prefix = f"https://github.com/{CONFIG['repository']}/releases/download/{tag}/"
+    entries = [item.find("enclosure"), *item.findall("s:deltas/enclosure", NS)]
+    result = []
+    for entry in entries:
+        if entry is None:
+            raise RuntimeError("The signed appcast is missing its full update enclosure")
+        url = entry.get("url", "")
+        name = Path(urlsplit(url).path).name
+        signature = entry.get(f"{{{NS['s']}}}edSignature")
+        if (url != prefix + name or name not in assets or not signature
+                or not name.endswith((".zip", ".delta"))):
+            raise RuntimeError("An update enclosure is not a signed asset in this exact release")
+        result.append((directory / name, signature))
+    return result
+
+
 def prepare(args):
     if not re.fullmatch(r"\d+\.\d+\.\d+", args.version) or not re.fullmatch(r"[1-9]\d*", args.build):
         raise RuntimeError("Use a numeric version (0.1.0) and a positive increasing build number (10)")
@@ -118,10 +169,15 @@ def prepare(args):
     run(["/usr/bin/ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", app, archive])
     # Inline plain-text notes remain covered by the appcast signature.
     archive.with_suffix(".txt").write_text(note_text)
+    bases = delta_bases(args.build, public_key)
+    for base in bases:
+        # Old archives are inputs only, excluded from the new release's assets.
+        shutil.copy2(base["archive"], destination / base["archive"].name)
     prefix = f"https://github.com/{CONFIG['repository']}/releases/download/{tag}/"
     run([binaries / "generate_appcast", "--account", CONFIG["keychain_account"],
          "--download-url-prefix", prefix, "--link", f"https://github.com/{CONFIG['repository']}",
-         "--embed-release-notes", "--maximum-deltas", "0", destination])
+         "--embed-release-notes", "--versions", args.build, "--maximum-versions", "1",
+         "--maximum-deltas", str(MAXIMUM_DELTA_BASES), destination])
     feed = destination / "appcast.xml"
     item = ET.parse(feed).find("channel/item")
     if item is None or item.findtext("s:version", namespaces=NS) != args.build:
@@ -130,15 +186,35 @@ def prepare(args):
     signature_key = f"{{{NS['s']}}}edSignature"
     if enclosure is None or not enclosure.get(signature_key) or enclosure.get("url") != prefix + archive.name:
         raise RuntimeError("Generated appcast lacks the expected signed archive")
+    deltas = []
+    for entry in item.findall("s:deltas/enclosure", NS):
+        baseline = next((base for base in bases if base["build"] == entry.get(f"{{{NS['s']}}}deltaFrom")), None)
+        if baseline is None:
+            raise RuntimeError("Generated delta targets a build that does not accept incremental updates")
+        path = destination / Path(urlsplit(entry.get("url")).path).name
+        if not path.name.endswith(".delta") or not entry.get(signature_key) or entry.get("url") != prefix + path.name:
+            raise RuntimeError("Generated delta lacks the expected signed release URL")
+        # Apply every real patch before publishing. Sparkle also checks its hash
+        # and signature on the receiving Mac and falls back to the full ZIP.
+        with tempfile.TemporaryDirectory(prefix="SapphireDeltaCheck-") as scratch:
+            old = Path(scratch) / "old"
+            run(["ditto", "-x", "-k", baseline["archive"], old])
+            patched = Path(scratch) / "Sapphire.app"
+            run([binaries / "BinaryDelta", "apply", old / "Sapphire.app", patched, path])
+            run(["codesign", "--verify", "--deep", "--strict", patched])
+            if plistlib.loads((patched / "Contents/Info.plist").read_bytes())["CFBundleVersion"] != args.build:
+                raise RuntimeError("Applied delta produced the wrong application version")
+        deltas.append(path)
     (destination / "release-notes.md").write_text(
         note_text + f"\n\nSource: https://github.com/{CONFIG['repository']}/commit/{commit}\n"
         "\nUnofficial personal fork of cshariq/Sapphire by Shariq Charolia. GNU AGPLv3.\n"
         "Apple Silicon / macOS 14+. Locally ad-hoc signed; not Apple notarized.\n")
     checksum = destination / "SHA256SUMS.txt"
-    checksum.write_text("".join(f"{sha256(p)}  {p.name}\n" for p in [archive, feed]))
-    assets = [archive, feed, checksum]
+    checksum.write_text("".join(f"{sha256(p)}  {p.name}\n" for p in [archive, *deltas, feed]))
+    assets = [archive, *deltas, feed, checksum]
     receipt = {"tag": tag, "version": args.version, "build": args.build, "commit": commit,
                "repository": CONFIG["repository"], "public_key": public_key,
+               "supports_delta_updates": True, "delta_bases": [base["build"] for base in bases],
                "assets": {p.name: {"sha256": sha256(p), "size": p.stat().st_size} for p in assets}}
     (destination / "release.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print(f"Prepared, not published: {destination}")
@@ -164,10 +240,8 @@ def publish(args):
     if public_key != receipt["public_key"]:
         raise RuntimeError("The prepared release uses a different signing key")
     run([binaries / "sign_update", "--account", CONFIG["keychain_account"], "--verify", directory / "appcast.xml"])
-    enclosure = ET.parse(directory / "appcast.xml").find("channel/item/enclosure")
-    archive = directory / Path(enclosure.get("url")).name
-    run([binaries / "sign_update", "--account", CONFIG["keychain_account"], "--verify", archive,
-         enclosure.get(f"{{{NS['s']}}}edSignature")])
+    for archive, signature in signed_enclosures(directory, receipt["tag"], receipt["assets"]):
+        run([binaries / "sign_update", "--account", CONFIG["keychain_account"], "--verify", archive, signature])
     # Require the complete source to be publicly available before publishing binaries.
     gh(["api", f"repos/{CONFIG['repository']}/commits/{receipt['commit']}", "--jq", ".sha"])
     existing = json.loads(gh(["api", f"repos/{CONFIG['repository']}/releases?per_page=100"]))

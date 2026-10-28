@@ -31,6 +31,11 @@ def run(args, **kwargs):
 
 
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
+    requests = []
+    def do_GET(self):
+        self.requests.append(self.path)
+        super().do_GET()
+
     def log_message(self, *args):
         pass
 
@@ -57,16 +62,20 @@ with tempfile.TemporaryDirectory(prefix="SapphireUpdateTests-") as temp:
     origin = f"http://127.0.0.1:{server.server_port}"
     results = []
     try:
-        for mode in ["install", "automatic", "quit", "cancel", "lock", "bad-archive", "bad-feed"]:
+        for mode in ["install", "automatic", "quit", "cancel", "lock", "bad-archive", "bad-feed", "delta", "delta-fallback"]:
             case = root / mode
             downloads = case / "downloads"
             downloads.mkdir(parents=True)
             result = case / "result.json"
             app = case / "installed/UpdateCheck.app"
             candidate = case / "candidate/UpdateCheck.app"
+            payload = secrets.token_bytes(1024 * 1024) if mode.startswith("delta") else None
             for bundle, build in [(app, "1"), (candidate, "2")]:
                 (bundle / "Contents/MacOS").mkdir(parents=True)
                 (bundle / "Contents/Frameworks").mkdir()
+                if payload is not None:
+                    (bundle / "Contents/Resources").mkdir()
+                    (bundle / "Contents/Resources/unchanged-fixture.bin").write_bytes(payload)
                 shutil.copy2(executable, bundle / "Contents/MacOS/UpdateHarness")
                 shutil.copytree(framework, bundle / "Contents/Frameworks/Sparkle.framework", symlinks=True)
                 info = {"CFBundleIdentifier": f"local.sapphire.update-tests.{mode}.{secrets.token_hex(4)}" if build == "1" else bundle_id,
@@ -83,10 +92,24 @@ with tempfile.TemporaryDirectory(prefix="SapphireUpdateTests-") as temp:
                 run(["codesign", "--force", "--deep", "--sign", "-", bundle], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             archive = downloads / "UpdateCheck.zip"
             run(["ditto", "-c", "-k", "--keepParent", candidate, archive])
+            if payload is not None:
+                run(["ditto", "-c", "-k", "--keepParent", app, downloads / "UpdateCheck-old.zip"])
             run([tools / "generate_appcast", "--ed-key-file", key, "--download-url-prefix", f"{origin}/{mode}/downloads/",
-                 "--maximum-deltas", "0", downloads], stdout=subprocess.DEVNULL)
+                 "--versions", "2", "--maximum-versions", "1", "--maximum-deltas", "1" if payload else "0", downloads], stdout=subprocess.DEVNULL)
             feed = downloads / "appcast.xml"
             run([tools / "sign_update", "--ed-key-file", key, "--verify", feed], stdout=subprocess.DEVNULL)
+            if payload is not None:
+                item = ET.parse(feed).find("channel/item")
+                enclosure = item.find("s:deltas/enclosure", release.NS)
+                assert enclosure is not None, "The fixture must produce a signed delta"
+                delta = downloads / Path(enclosure.get("url")).name
+                assert delta.stat().st_size < archive.stat().st_size // 4
+                run([tools / "sign_update", "--ed-key-file", key, "--verify", delta,
+                     enclosure.get(f"{{{release.NS['s']}}}edSignature")], stdout=subprocess.DEVNULL)
+                if mode == "delta-fallback":
+                    content = bytearray(delta.read_bytes())
+                    content[len(content) // 2] ^= 1
+                    delta.write_bytes(content)
             if mode == "bad-archive":
                 content = bytearray(archive.read_bytes())
                 content[len(content) // 2] ^= 1
@@ -96,7 +119,7 @@ with tempfile.TemporaryDirectory(prefix="SapphireUpdateTests-") as temp:
             with (case / "process.log").open("w") as log:
                 process = subprocess.Popen([str(app / "Contents/MacOS/UpdateHarness")], stdout=log, stderr=log)
                 deadline = time.monotonic() + 65
-                expected = "relaunched" if mode in {"install", "automatic"} else "rejected" if mode.startswith("bad-") else "cancelled"
+                expected = "relaunched" if mode in {"install", "automatic", "delta", "delta-fallback"} else "rejected" if mode.startswith("bad-") else "cancelled"
                 data = {}
                 while time.monotonic() < deadline:
                     if result.exists():
@@ -116,7 +139,12 @@ with tempfile.TemporaryDirectory(prefix="SapphireUpdateTests-") as temp:
             if data.get("state") != expected:
                 raise AssertionError(f"{mode}: {data}\n{(case / 'process.log').read_text()[-10000:]}")
             installed_info = plistlib.loads((app / "Contents/Info.plist").read_bytes())
-            assert installed_info["CFBundleVersion"] == ("2" if mode in {"install", "automatic", "quit"} else "1")
+            assert installed_info["CFBundleVersion"] == ("2" if mode in {"install", "automatic", "quit", "delta", "delta-fallback"} else "1")
+            if payload is not None:
+                requested = [path for path in QuietHandler.requests if path.startswith(f"/{mode}/downloads/")]
+                assert any(path.endswith(".delta") for path in requested), requested
+                assert any(path.endswith("/UpdateCheck.zip") for path in requested) == (mode == "delta-fallback"), requested
+                print(f"PASS: {mode} downloaded the delta; full archive fallback = {mode == 'delta-fallback'}")
             run(["codesign", "--verify", "--deep", "--strict", app])
             results.append({"case": mode, "state": data["state"], "build": installed_info["CFBundleVersion"], "message": data["message"]})
             print(f"PASS: {mode} → {data['state']}; installed build {installed_info['CFBundleVersion']}", flush=True)

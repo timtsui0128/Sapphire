@@ -14,7 +14,7 @@ enum PersonalUpdateChannel {
         url.scheme == "https" && url.host == "github.com"
             && url.user == nil && url.password == nil && url.port == nil
             && url.path.hasPrefix("/\(repository)/releases/download/personal-v")
-            && url.path.hasSuffix(".zip")
+            && (url.path.hasSuffix(".zip") || url.path.hasSuffix(".delta"))
     }
 }
 
@@ -45,10 +45,27 @@ final class UpdateChecker: NSObject, ObservableObject, SPUUserDriver, SPUUpdater
     private var readyReply: ((SPUUserUpdateChoice) -> Void)?
     private var expectedBytes: UInt64 = 0
     private var receivedBytes: UInt64 = 0
+    private var downloadStartedAt: TimeInterval?
+    private var lastProgressPublishedAt: TimeInterval = 0
     private var offeredAsset: GitHubReleaseAsset?
     private var privacyObservation: AnyCancellable?
     private let autoDownloadKey = "SapphirePersonalUpdaterAutomaticDownloads"
     private let migratedKey = "SapphirePersonalUpdaterPreferencesMigrated"
+
+    var downloadDetail: String? {
+        guard case .downloading = status, !isExtracting else { return nil }
+        func size(_ bytes: UInt64) -> String {
+            ByteCountFormatter.string(fromByteCount: Int64(clamping: bytes), countStyle: .file)
+        }
+        let amount = expectedBytes > 0
+            ? L10n.format("%@ of %@", size(receivedBytes), size(expectedBytes))
+            : L10n.format("%@ downloaded", size(receivedBytes))
+        guard let downloadStartedAt else { return amount }
+        let elapsed = ProcessInfo.processInfo.systemUptime - downloadStartedAt
+        guard elapsed >= 0.5, receivedBytes > 0 else { return amount }
+        let speed = UInt64(min(Double(UInt64.max / 2), Double(receivedBytes) / elapsed))
+        return L10n.format("%@ · %@/s", amount, size(speed))
+    }
 
     init(bundle: Bundle = .main, feedURL: URL = PersonalUpdateChannel.feedURL,
          archivePolicy: @escaping (URL) -> Bool = PersonalUpdateChannel.allowsArchive) {
@@ -243,6 +260,8 @@ final class UpdateChecker: NSObject, ObservableObject, SPUUserDriver, SPUUpdater
         self.cancellation = cancellation
         receivedBytes = 0
         expectedBytes = 0
+        downloadStartedAt = ProcessInfo.processInfo.systemUptime
+        lastProgressPublishedAt = 0
         isExtracting = false
         status = .downloading(progress: 0)
     }
@@ -250,6 +269,11 @@ final class UpdateChecker: NSObject, ObservableObject, SPUUserDriver, SPUUpdater
     func showDownloadDidReceiveData(ofLength length: UInt64) {
         let (total, overflow) = receivedBytes.addingReportingOverflow(length)
         receivedBytes = overflow ? .max : total
+        let now = ProcessInfo.processInfo.systemUptime
+        // Keep byte accounting exact while avoiding a full Settings redraw for
+        // every network chunk. Always publish completion, including tiny files.
+        guard now - lastProgressPublishedAt >= 0.1 || (expectedBytes > 0 && receivedBytes >= expectedBytes) else { return }
+        lastProgressPublishedAt = now
         status = .downloading(progress: expectedBytes > 0 ? min(1, Double(receivedBytes) / Double(expectedBytes)) : 0)
     }
     func showDownloadDidStartExtractingUpdate() {

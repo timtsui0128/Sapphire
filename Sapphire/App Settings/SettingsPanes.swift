@@ -10775,7 +10775,7 @@ struct ModernUpdateStatusView: View {
                     if updateChecker.isExtracting {
                         ProgressView("Verifying and preparing update…")
                     } else {
-                        DownloadingView(progress: progress, onCancel: { updateChecker.cancelDownload() })
+                        DownloadingView(progress: progress, onCancel: { updateChecker.cancelDownload() }, detail: updateChecker.downloadDetail)
                     }
 #else
                     DownloadingView(progress: progress, onCancel: { updateChecker.cancelDownload() })
@@ -10944,6 +10944,7 @@ private struct ReleaseNotesSheet: View {
 struct DownloadingView: View {
     let progress: Double
     let onCancel: () -> Void
+    var detail: String? = nil
 
     var body: some View {
         VStack(spacing: 10) {
@@ -10964,6 +10965,12 @@ struct DownloadingView: View {
                     .animation(.easeOut, value: progress)
             }
             .frame(width: 300)
+
+            if let detail {
+                Text(verbatim: detail)
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
 
             Button("Cancel", action: onCancel)
                 .buttonStyle(.plain)

@@ -391,7 +391,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     private lazy var launchpadGestureMonitor: LaunchpadGestureMonitor = .shared
 
     private var statusItem: NSStatusItem?
-    private var airDropMenuBar: AirDropMenuBarController?
     private var networkMonitor: NWPathMonitor?
     private var previouslyFrontmostApp: NSRunningApplication?
     private var didActivateForNotchFocus = false
@@ -697,8 +696,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         NearbyConnectionManager.shared.becomeInvisible()
 
         isMainAppRunning = false
-        airDropMenuBar?.shutdown()
-        airDropMenuBar = nil
 
         UpdateChecker.shared.stopPeriodicChecks()
 
@@ -970,7 +967,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 MenuBarHotkeyMonitor.shared.start()
             }
         }
-        if airDropMenuBar == nil { airDropMenuBar = AirDropMenuBarController() }
 
         SystemControl.configureKeyboardBacklight()
         setupSessionObservers()
@@ -1479,8 +1475,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
-        airDropMenuBar?.shutdown()
-        airDropMenuBar = nil
         ScreenshotShelfManager.shared.stopMonitoring()
         StartupHealthMarker.shared.markCleanExit()
         mouseControlManager.restoreSystemSettings()

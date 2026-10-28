@@ -15,16 +15,16 @@ This is an unofficial personal fork of Sapphire, originally created by Shariq Ch
 
 ## 本分支增加与修改了什么
 
-以下是相对于上游提交 [`2e8085676209cbbb424bc60fd7ea2f11bfd625aa`](https://github.com/cshariq/Sapphire/commit/2e8085676209cbbb424bc60fd7ea2f11bfd625aa) 的个人修改，记录日期为 **2026-10-27**。
+以下是相对于上游提交 [`2e8085676209cbbb424bc60fd7ea2f11bfd625aa`](https://github.com/cshariq/Sapphire/commit/2e8085676209cbbb424bc60fd7ea2f11bfd625aa) 的个人修改，记录日期为 **2026-10-28**。
 
 | 功能 | 本分支的行为 | 使用说明 |
 | --- | --- | --- |
 | 截图暂存架 | 收集系统截图，多选后一次拖出多张；可选立即收集或保留系统浮动预览；截图历史不触发常驻胶囊 | [截图与文件保存](docs/screenshot-shelf.md) |
 | 截图保存策略 | 自动收集后移入 Sapphire 专用目录；可选手动移除、24 小时清理、成功拖出后清理；支持手动导入 | [保存策略与限制](docs/screenshot-shelf.md#保存与收集范围) |
-| 快速隔空投送 | 文件、文件夹、图片、链接或文字拖到菜单栏分享图标；支持选择文件、分享剪贴板和多张截图一起 AirDrop | [隔空投送入口](docs/quick-airdrop.md) |
+| 快速隔空投送 | 文件架内独立 AirDrop 标签，与截图／文件并列；拖入内容、选择文件、分享剪贴板或多张截图一起 AirDrop | [隔空投送入口](docs/quick-airdrop.md) |
 | 足球与 F1 | 足球赛程、比分和关注球队；F1 赛历、赛后结果、排名、圈数、关注车手／车队和刘海状态卡 | [Sports / F1](docs/community-sports.md) |
 | 股票关注列表 | 默认关注 AAPL、MSFT、NVDA，支持搜索增删、报价、历史图表和刘海小组件 | [Stocks / Finance](docs/community-finance-and-appearance.md) |
-| 应用内更新 | 从自己的 GitHub 检查新版，验证更新列表／安装包签名，支持安装重启和可选后台准备 | [更新与发布](docs/app-updates.md) |
+| 应用内更新 | 签名 GitHub 更新渠道，支持后台准备、下载大小／速度显示及兼容版本间的增量更新 | [更新与发布](docs/app-updates.md) |
 | 界面语言 | 默认跟随系统，可选择 English 或简体中文；切换立即生效并在下次启动时保留 | [语言设置](docs/app-language.md) |
 | 主题与玻璃材质 | 应用可跟随系统或选择浅色／深色；展开顶栏和面板支持 Match Panel、Liquid Glass、White、Black；Sports／Stocks 透出面板材质 | [面板材质](docs/panel-surface.md) |
 | 蓝牙提示静音 | 默认关闭 Sapphire 的蓝牙连接／断开提示音，并提供设置开关 | [蓝牙声音](docs/community-finance-and-appearance.md#蓝牙连接静音) |
@@ -37,7 +37,7 @@ This is an unofficial personal fork of Sapphire, originally created by Shariq Ch
 
 ## 当前源码版本与运行范围
 
-- 当前源码的构建标记为 **Quick AirDrop 11**（版本 **0.1.1**，构建 **11**），已在本机完成完整应用构建和签名复检。
+- 当前源码的构建标记为 **Shelf AirDrop 12**（版本 **0.1.2**，构建 **12**），已在本机完成完整应用构建和签名复检。
 - 个人开发分支为 **`codex/personal-notched-tools`**。`main` 保留 Fork 时的上游状态；本分支基于上面标注的提交，尚未合并上游后续的 macOS 27 充电限制改动。
 - 最低部署目标为 macOS 14；当前完整构建与本地安装包在 Apple Silicon（arm64）Mac 上验证。Intel 机器和不同 macOS 版本尚未完整验收。
 - 上游未公开的付费模块继续使用公开占位或兼容实现。独立实现的 Sports／Finance 不依赖这些私有模块，也不连接或同步 Apple Sports／Stocks 账户。

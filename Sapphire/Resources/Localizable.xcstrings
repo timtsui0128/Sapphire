@@ -53924,6 +53924,125 @@
           }
         }
       }
+    },
+    "Drop items here to AirDrop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drop items here to AirDrop"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将内容拖到这里以隔空投送"
+          }
+        }
+      }
+    },
+    "Files, folders, images, links, and text": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files, folders, images, links, and text"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件、文件夹、图片、链接和文字"
+          }
+        }
+      }
+    },
+    "Choose the receiving device in the macOS AirDrop window. Cancel to keep your files.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the receiving device in the macOS AirDrop window. Cancel to keep your files."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 macOS 隔空投送窗口中选择接收设备。取消时保留文件。"
+          }
+        }
+      }
+    },
+    "AirDrop in Sapphire": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop in Sapphire"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sapphire 内的隔空投送"
+          }
+        }
+      }
+    },
+    "Open File Shelf → AirDrop in Sapphire to drop items, choose files, or share your clipboard. You can also AirDrop selected screenshots from the Screenshots tab.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open File Shelf → AirDrop in Sapphire to drop items, choose files, or share your clipboard. You can also AirDrop selected screenshots from the Screenshots tab."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 Sapphire 内打开“文件架 → AirDrop”，即可拖入内容、选择文件或分享剪贴板。也可以在“截图”标签多选截图后隔空投送。"
+          }
+        }
+      }
+    },
+    "%@ downloaded": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ downloaded"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已下载 %@"
+          }
+        }
+      }
+    },
+    "%@ · %@/s": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@/s"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@/秒"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

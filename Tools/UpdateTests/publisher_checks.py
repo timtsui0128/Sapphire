@@ -79,3 +79,50 @@ def check(mode):
 
 for mode in ["new", "resume", "wrong-source", "public-tag", "bad-upload"]:
     check(mode)
+
+with tempfile.TemporaryDirectory() as temp:
+    directory = Path(temp)
+    tag = "personal-v0.1.3"
+    prefix = f"https://github.com/{release.CONFIG['repository']}/releases/download/{tag}/"
+    feed = f'<rss xmlns:sparkle="{release.NS["s"]}"><channel><item><enclosure url="{prefix}Sapphire.zip" sparkle:edSignature="full"/><sparkle:deltas><enclosure url="{prefix}Sapphire13-12.delta" sparkle:edSignature="delta" sparkle:deltaFrom="12"/></sparkle:deltas></item></channel></rss>'
+    assets = {"Sapphire.zip": {}, "Sapphire13-12.delta": {}}
+    (directory / "appcast.xml").write_text(feed)
+    entries = release.signed_enclosures(directory, tag, assets)
+    assert [path.name for path, _ in entries] == list(assets)
+    for bad in [feed.replace(prefix + "Sapphire13", "https://example.com/Sapphire13"),
+                feed.replace('sparkle:edSignature="delta"', ''),
+                feed.replace("Sapphire13-12.delta", "undeclared.delta")]:
+        (directory / "appcast.xml").write_text(bad)
+        try:
+            release.signed_enclosures(directory, tag, assets)
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("Unsafe or unsigned delta enclosure accepted")
+    print("PASS: publisher validates declared, signed delta assets and rejects foreign/missing/unsigned entries")
+
+with tempfile.TemporaryDirectory() as temp:
+    root = Path(temp)
+    for build in [10, 11, 12, 13, 14]:
+        directory = root / f"output/releases/personal-v0.1.{build}"
+        directory.mkdir(parents=True)
+        archive = directory / "Sapphire.zip"
+        archive.write_bytes(f"distributed archive {build}".encode())
+        feed = directory / "appcast.xml"
+        feed.write_text(f'<rss xmlns:sparkle="{release.NS["s"]}"><channel><item><sparkle:version>{build}</sparkle:version><enclosure url="https://example.com/Sapphire.zip" /></item></channel></rss>')
+        receipt = {"repository": release.CONFIG["repository"], "public_key": "fixture-key", "build": str(build),
+                   "supports_delta_updates": build >= 12,
+                   "assets": {p.name: {"sha256": release.sha256(p)} for p in [feed, archive]}}
+        (directory / "release.json").write_text(json.dumps(receipt))
+    with patch.object(release, "ROOT", root):
+        assert [base["build"] for base in release.delta_bases("15", "fixture-key")] == ["14", "13"]
+        assert release.delta_bases("12", "fixture-key") == [], "ZIP-only clients must not receive deltas"
+        assert release.delta_bases("15", "different-key") == []
+        (root / "output/releases/personal-v0.1.14/Sapphire.zip").write_bytes(b"changed")
+        try:
+            release.delta_bases("15", "fixture-key")
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("A rebuilt/tampered baseline was accepted")
+    print("PASS: delta baselines exclude ZIP-only builds, select the latest two compatible releases, and reject changed bytes")

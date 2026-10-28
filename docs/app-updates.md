@@ -13,7 +13,7 @@ Install the first update-enabled app once, then open **Settings → About → Up
 - The app only accepts stable, signed personal releases from `timtsui0128/Sapphire`. Original upstream releases are not offered. This is periodic checking while the app runs, not a remote service that wakes a closed app.
 - Session locking blocks checks and user actions, cancels pending downloads/offers and staged update replies, and suppresses update UI. If locking occurs during extraction, the ready-to-install callback cancels the prepared update.
 
-This first channel publishes full Apple Silicon ZIP updates for macOS 14+. Delta updates and Intel releases are not enabled yet. Downloads are managed inside the updater; they do not require manually downloading and replacing the app. These personal builds use local ad-hoc code signing, not Apple Developer ID notarization. Update archive signing is separate and is required even for these local builds.
+This first channel publishes full Apple Silicon ZIP updates for macOS 14+. Version 0.1.2 (build 12) enables incremental updates between compatible builds; Intel releases are not enabled yet. Builds 10/11 require one full update because their URL policy rejects delta files. Downloads are managed inside the updater; they do not require manually downloading and replacing the app. These personal builds use local ad-hoc code signing, not Apple Developer ID notarization. Update archive signing is separate and is required even for these local builds.
 
 ## Security and source
 
@@ -34,7 +34,7 @@ Commit all source changes and run the relevant tests. The first release uses `0.
 ```sh
 # Example for the next version, after committing its complete source:
 python3 Tools/Updates/release.py prepare \
-  --version 0.1.1 --build 11 --notes docs/releases/0.1.1.md
+  --version 0.1.3 --build 13 --notes docs/releases/0.1.3.md
 ```
 
 `prepare` downloads checksum-pinned official Sparkle tools, verifies the Keychain public key, builds the app, verifies metadata and its bundle signature, creates a ZIP preserving symlinks, and uses Sparkle's official `generate_appcast` to sign the archive and feed. It only writes under ignored `output/` and does not publish anything. It produces `output/releases/personal-vVERSION/` with the ZIP, signed `appcast.xml`, checksums, release notes, and a local receipt binding the assets to the source commit.
@@ -42,12 +42,12 @@ python3 Tools/Updates/release.py prepare \
 Push that source commit to this repository using Git, then publish the prepared package:
 
 ```sh
-python3 Tools/Updates/release.py publish output/releases/personal-v0.1.1
+python3 Tools/Updates/release.py publish output/releases/personal-v0.1.3
 ```
 
-`publish` verifies the unchanged source commit, hashes, signatures, remote source availability, and increasing build number. It uploads a draft Release, checks the uploaded asset sizes and GitHub SHA-256 digests, and only then publishes it as the latest release. It refuses to overwrite an existing published tag. If a failed upload leaves a draft with the same source commit and identical verified assets, rerun `publish` to resume it. A mismatched or incomplete draft stops publication and must be inspected before deleting/re-preparing it. Publishing a Git commit alone does not release an app update. No separate paid server or background CI signing service is required.
+`publish` verifies the unchanged source commit, hashes, signatures, remote source availability, and increasing build number. It uploads a draft Release, verifies every full/delta enclosure signature, checks uploaded asset sizes and GitHub SHA-256 digests, and only then publishes it as the latest release. It refuses to overwrite an existing published tag. If a failed upload leaves a draft with the same source commit and identical verified assets, rerun `publish` to resume it. A mismatched or incomplete draft stops publication and must be inspected before deleting/re-preparing it. Publishing a Git commit alone does not release an app update. No separate paid server or background CI signing service is required.
 
-For now, each release provides a single current full-update feed. Older installed builds can update directly to it; rollout groups, beta channels, OS-specific branches, and deltas are future work.
+Each release provides a single current signed feed with a full ZIP fallback. The release tool automatically considers the two latest retained, delta-capable release receipts, checks unchanged baseline hashes, generates signed patches, and applies each patch locally before publishing. Keep the actual distributed archives and receipts under `output/releases/`; rebuilding an older version is not an equivalent baseline. Builds 10/11 are excluded from delta generation, so their first update still downloads the full ZIP. Future compatible updates can transfer only changed content. If a delta does not apply, Sparkle falls back to the full archive. Download size varies with the actual changes and network speed still depends on GitHub. Rollout groups, beta channels, and OS-specific branches are future work.
 
 ## Validation
 
@@ -69,7 +69,7 @@ The update tests build disposable native applications using the production user 
 - 未开启自动准备时，先点“下载更新”。“取消已准备的更新”可以撤销已准备好的安装。
 - 更新只替换应用，保留已有设置、截图和关注列表。请先退出其他 Sapphire 副本。
 - 更新源只连接自己的 GitHub，原作者的更新不会覆盖这个改装版。更新列表和安装包都需要匹配内置公钥的签名；私钥留在本机钥匙串中。
-- 当前提供 Apple Silicon / macOS 14+ 的完整更新包；尚未启用增量包和 Intel 发布。自动更新不等于无需下载数据，而是由应用完成下载与安装。
+- 当前提供 Apple Silicon / macOS 14+ 的完整包，以及兼容版本之间的增量包；尚未提供 Intel 发布。0.1.0／0.1.1 的更新器不接受增量 URL，需要先完整更新一次到 0.1.2，之后的兼容更新才能下载变化部分；补丁失败时回退完整包。发布工具自动从本地保留的最近两个兼容版本生成补丁，并在发布前实际应用验证。请保留原发布 ZIP 和 receipt，不要通过重新编译旧版代替。下载页显示已下载大小和平均速度，实际速度仍受 GitHub 网络影响。
 - 锁屏时禁止更新界面和操作，并取消可取消的下载／安装准备；不会为了提醒新版而在锁屏上弹出窗口。
 
 维护者以后运行上面的 `prepare` 命令构建并签名，再推送源码并运行 `publish` 发布。仅上传源码不会触发更新。此版本仍为本机 ad-hoc 签名，尚未进行 Apple Developer ID 公证；更新包的签名验证已独立启用。

@@ -70,6 +70,7 @@ final class HarnessDelegate: NSObject, NSApplicationDelegate {
 
     private func checkPolicyAndCallbacks() {
         assert(PersonalUpdateChannel.allowsArchive(URL(string: "https://github.com/timtsui0128/Sapphire/releases/download/personal-v0.2.0/Sapphire.zip")!))
+        assert(PersonalUpdateChannel.allowsArchive(URL(string: "https://github.com/timtsui0128/Sapphire/releases/download/personal-v0.2.0/Sapphire13-12.delta")!))
         for value in ["https://github.com/cshariq/Sapphire/releases/download/personal-v0.2.0/Sapphire.zip",
                       "https://github.com/timtsui0128/Other/releases/download/personal-v0.2.0/Sapphire.zip",
                       "http://github.com/timtsui0128/Sapphire/releases/download/personal-v0.2.0/Sapphire.zip",
@@ -92,6 +93,7 @@ final class HarnessDelegate: NSObject, NSApplicationDelegate {
         driver.showDownloadDidReceiveExpectedContentLength(10)
         driver.showDownloadDidReceiveData(ofLength: 20)
         assert(driver.status == .downloading(progress: 1))
+        assert(driver.downloadDetail != nil, "The UI should show actual byte progress")
         driver.cancelDownload()
         driver.cancelDownload()
         assert(cancellations == 1)

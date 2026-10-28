@@ -2,24 +2,24 @@
 
 ## English
 
-Sapphire 0.1.1 adds a menu-bar AirDrop destination, inspired by [Menu Drop by Sindre Sorhus](https://sindresorhus.com/menu-drop). This is an independent implementation using AppKit's public `NSSharingService.sendViaAirDrop`; no Menu Drop code, icon, or app binary is bundled. The fork remains AGPLv3 and preserves Sapphire's original attribution.
+Sapphire 0.1.2 puts AirDrop inside **File Shelf → AirDrop**, beside Screenshots and Files, inspired by [Menu Drop by Sindre Sorhus](https://sindresorhus.com/menu-drop). This is an independent implementation using AppKit's public `NSSharingService.sendViaAirDrop`; no Menu Drop code, icon, or app binary is bundled. The fork remains AGPLv3 and preserves Sapphire's original attribution.
 
-- Drag files, folders, images, web links, or text onto Sapphire's share icon in the macOS menu bar. On newer systems it uses the AirDrop symbol; older systems use the standard share symbol.
-- Click the icon for **Choose Files for AirDrop…**, **AirDrop from Clipboard**, or settings. The file chooser supports multiple files and folders.
+- Open Sapphire's File Shelf and choose the **AirDrop** tab. Drag files, folders, images, web links, or text into its drop area. On newer systems it uses the AirDrop symbol; older systems use the standard share symbol.
+- Use **Choose Files for AirDrop…** or **AirDrop from Clipboard** beneath the drop area. The file chooser supports multiple files and folders.
 - In **File Shelf → Screenshots**, select several screenshots and click **AirDrop** to share them together.
-- Toggle the icon under **Settings → File Shelf → AirDrop in the Menu Bar**. Search settings for AirDrop, Menu Drop, or screenshots. The toggle affects the menu-bar icon; screenshot sharing remains available.
+- Find usage instructions under **Settings → File Shelf → AirDrop in Sapphire**. The menu-bar icon from 0.1.1 has been removed, including for existing installations; it does not need to be disabled manually.
 
-The macOS AirDrop window opens after preparation. **You choose the recipient**; Sapphire does not automatically select a device. macOS handles discovery and transfer. File selection is also useful when a system gesture intercepts a drag near the top edge.
+The macOS AirDrop window opens after preparation. **You choose the recipient**; Sapphire does not automatically select a device. macOS handles discovery and transfer. File selection is also useful when a system gesture intercepts a drag near the top edge. Sapphire does not add a separate menu-bar item or Dock icon for this tool.
 
 ### Files, clipboard, and privacy
 
-The general clipboard is read only when you choose its share command. Hovering over the icon checks the drag's advertised types without reading the general clipboard. Rich text is shared as plain text. Inline clipboard/drag data is limited to 64 MiB and a batch to 512 items; save larger inline content as a file first. File-only promises that have not materialized as files/images are not supported. For a drag containing both file URLs and other representations, file URLs take priority.
+The general clipboard is read only when you choose its share command. Hovering over the drop area checks the drag's advertised types without reading the general clipboard. Rich text is shared as plain text. Inline clipboard/drag data is limited to 64 MiB and a batch to 512 items; save larger inline content as a file first. File-only promises that have not materialized as files/images are not supported. For a drag containing both file URLs and other representations, file URLs take priority.
 
 Ordinary selected files and folders are passed directly to macOS. Sapphire-owned screenshots are copied into a private, per-transfer cache before sharing, so cleanup of the shelf cannot invalidate an active share. Clipboard images also become temporary files. Those files are removed when the system sharing service finishes or fails. Interrupted handoffs are retained for up to a day, then removed on a later launch. Sapphire does not run its own file-upload server or a replacement AirDrop protocol.
 
 Opening the AirDrop picker does not count as successful sharing. Screenshot retention is applied only after the system service reports success, using the item's existing retention setting. Cancelling or failing keeps the shelf items. Other destinations retain their original drag behavior. Actual device delivery remains under macOS control.
 
-The menu icon is hidden while the session is locked or inactive. New share commands are blocked, and queued preparation/file selection is cancelled. Transfers already handed to macOS remain under the system's control; there is no public API here to cancel them after handoff.
+The Sapphire shelf is hidden while the session is locked or inactive. New share commands are blocked, and queued preparation/file selection is cancelled. Transfers already handed to macOS remain under the system's control; there is no public API here to cancel them after handoff.
 
 ### Validation
 
@@ -27,12 +27,12 @@ The menu icon is hidden while the session is locked or inactive. New share comma
 
 ## 简体中文
 
-Sapphire 0.1.1 加入菜单栏隔空投送入口，交互灵感来自 [Sindre Sorhus 的 Menu Drop](https://sindresorhus.com/menu-drop)。功能使用 AppKit 的公开隔空投送接口独立实现，没有打包 Menu Drop 的源码、图标或应用文件。本分支继续保留 Sapphire 原作者署名及 AGPLv3 许可证。
+Sapphire 0.1.2 将隔空投送放入 **文件架 → AirDrop** 独立标签，与截图、文件并列，交互灵感来自 [Sindre Sorhus 的 Menu Drop](https://sindresorhus.com/menu-drop)。功能使用 AppKit 的公开隔空投送接口独立实现，没有打包 Menu Drop 的源码、图标或应用文件。本分支继续保留 Sapphire 原作者署名及 AGPLv3 许可证。
 
-- 将文件、文件夹、图片、网页链接或文字拖到菜单栏的分享图标，即可打开系统隔空投送窗口。较新的系统显示 AirDrop 图标，旧系统显示标准分享图标。
-- 点击图标，可以选择多个文件／文件夹，或主动分享剪贴板内容。
+- 打开 Sapphire 的文件架，选择 **AirDrop** 标签，将文件、文件夹、图片、链接或文字拖到面板内。
+- 也可以使用面板下方按钮选择多个文件／文件夹，或主动分享剪贴板内容。
 - 在 **File Shelf → Screenshots（文件架 → 截图）** 多选截图，再点 **AirDrop**，可以一次分享多张。
-- 在 **设置 → 文件架 → 菜单栏隔空投送** 开关图标，也可以搜索 AirDrop、Menu Drop、截图或隔空投送。关闭图标后，截图页的 AirDrop 按钮仍可使用。
+- 在 **设置 → 文件架 → Sapphire 内的隔空投送** 查看说明。0.1.1 的菜单栏图标已移除，已有安装也不需要手动关闭它。
 
 准备完成后，**由你在 macOS 窗口里选择接收设备**，Sapphire 不会自动指定接收人。设备发现和实际传输均由系统处理。如果顶边系统手势影响拖放，可以改用“选择文件”入口。
 
