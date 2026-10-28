@@ -32,12 +32,13 @@ These personal changes are relative to upstream commit [`2e8085676209cbbb424bc60
 | Display switching | Keep the settings window and expanded notch within the available screen after switching displays; scroll overflowing content | [Window and notch sizing](docs/window-fit.md) |
 | External display line | Click the line from the screen's top edge; retain the original curved transition when expanded; match Liquid Glass tone to the wallpaper or choose light/dark glass | [External display appearance](docs/external-display-bar.md) |
 | Pin and click fixes | Highlight the pinned state, allow unpinning from detail views, and use Esc to unpin and collapse; fix click-region lookup through the SwiftUI hosting hierarchy | [Pin and input](docs/pin-and-input.md) |
+| Music artwork synchronization | Clear the previous song's cover when new metadata arrives first; accept delayed cover updates and reject stale image downloads | [Artwork fix](docs/releases/0.1.4.md) |
 
 Open **File Shelf → Screenshots** for screenshots, and use its gear menu to change retention. Configure Sports, Finance, and Appearance in their respective settings pages.
 
 ## Current version and supported scope
 
-- The current source build is labeled **Screenshot Priority 13** (version **0.1.3**, build **13**). A complete local app build and signature verification have been completed.
+- The current source build is labeled **Music Artwork 14** (version **0.1.4**, build **14**). A complete local app build and signature verification have been completed.
 - Personal development takes place on **`codex/personal-notched-tools`**. `main` retains the upstream state from the fork; this branch is based on the commit above and has not merged the later upstream macOS 27 charging-limit changes.
 - The minimum deployment target is macOS 14. Complete builds and local packages have been verified on Apple Silicon (arm64); Intel hardware and other macOS versions have not been fully validated.
 - Upstream paid modules whose source is not public continue to use public placeholders or compatibility implementations. The independently implemented Sports/Finance features do not require those private modules and do not connect or sync with Apple Sports/Stocks accounts.
@@ -76,6 +77,7 @@ Run these checks in a normal macOS user session. Most use temporary files, simul
 ```sh
 bash Tools/QuickAirDropTests/run.sh
 bash Tools/ScreenshotShelfTests/run.sh
+bash Tools/MusicArtworkTests/run.sh
 bash Tools/CommunitySportsTests/run.sh
 bash Tools/F1LiveTests/run.sh
 bash Tools/CommunityFinanceTests/run.sh

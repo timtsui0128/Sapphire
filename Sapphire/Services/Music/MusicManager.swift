@@ -338,6 +338,9 @@ class MusicManager {
     @ObservationIgnored private var artworkColorExtractionTask: Task<Void, Never>?
     @ObservationIgnored private var displayedRemoteArtwork: (url: URL, image: NSImage)?
     @ObservationIgnored private var loadingArtworkURL: URL?
+    @ObservationIgnored private var loadingArtworkTrackToken: String?
+    @ObservationIgnored private var loadingArtworkRequestID: UUID?
+    @ObservationIgnored private var remoteArtworkTask: Task<Void, Never>?
     @ObservationIgnored private var artworkTrackToken: String?
     @ObservationIgnored private var trackIdentifierRefreshTask: Task<Void, Never>?
     @ObservationIgnored private var lastHandledTrackKey: String?
@@ -578,13 +581,13 @@ class MusicManager {
         }
         var identityChanged = false
         let keepsDisplayedSong = isDisplayedSpotifySong(track)
+        if !keepsDisplayedSong {
+            clearArtwork()
+            currentTrackArtworkToken = track.uri
+        }
         if track.uri != self.uri, !track.uri.isEmpty, !keepsDisplayedSong {
             if track.metadata?.artistName.trimmedOrNil == nil { self.artist = nil }
             if track.metadata?.albumTitle.trimmedOrNil == nil { self.album = nil }
-            if track.metadata?.imageURL == nil {
-                clearArtwork()
-                currentTrackArtworkToken = "connect-missing-\(track.uri)"
-            }
             if !track.uri.hasPrefix("spotify:track:") { trackID = nil }
         }
         if let imageURL = track.metadata?.imageURL {
@@ -1729,17 +1732,29 @@ class MusicManager {
     private func showRemoteArtwork(_ url: URL) {
         artworkURL = url
         if isShowingRemoteArtwork {
+            artworkTrackToken = currentTrackArtworkToken
             refreshArtworkColorExtractionIfNeeded()
             return
         }
-        guard loadingArtworkURL != url else { return }
+        guard loadingArtworkURL != url || loadingArtworkTrackToken != currentTrackArtworkToken else { return }
+        remoteArtworkTask?.cancel()
+        let requestID = UUID()
+        let trackToken = currentTrackArtworkToken
         loadingArtworkURL = url
-        Task { await loadRemoteArtwork(from: url) }
+        loadingArtworkTrackToken = trackToken
+        loadingArtworkRequestID = requestID
+        remoteArtworkTask = Task {
+            await loadRemoteArtwork(from: url, trackToken: trackToken, requestID: requestID)
+        }
     }
 
     private static let remoteArtworkAttempts = 3
 
     private func clearArtwork() {
+        remoteArtworkTask?.cancel()
+        remoteArtworkTask = nil
+        loadingArtworkRequestID = nil
+        loadingArtworkTrackToken = nil
         artwork = nil
         artworkURL = nil
         loadingArtworkURL = nil
@@ -1762,22 +1777,32 @@ class MusicManager {
         image !== artwork && !(isSpotifySourceSelected && isShowingRemoteArtwork)
     }
 
-    private func loadRemoteArtwork(from url: URL) async {
+    private func isCurrentArtworkRequest(url: URL, trackToken: String, requestID: UUID) -> Bool {
+        !Task.isCancelled && artworkURL == url && currentTrackArtworkToken == trackToken
+            && loadingArtworkRequestID == requestID
+    }
+
+    private func loadRemoteArtwork(from url: URL, trackToken: String, requestID: UUID) async {
+        defer {
+            if loadingArtworkRequestID == requestID {
+                loadingArtworkURL = nil
+                loadingArtworkTrackToken = nil
+                loadingArtworkRequestID = nil
+                remoteArtworkTask = nil
+            }
+        }
         var image = await FileImageCache.shared.image(for: url)
         var attempt = 1
-        while image == nil, attempt < Self.remoteArtworkAttempts, artworkURL == url {
+        while image == nil, attempt < Self.remoteArtworkAttempts,
+              isCurrentArtworkRequest(url: url, trackToken: trackToken, requestID: requestID) {
             try? await Task.sleep(for: .seconds(1.5 * Double(attempt)))
-            guard artworkURL == url else { break }
+            guard isCurrentArtworkRequest(url: url, trackToken: trackToken, requestID: requestID) else { return }
             image = await FileImageCache.shared.image(for: url)
             attempt += 1
         }
-        if loadingArtworkURL == url { loadingArtworkURL = nil }
-        guard let image, artworkURL == url else { return }
+        guard let image, isCurrentArtworkRequest(url: url, trackToken: trackToken, requestID: requestID) else { return }
         displayedRemoteArtwork = (url, image)
-        if artwork == nil || artworkTrackToken != currentTrackArtworkToken {
-            currentTrackArtworkToken = "url:\(url.absoluteString)"
-        }
-        artworkTrackToken = currentTrackArtworkToken
+        artworkTrackToken = trackToken
         guard artwork !== image else { return }
         artwork = image
         refreshArtworkColorExtractionIfNeeded()
@@ -2139,6 +2164,8 @@ class MusicManager {
         if self.album != resolvedAlbum { self.album = resolvedAlbum }
 
         if hasTrackChanged {
+            let keepsConnectArtwork = isSpotify && connectTrackMatches(payload) == true && isShowingRemoteArtwork
+            if !keepsConnectArtwork { clearArtwork() }
             self.lastTrackIdentity = trackIdentity
             let fingerprint = mediaFingerprint(for: payload)
             self.lastMediaFingerprint = fingerprint.isEmpty ? nil : fingerprint

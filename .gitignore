@@ -26,6 +26,7 @@ Sapphire/App/GoogleService-Info.plist
 /Tools/*
 !/Tools/ScreenshotShelfPreview/
 !/Tools/ScreenshotShelfTests/
+!/Tools/MusicArtworkTests/
 !/Tools/CommunitySportsTests/
 !/Tools/F1LiveTests/
 !/Tools/CommunityFinanceTests/

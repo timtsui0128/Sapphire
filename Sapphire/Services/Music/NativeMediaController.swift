@@ -516,12 +516,21 @@ final class NativeMediaController: NSObject {
                 lastMediaFingerprint = fingerprint
             }
             lastTrackChangeAt = now
+            artworkGraceTask?.cancel()
+            artworkGraceTask = nil
         }
 
         var artworkChanged = false
         switch artworkUpdate {
         case .unchanged:
-            break
+            // A missing artwork key is a diff for this song, not permission to
+            // attach the previous song's image to new metadata (NetEase sends
+            // its title and cover in separate events).
+            if trackChanged, currentArtwork != nil || currentArtworkDigest != nil {
+                currentArtwork = nil
+                currentArtworkDigest = nil
+                artworkChanged = true
+            }
         case .removed:
             if currentArtwork != nil || currentArtworkDigest != nil {
                 currentArtwork = nil

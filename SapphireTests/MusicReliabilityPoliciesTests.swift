@@ -86,7 +86,7 @@ struct ArtworkChangeTests {
         #expect(ArtworkDigest.of(base64: first) != ArtworkDigest.of(base64: second))
     }
 
-    @Test func graceKeepsTheOldCoverBriefly() {
+    @Test func graceWaitsForCurrentCoverBeforeDeclaringAbsence() {
         let changed = Date(timeIntervalSince1970: 1_000)
         #expect(!ArtworkGracePolicy.isArtworkKnownAbsent(trackChangedAt: changed, now: changed.addingTimeInterval(0.5), hasArtwork: false))
         #expect(ArtworkGracePolicy.isArtworkKnownAbsent(trackChangedAt: changed, now: changed.addingTimeInterval(ArtworkGracePolicy.interval), hasArtwork: false))
