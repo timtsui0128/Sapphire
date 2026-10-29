@@ -33,12 +33,13 @@ These personal changes are relative to upstream commit [`2e8085676209cbbb424bc60
 | External display line | Click the line from the screen's top edge; retain the original curved transition when expanded; match Liquid Glass tone to the wallpaper or choose light/dark glass | [External display appearance](docs/external-display-bar.md) |
 | Pin and click fixes | Highlight the pinned state, allow unpinning from detail views, and use Esc to unpin and collapse; fix click-region lookup through the SwiftUI hosting hierarchy | [Pin and input](docs/pin-and-input.md) |
 | Music artwork synchronization | Clear the previous song's cover when new metadata arrives first; accept delayed cover updates and reject stale image downloads | [Artwork fix](docs/releases/0.1.4.md) |
+| Security and glass readability | Keychain music credentials, password/OAuth protection, and frosted panels with controls below the system menu bar | [Security notes](docs/security-hardening.md) · [0.1.5 changes](docs/releases/0.1.5.md) |
 
 Open **File Shelf → Screenshots** for screenshots, and use its gear menu to change retention. Configure Sports, Finance, and Appearance in their respective settings pages.
 
 ## Current version and supported scope
 
-- The current source build is labeled **Music Artwork 14** (version **0.1.4**, build **14**). A complete local app build and signature verification have been completed.
+- The current source build is labeled **Security & Glass 15** (version **0.1.5**, build **15**). A complete local app build and signature verification have been completed.
 - Personal development takes place on **`codex/personal-notched-tools`**. `main` retains the upstream state from the fork; this branch is based on the commit above and has not merged the later upstream macOS 27 charging-limit changes.
 - The minimum deployment target is macOS 14. Complete builds and local packages have been verified on Apple Silicon (arm64); Intel hardware and other macOS versions have not been fully validated.
 - Upstream paid modules whose source is not public continue to use public placeholders or compatibility implementations. The independently implemented Sports/Finance features do not require those private modules and do not connect or sync with Apple Sports/Stocks accounts.
@@ -50,7 +51,7 @@ Download the Apple Silicon app from [Personal Releases](https://github.com/timts
 
 ## Build from source
 
-Requirements: macOS, Python 3, a full Xcode installation, and network access to download the pinned Swift Package dependencies. The public-source build workflow has been verified with **Xcode 26.3**.
+Requirements: macOS, Python 3, a full Xcode installation, and network access to download the pinned Swift Package dependencies. The public-source build workflow has been verified with **Xcode 27.1**.
 
 ```sh
 git clone --branch codex/personal-notched-tools https://github.com/timtsui0128/Sapphire.git
@@ -78,6 +79,7 @@ Run these checks in a normal macOS user session. Most use temporary files, simul
 bash Tools/QuickAirDropTests/run.sh
 bash Tools/ScreenshotShelfTests/run.sh
 bash Tools/MusicArtworkTests/run.sh
+bash Tools/SecurityRegressionTests/run.sh
 bash Tools/CommunitySportsTests/run.sh
 bash Tools/F1LiveTests/run.sh
 bash Tools/CommunityFinanceTests/run.sh

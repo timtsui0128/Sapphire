@@ -96,7 +96,7 @@ class AuthLoginCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         window.makeKeyAndOrderFront(nil)
 
         popupWindows[popup] = window
-        print("[\(logPrefix)] Opened auth popup for \(navigationAction.request.url?.absoluteString ?? "unknown")")
+        print("[\(logPrefix)] Opened auth popup.")
 
         popup.load(navigationAction.request)
         return popup

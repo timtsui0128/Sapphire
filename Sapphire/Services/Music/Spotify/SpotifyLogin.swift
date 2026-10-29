@@ -115,12 +115,12 @@ private struct SpotifyLoginWebViewRepresentable: NSViewRepresentable {
         override func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             guard let url = webView.url else { return }
             if popupWindows[webView] != nil {
-                print("[SpotifyLogin] Popup finished: \(url.absoluteString)")
+                print("[SpotifyLogin] Popup finished.")
                 checkForFreshSessionCookies(in: webView)
                 return
             }
 
-            print("[SpotifyLogin] Finished loading URL: \(url.absoluteString)")
+            print("[SpotifyLogin] Login page finished loading.")
 
             if Self.looksLikeAuthenticatedDestination(url) {
                 didPassLoginForm = true

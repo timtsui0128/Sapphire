@@ -12,6 +12,7 @@ import Security
 import ApplicationServices
 import os.log
 import Darwin
+import OpenDirectory
 
 @_silgen_name("CGSessionCopyCurrentDictionary")
 private func CGSessionCopyCurrentDictionary() -> CFDictionary?
@@ -642,15 +643,13 @@ class AuthenticationManager: NSObject, ObservableObject, BLEDelegate {
         let userName = currentLoginUserName()
         guard !userName.isEmpty else { return false }
 
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/dscl")
-        process.arguments = [".", "-authonly", userName, password]
         do {
-            try process.run()
-            process.waitUntilExit()
-            return process.terminationStatus == 0
+            let node = try ODNode(session: ODSession.default(), type: UInt32(kODNodeTypeLocalNodes))
+            let record = try node.record(withRecordType: kODRecordTypeUsers, name: userName, attributes: nil)
+            try record.verifyPassword(password)
+            return true
         } catch {
-            print("[AuthManager] dscl authonly failed: \(error)")
+            // Authentication errors can contain sensitive context; never log them.
             return false
         }
     }

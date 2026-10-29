@@ -38,6 +38,7 @@ Sapphire/App/GoogleService-Info.plist
 !/Tools/BluetoothSoundTests/
 !/Tools/SessionPrivacyTests/
 !/Tools/ClipboardPrivacyTests/
+!/Tools/SecurityRegressionTests/
 !/Tools/WindowFitTests/
 !/Tools/NotchScreenFitTests/
 !/Tools/NotchPinTests/

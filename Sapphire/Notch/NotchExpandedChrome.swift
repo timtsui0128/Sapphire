@@ -22,6 +22,7 @@ enum NotchExpandedChrome {
         var iconsRightWidth: Binding<CGFloat>
         var iconsIntrinsicWidth: CGFloat
         var islandBarItems: [NotchIslandBar.Item] = []
+        var toolbarTopOffset: CGFloat = 0
         var onPin: (Bool) -> Void
         var onOpenBlipHub: () -> Void
         var onOpenAgentS: () -> Void
@@ -34,7 +35,7 @@ enum NotchExpandedChrome {
     static func key(_ context: Context) -> NotchContentKey {
         NotchContentKey(
             config: context.config,
-            numbers: [context.fixedSpacer ? context.barWidth : 0, context.iconsIntrinsicWidth],
+            numbers: [context.fixedSpacer ? context.barWidth : 0, context.iconsIntrinsicWidth, context.toolbarTopOffset],
             flags: [context.fixedSpacer, context.showRightHUDOverlay, context.isPinned.wrappedValue],
             tags: [String(describing: context.mode), String(describing: context.notchState)]
                 + context.islandBarItems.map { String(describing: $0) }
@@ -61,7 +62,7 @@ enum NotchExpandedChrome {
             ]
         }
         if context.mode == .defaultWidgets {
-            let top = config.widgetMenuTopInset
+            let top = config.widgetMenuTopInset + context.toolbarTopOffset
             let inset = config.defaultModeIconsHorizontalPadding
             if context.fixedSpacer {
                 return [
@@ -91,6 +92,7 @@ enum NotchExpandedChrome {
         return [
             .header: NotchChromePiece(
                 anchor: .leading,
+                top: context.toolbarTopOffset,
                 width: .outline,
                 height: config.initialSize.height,
                 view: AnyView(NotchChromeNavigationHeader(context: context))

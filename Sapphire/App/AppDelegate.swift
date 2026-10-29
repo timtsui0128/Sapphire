@@ -1581,6 +1581,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             }
             return
         }
+        guard OAuthLoginSession.isCallbackURL(url) else { return }
         musicManager.spotifyOfficialAPI.handleRedirect(url: url)
         musicManager.tidalAPI.handleRedirect(url: url)
     }

@@ -1,15 +1,17 @@
 # 展开顶栏与面板材质
 
-当前交付为 `output/Sapphire Bilingual.app`，压缩包为 `output/Sapphire-Bilingual-English-Chinese-arm64.zip`。先退出旧版，再打开新版；**Settings → About** 显示 **Language Switch 9**。
+使用个人分支的最新版本，版本信息位于 **Settings → About**。从支持应用内更新的版本可在此检查更新。
 
 打开 **Settings → Appearance → App appearance → Top bar & panel**：
 
 - **Match Panel**：默认选项。顶栏与面板使用连续背景，去掉之前软件绘制的黑色横条，遵循下方 Expanded Notch Appearance 的材质设置。
-- **Liquid Glass**：展开顶栏与内容使用一块连续的系统玻璃，不叠加不透明的黑色条。旧系统使用原生模糊材质；开启“降低透明度”时回退为符合当前主题的实色。
+- **Liquid Glass**：展开顶栏与内容使用连续的原生磨砂模糊背景，加上轻薄明暗底色来减弱桌面文字透出。开启“降低透明度”或“增强对比度”时回退为符合当前主题的实色。
 - **White**：整个展开面板及顶栏使用白色背景与深色文字。
 - **Black**：整个展开面板及顶栏使用黑色背景与浅色文字。
 
 选择立即生效并保存在本机，不用重新打开面板。白色／黑色选项独立于 Settings 窗口的 App appearance；截图、Sports、Finance 等嵌套内容会继承面板主题，返回按钮、设置／文件按钮、电池和连接状态图标一起调整对比度。Match Panel 尊重每块显示器选择的玻璃明暗样式。
+
+0.1.5 起，贴顶半透明面板的工具按钮位于系统菜单栏下方，并按当前显示器的菜单栏高度留白。内容区同步下移并保持屏幕高度限制，避免和苹果菜单、应用菜单、时间图标重叠；胶囊原有底部工具栏及展开轮廓保持不变。
 
 Sports／Stocks 的紧凑小组件和详情页现在直接透出所选材质，移除内部不透明底板；独立 Settings 预览仍保留正常画布。
 

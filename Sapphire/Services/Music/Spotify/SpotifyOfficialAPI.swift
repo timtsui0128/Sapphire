@@ -26,6 +26,7 @@ class SpotifyOfficialAPIManager {
     @ObservationIgnored private var clientSecret = ""
     private let redirectURI = "sapphire://callback"
 
+    @ObservationIgnored private var loginSession = OAuthLoginSession()
     @ObservationIgnored private var refreshTask: Task<Bool, Never>?
 
     private init() {
@@ -38,8 +39,8 @@ class SpotifyOfficialAPIManager {
             Task { @MainActor in self?.updateCredentials() }
         }
 
-        self.accessToken = UserDefaults.standard.string(forKey: "spotifyAccessToken")
-        self.refreshToken = UserDefaults.standard.string(forKey: "spotifyRefreshToken")
+        self.accessToken = MusicCredentialStore.shared.string(forKey: "spotifyAccessToken")
+        self.refreshToken = MusicCredentialStore.shared.string(forKey: "spotifyRefreshToken")
         self.accessTokenExpiresAt = UserDefaults.standard.object(forKey: "spotifyAccessTokenExpiresAt") as? Date
         self.isAuthenticated = self.accessToken != nil
 
@@ -51,9 +52,14 @@ class SpotifyOfficialAPIManager {
     private func updateCredentials() {
         let clientId = APIKeyManager.shared.spotifyClientId
         let clientSecret = APIKeyManager.shared.spotifyClientSecret
+        if self.clientId != clientId {
+            loginSession.cancel()
+            refreshTask?.cancel()
+            refreshTask = nil
+        }
         self.clientId = clientId
         self.clientSecret = clientSecret
-        let nowHasKeys = !clientId.isEmpty && !clientSecret.isEmpty
+        let nowHasKeys = !clientId.isEmpty
         if self.hasApiKeys != nowHasKeys {
             self.hasApiKeys = nowHasKeys
         }
@@ -63,14 +69,20 @@ class SpotifyOfficialAPIManager {
 
     func login() {
         updateCredentials()
-        guard !clientId.isEmpty, !clientSecret.isEmpty else {
-            print("[SpotifyOfficialAPIManager] Log in failed: Client ID or Client Secret is missing.")
+        guard !clientId.isEmpty else {
+            print("[SpotifyOfficialAPIManager] Log in failed: Client ID is missing.")
             return
         }
+        guard let attempt = loginSession.begin(clientID: clientId) else { return }
+        refreshTask?.cancel()
+        refreshTask = nil
         let scope = "user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private user-read-private user-library-modify user-library-read"
         var components = URLComponents(string: "https://accounts.spotify.com/authorize")!
         components.queryItems = [
             URLQueryItem(name: "response_type", value: "code"),
+            URLQueryItem(name: "state", value: attempt.state),
+            URLQueryItem(name: "code_challenge", value: attempt.challenge),
+            URLQueryItem(name: "code_challenge_method", value: "S256"),
             URLQueryItem(name: "client_id", value: clientId),
             URLQueryItem(name: "scope", value: scope),
             URLQueryItem(name: "redirect_uri", value: redirectURI),
@@ -79,12 +91,11 @@ class SpotifyOfficialAPIManager {
         NSWorkspace.shared.open(url)
     }
 
+    func cancelLogin() { loginSession.cancel() }
+
     func handleRedirect(url: URL) {
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
-              let code = components.queryItems?.first(where: { $0.name == "code" })?.value else {
-            return
-        }
-        Task { await self.exchangeCodeForToken(code: code) }
+        guard let result = loginSession.consume(url) else { return }
+        Task { await self.exchangeCodeForToken(code: result.code, attempt: result.attempt) }
     }
 
     private struct TokenResponse: Decodable {
@@ -92,7 +103,8 @@ class SpotifyOfficialAPIManager {
         enum CodingKeys: String, CodingKey { case accessToken = "access_token", refreshToken = "refresh_token", expiresIn = "expires_in" }
     }
 
-    private func exchangeCodeForToken(code: String) async {
+    private func exchangeCodeForToken(code: String, attempt: OAuthLoginSession.Attempt) async {
+        guard loginSession.generation == attempt.id else { return }
         guard let url = URL(string: "https://accounts.spotify.com/api/token") else { return }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -100,31 +112,30 @@ class SpotifyOfficialAPIManager {
         components.queryItems = [
             URLQueryItem(name: "grant_type", value: "authorization_code"),
             URLQueryItem(name: "code", value: code),
+            URLQueryItem(name: "client_id", value: attempt.clientID),
+            URLQueryItem(name: "code_verifier", value: attempt.verifier),
             URLQueryItem(name: "redirect_uri", value: redirectURI),
         ]
-        request.httpBody = components.query?.data(using: .utf8)
-        let authHeader = "\(clientId):\(clientSecret)".data(using: .utf8)!.base64EncodedString()
-        request.setValue("Basic \(authHeader)", forHTTPHeaderField: "Authorization")
+        request.httpBody = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B").data(using: .utf8)
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
 
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
+            guard !Task.isCancelled, loginSession.generation == attempt.id, clientId == attempt.clientID else { return }
             guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                let errorBody = String(data: data, encoding: .utf8) ?? "No response body"
-                print("[SpotifyOfficialAPIManager] Token exchange failed with status code \((response as? HTTPURLResponse)?.statusCode ?? 0). Response: \(errorBody)")
+                print("[SpotifyOfficialAPIManager] Token exchange was rejected.")
                 return
             }
 
             let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: data)
 
+            UserDefaults.standard.set(true, forKey: "spotifyUsesPKCE")
             self.accessToken = tokenResponse.accessToken
             self.accessTokenExpiresAt = Date().addingTimeInterval(TimeInterval(tokenResponse.expiresIn))
             self.refreshToken = tokenResponse.refreshToken
-            UserDefaults.standard.set(tokenResponse.accessToken, forKey: "spotifyAccessToken")
+            MusicCredentialStore.shared.set(tokenResponse.accessToken, forKey: "spotifyAccessToken")
             UserDefaults.standard.set(self.accessTokenExpiresAt, forKey: "spotifyAccessTokenExpiresAt")
-            if let refreshToken = tokenResponse.refreshToken {
-                UserDefaults.standard.set(refreshToken, forKey: "spotifyRefreshToken")
-            }
+            MusicCredentialStore.shared.set(tokenResponse.refreshToken, forKey: "spotifyRefreshToken")
             self.isAuthenticated = true
             await self.fetchUserProfile()
         } catch {
@@ -154,12 +165,14 @@ class SpotifyOfficialAPIManager {
             return await existing.value
         }
 
+        let generation = loginSession.generation
         let task = Task { [weak self] in
             guard let self else { return false }
-            return await self.performTokenRefresh(refreshToken: refreshToken)
+            return await self.performTokenRefresh(refreshToken: refreshToken, generation: generation)
         }
         refreshTask = task
         let success = await task.value
+        guard generation == loginSession.generation else { return false }
         refreshTask = nil
 
         if success {
@@ -168,7 +181,8 @@ class SpotifyOfficialAPIManager {
         return success
     }
 
-    private func performTokenRefresh(refreshToken: String) async -> Bool {
+    private func performTokenRefresh(refreshToken: String, generation: UUID) async -> Bool {
+        guard !Task.isCancelled, generation == loginSession.generation else { return false }
         guard let url = URL(string: "https://accounts.spotify.com/api/token") else { return false }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -177,27 +191,34 @@ class SpotifyOfficialAPIManager {
             URLQueryItem(name: "grant_type", value: "refresh_token"),
             URLQueryItem(name: "refresh_token", value: refreshToken),
         ]
-        request.httpBody = components.query?.data(using: .utf8)
-        let authHeader = "\(clientId):\(clientSecret)".data(using: .utf8)!.base64EncodedString()
-        request.setValue("Basic \(authHeader)", forHTTPHeaderField: "Authorization")
+        request.httpBody = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B").data(using: .utf8)
+        if UserDefaults.standard.bool(forKey: "spotifyUsesPKCE") {
+            components.queryItems?.append(URLQueryItem(name: "client_id", value: clientId))
+            request.httpBody = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B").data(using: .utf8)
+        } else {
+            // Keep existing confidential-client sessions working until their next PKCE login.
+            let authHeader = "\(clientId):\(clientSecret)".data(using: .utf8)!.base64EncodedString()
+            request.setValue("Basic \(authHeader)", forHTTPHeaderField: "Authorization")
+        }
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
 
         do {
             let (data, _) = try await URLSession.shared.data(for: request)
+            guard !Task.isCancelled, generation == loginSession.generation else { return false }
             let decoder = JSONDecoder()
             if let tokenResponse = try? decoder.decode(TokenResponse.self, from: data) {
                 self.accessToken = tokenResponse.accessToken
                 self.accessTokenExpiresAt = Date().addingTimeInterval(TimeInterval(tokenResponse.expiresIn))
-                UserDefaults.standard.set(tokenResponse.accessToken, forKey: "spotifyAccessToken")
+                MusicCredentialStore.shared.set(tokenResponse.accessToken, forKey: "spotifyAccessToken")
                 UserDefaults.standard.set(self.accessTokenExpiresAt, forKey: "spotifyAccessTokenExpiresAt")
                 if let newRefreshToken = tokenResponse.refreshToken {
                     self.refreshToken = newRefreshToken
-                    UserDefaults.standard.set(newRefreshToken, forKey: "spotifyRefreshToken")
+                    MusicCredentialStore.shared.set(newRefreshToken, forKey: "spotifyRefreshToken")
                 }
                 self.isAuthenticated = true
                 return true
             } else if let errorResponse = try? decoder.decode(TokenErrorResponse.self, from: data) {
-                print("[SpotifyOfficialAPIManager] Refresh token error: \(errorResponse.error_description)")
+                print("[SpotifyOfficialAPIManager] Refresh token request was rejected.")
                 let permanent = Self.isPermanentTokenError(errorResponse.error)
                 if permanent {
                     logout()
@@ -223,15 +244,18 @@ class SpotifyOfficialAPIManager {
     }
 
     func logout() {
+        cancelLogin()
+        UserDefaults.standard.removeObject(forKey: "spotifyUsesPKCE")
         refreshTask?.cancel()
         refreshTask = nil
         self.accessToken = nil
         self.refreshToken = nil
         self.accessTokenExpiresAt = nil
         self.userProfile = nil
+        self.isPremiumUser = false
         self.isAuthenticated = false
-        UserDefaults.standard.removeObject(forKey: "spotifyAccessToken")
-        UserDefaults.standard.removeObject(forKey: "spotifyRefreshToken")
+        MusicCredentialStore.shared.removeObject(forKey: "spotifyAccessToken")
+        MusicCredentialStore.shared.removeObject(forKey: "spotifyRefreshToken")
         UserDefaults.standard.removeObject(forKey: "spotifyAccessTokenExpiresAt")
     }
 
@@ -239,7 +263,9 @@ class SpotifyOfficialAPIManager {
 
     func fetchUserProfile() async {
         guard isAuthenticated, let url = URL(string: "https://api.spotify.com/v1/me") else { return }
+        let generation = loginSession.generation
         let profile: UserProfile? = await makeAPIRequest(url: url)
+        guard !Task.isCancelled, generation == loginSession.generation, isAuthenticated else { return }
         self.userProfile = profile
         self.isPremiumUser = (profile?.product == "premium")
     }

@@ -123,7 +123,9 @@ private struct SurfaceStyleChecks {
                     try check(style.glass == nil, "Solid finish must not stack glass under its fill")
                 }
                 if finish == .liquidGlass {
-                    try check(style.glass?.backend == .automatic && style.fill == nil, "Glass must use one continuous native surface without opaque paint")
+                    try check(style.glass?.backend == .visualEffect && style.glass?.material == .menu, "Expanded glass must blur background text using the stable native menu material")
+                    guard case .solid(let veil)? = style.fill else { throw NSError(domain: "GlassReadability", code: 1) }
+                    try check(veil.alphaComponent >= 0.30 && veil.alphaComponent < 1, "A translucent veil must separate dense content from the desktop")
                     try check(style.glass?.appearance == (scheme == .light ? .light : .dark), "Glass appearance must match semantic text")
                     input.systemGlassAvailable = false
                     try check(NotchSurfaceStyle.resolve(input).glass?.backend == .visualEffect, "Older macOS must use a native blur fallback")
@@ -135,6 +137,12 @@ private struct SurfaceStyleChecks {
                         try check(scheme == .light ? brightness(color) > 0.8 : brightness(color) < 0.01, "Opaque accessibility fallback must retain the selected light/dark contrast")
                     }
                     input.reduceTransparency = false
+                    input.increaseContrast = true
+                    let highContrast = NotchSurfaceStyle.resolve(input)
+                    try check(highContrast.glass == nil, "Increase Contrast must remove the translucent backdrop")
+                    guard case .solid(let contrastCanvas)? = highContrast.fill else { throw NSError(domain: "GlassReadability", code: 2) }
+                    try check(contrastCanvas.alphaComponent == 1, "Increase Contrast must provide an opaque canvas")
+                    input.increaseContrast = false
                 }
             }
         }

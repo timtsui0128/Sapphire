@@ -41,6 +41,7 @@ struct NotchSurfaceStyle: Equatable {
         var surfaceHeight: CGFloat = 0
         var expandedPanelSurface: ExpandedPanelSurface = .matchPanel
         var reduceTransparency = false
+        var increaseContrast = false
         var systemColorScheme: ColorScheme = .dark
         var isExternalIndicator = false
     }
@@ -118,15 +119,18 @@ struct NotchSurfaceStyle: Equatable {
             case .white, .black:
                 style.fill = .solid(input.expandedPanelSurface == .white ? .white : .black)
             case .liquidGlass:
-                if input.reduceTransparency {
+                if input.reduceTransparency || input.increaseContrast {
                     style.fill = .solid(canvas)
                 } else {
                     style.glass = Glass(
-                        backend: input.systemGlassAvailable && !profilingDisablesGlass ? .automatic : .visualEffect,
-                        material: config.usesExternalDisplayBar ? .menu : .frosted, tintColor: nil, blendingMode: .behindWindow,
+                        // The private glass renderer can refract menu text without
+                        // blurring it. Expanded controls need a stable native blur.
+                        backend: .visualEffect,
+                        material: .menu, tintColor: nil, blendingMode: .behindWindow,
                         appearance: input.expandedColorScheme == .light ? .light : .dark,
                         interaction: .normal, shadow: nativeShadow
                     )
+                    style.fill = .solid(canvas.withAlphaComponent(0.30))
                 }
             case .matchPanel:
                 break
@@ -152,12 +156,24 @@ struct NotchSurfaceStyle: Equatable {
             return style
         }
 
-        if input.notchState == .clickExpanded, input.reduceTransparency {
+        if input.notchState == .clickExpanded, input.reduceTransparency || input.increaseContrast {
             style.fill = .solid(expandedCanvas(for: input.expandedColorScheme))
             style.fillShadow = NotchLayerSurfaceView.Shadow(
                 color: nativeShadow.color, opacity: nativeShadow.opacity,
                 radius: nativeShadow.radius, offset: nativeShadow.offset
             )
+            return style
+        }
+
+        if input.notchState == .clickExpanded,
+           appearance.mode == .liquidGlass || (appearance.usesLiquidGlass && !isOpaqueSolid) {
+            style.glass = Glass(
+                backend: .visualEffect, material: .menu, tintColor: nil,
+                blendingMode: .behindWindow,
+                appearance: input.expandedColorScheme == .light ? .light : .dark,
+                interaction: .normal, shadow: nativeShadow
+            )
+            style.fill = .solid(expandedCanvas(for: input.expandedColorScheme).withAlphaComponent(0.30))
             return style
         }
 

@@ -43,6 +43,7 @@ struct NotchController: View {
     @ObservedObject private var appAppearance = AppAppearance.shared
     @ObservedObject private var menuBarTint = MenuBarWallpaperTint.shared
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
     let notchWindow: NSWindow?
     private let notchWidget: NotchWidgetView
     private let timerManager: TimerManager
@@ -773,6 +774,7 @@ struct NotchController: View {
             surfaceHeight: targetSize.height,
             expandedPanelSurface: appAppearance.expandedPanelSurface,
             reduceTransparency: reduceTransparency,
+            increaseContrast: colorSchemeContrast == .increased,
             systemColorScheme: config.usesExternalDisplayBar ? externalGlassColorScheme : appAppearance.systemColorScheme,
             isExternalIndicator: showsExternalDisplayIndicator
         ))
@@ -1362,7 +1364,19 @@ struct NotchController: View {
 
     // MARK: - Subviews
     private func expandedTopReserve(config: ResolvedNotchConfiguration) -> CGFloat {
-        config.isFloatingIsland ? 0 : config.initialSize.height
+        config.isFloatingIsland ? 0 : config.initialSize.height + expandedToolbarOffset(config: config)
+    }
+
+    private func expandedToolbarOffset(config: ResolvedNotchConfiguration) -> CGFloat {
+        let appearance = activeAppearanceSettings
+        let translucent = appAppearance.expandedPanelSurface == .liquidGlass
+            || (appAppearance.expandedPanelSurface == .matchPanel
+                && (appearance.mode == .liquidGlass || appearance.mode == .blur
+                    || (appearance.mode == .custom && appearance.opacity < 1)))
+        return ExpandedPanelLayout.toolbarOffset(
+            menuBarHeight: config.menuBarHeight, panelTopInset: config.topInset,
+            isFloatingIsland: config.isFloatingIsland, usesTranslucency: translucent
+        )
     }
 
     private func expandedBottomReserve(config: ResolvedNotchConfiguration) -> CGFloat {
@@ -1446,6 +1460,7 @@ struct NotchController: View {
             iconsRightWidth: $notchIconsRightWidth,
             iconsIntrinsicWidth: notchIconsIntrinsicWidth,
             islandBarItems: config.isFloatingIsland ? islandBarItems(config: config) : [],
+            toolbarTopOffset: expandedToolbarOffset(config: config),
             onPin: { pinned in
                 if pinned {
                     scratch.collapseTask?.cancel()

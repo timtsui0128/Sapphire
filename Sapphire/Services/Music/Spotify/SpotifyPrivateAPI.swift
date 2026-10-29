@@ -215,6 +215,7 @@ class SpotifyPrivateAPIManager {
 
     private static let webPlayerClientID = "d8a5ed958d274c2e8ee717e6a4b0971d"
 
+    private var credentialGeneration = UUID()
     private let sessionUserDefaultsKey = "spotAPISessionCookies"
     private let controllerDeviceIDKey = "spotAPIControllerDeviceID"
     private let externalRefreshTokenKey = "spotAPIExternalRefreshToken"
@@ -251,7 +252,7 @@ class SpotifyPrivateAPIManager {
     }
 
     func hasPersistedSession() -> Bool {
-        guard let savedCookiesData = UserDefaults.standard.array(forKey: sessionUserDefaultsKey) as? [[String: Any]] else {
+        guard let savedCookiesData = MusicCredentialStore.shared.array(forKey: sessionUserDefaultsKey) as? [[String: Any]] else {
             return false
         }
         return !savedCookiesData.isEmpty
@@ -407,7 +408,7 @@ class SpotifyPrivateAPIManager {
         reestablishTask = nil
         _internalLogout()
         await cookieManager.clear()
-        UserDefaults.standard.removeObject(forKey: sessionUserDefaultsKey)
+        MusicCredentialStore.shared.removeObject(forKey: sessionUserDefaultsKey)
         await clearSpotifyBrowserData()
         print("[SpotifyPrivateAPIManager] Prepared fresh login — cleared cookies and browser data.")
     }
@@ -415,10 +416,14 @@ class SpotifyPrivateAPIManager {
     func completeLoginAfterWebViewSuccess(with cookieProperties: [[String: Any]]) {
         hasRequestedSessionBootstrap = true
         let cookies = cookieProperties.compactMap { HTTPCookie(properties: $0.toStringKeys()) }
+        let generation = credentialGeneration
         Task {
             await cookieManager.clear()
+            guard generation == credentialGeneration else { return }
             await cookieManager.setCookies(cookies)
+            guard generation == credentialGeneration else { return }
             await saveSession()
+            guard generation == credentialGeneration else { return }
             reestablishSession()
         }
     }
@@ -426,13 +431,13 @@ class SpotifyPrivateAPIManager {
     func adoptExternalTokens(accessToken: String, refreshToken: String?, clientID: String, clientSecret: String?) {
         self.accessToken = accessToken
         if let refreshToken {
-            UserDefaults.standard.set(refreshToken, forKey: externalRefreshTokenKey)
+            MusicCredentialStore.shared.set(refreshToken, forKey: externalRefreshTokenKey)
             UserDefaults.standard.set(clientID, forKey: externalClientIDKey)
-            UserDefaults.standard.set(clientSecret, forKey: externalClientSecretKey)
+            MusicCredentialStore.shared.set(clientSecret, forKey: externalClientSecretKey)
         } else {
-            UserDefaults.standard.removeObject(forKey: externalRefreshTokenKey)
+            MusicCredentialStore.shared.removeObject(forKey: externalRefreshTokenKey)
             UserDefaults.standard.removeObject(forKey: externalClientIDKey)
-            UserDefaults.standard.removeObject(forKey: externalClientSecretKey)
+            MusicCredentialStore.shared.removeObject(forKey: externalClientSecretKey)
         }
         updateAllClientTokens()
         isLoggedIn = true
@@ -447,7 +452,7 @@ class SpotifyPrivateAPIManager {
             await cookieManager.clear()
             await clearSpotifyBrowserData()
         }
-        UserDefaults.standard.removeObject(forKey: sessionUserDefaultsKey)
+        MusicCredentialStore.shared.removeObject(forKey: sessionUserDefaultsKey)
     }
 
     @MainActor
@@ -472,7 +477,7 @@ class SpotifyPrivateAPIManager {
 
     private func invalidateStoredSession(reason: String, clearWebViewData: Bool = false) async {
         await cookieManager.clear()
-        UserDefaults.standard.removeObject(forKey: sessionUserDefaultsKey)
+        MusicCredentialStore.shared.removeObject(forKey: sessionUserDefaultsKey)
         if clearWebViewData {
             await clearSpotifyBrowserData()
         }
@@ -480,6 +485,12 @@ class SpotifyPrivateAPIManager {
     }
 
     private func _internalLogout() {
+        credentialGeneration = UUID()
+        bootstrapTask?.cancel()
+        bootstrapTask = nil
+        MusicCredentialStore.shared.removeObject(forKey: externalRefreshTokenKey)
+        MusicCredentialStore.shared.removeObject(forKey: externalClientSecretKey)
+        UserDefaults.standard.removeObject(forKey: externalClientIDKey)
         softReconnectRetryTask?.cancel()
         softReconnectRetryTask = nil
         resetActiveSession()
@@ -519,19 +530,24 @@ class SpotifyPrivateAPIManager {
     }
 
     private func saveSession() async {
+        let generation = credentialGeneration
         let cookies = await cookieManager.allCookies().values.map { $0.encodeToDictionary() }
-        UserDefaults.standard.set(cookies, forKey: sessionUserDefaultsKey)
+        guard !Task.isCancelled, generation == credentialGeneration else { return }
+        MusicCredentialStore.shared.set(cookies, forKey: sessionUserDefaultsKey)
     }
 
     private func loadSession() async {
-        guard let savedCookiesData = UserDefaults.standard.array(forKey: sessionUserDefaultsKey) as? [[String: Any]] else { return }
+        let generation = credentialGeneration
+        guard !Task.isCancelled else { return }
+        guard let savedCookiesData = MusicCredentialStore.shared.array(forKey: sessionUserDefaultsKey) as? [[String: Any]] else { return }
         let cookies = savedCookiesData.compactMap { HTTPCookie(properties: $0.toStringKeys()) }
         if cookies.isEmpty {
-            UserDefaults.standard.removeObject(forKey: sessionUserDefaultsKey)
+            MusicCredentialStore.shared.removeObject(forKey: sessionUserDefaultsKey)
             return
         }
 
         await cookieManager.setCookies(cookies)
+        guard !Task.isCancelled, generation == credentialGeneration else { return }
         reestablishSession()
     }
 

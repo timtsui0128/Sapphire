@@ -257,6 +257,7 @@ struct ResolvedNotchConfiguration: Equatable {
     let isNotchless: Bool
     let floatingIslandCornerRadius: CGFloat
     let widgetMenuTopInset: CGFloat
+    let menuBarHeight: CGFloat
     let topInset: CGFloat
     let displayScale: CGFloat
     let cameraWidth: CGFloat
@@ -360,6 +361,7 @@ struct ResolvedNotchConfiguration: Equatable {
         let displayID = targetScreen?.displayIdentifier
         let metrics = targetScreen.map { NotchDisplayMetrics.current(for: $0) } ?? .fallback
         self.displayScale = metrics.scale
+        self.menuBarHeight = metrics.menuBarHeight
         self.cameraWidth = metrics.cameraWidth ?? 0
         self.isNotchless = !metrics.hasHardwareNotch
         self.usesExternalDisplayBar = targetScreen.map {

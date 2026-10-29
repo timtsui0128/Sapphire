@@ -86,8 +86,8 @@ class iMessageActionManager {
         Task(priority: .userInitiated) {
             let contactIdentifiers = await _getContactIdentifiers(forName: recipientName)
             guard !contactIdentifiers.isEmpty else { return }
-            let identifiersString = contactIdentifiers.map { "\"\($0)\"" }.joined(separator: ", ")
-            let sanitizedMessage = message.replacingOccurrences(of: "\"", with: "\\\"")
+            let identifiersString = contactIdentifiers.map(AppleScriptLiteral.quoted).joined(separator: ", ")
+            let sanitizedMessage = AppleScriptLiteral.quoted(message)
             let scriptTemplate = """
             tell application "Messages"
                 set identifierList to {%@}
@@ -95,7 +95,7 @@ class iMessageActionManager {
                 repeat with anIdentifier in identifierList
                     if not messageSent then
                         try
-                            send "%@" to participant anIdentifier
+                            send %@ to participant anIdentifier
                             set messageSent to true
                             exit repeat
                         on error
@@ -112,12 +112,12 @@ class iMessageActionManager {
         Task(priority: .userInitiated) {
             let contactIdentifiers = await _getContactIdentifiers(forName: recipientName)
             guard let primaryIdentifier = contactIdentifiers.first else { return }
-            let sanitizedIdentifier = primaryIdentifier.replacingOccurrences(of: "\"", with: "\\\"")
+            let sanitizedIdentifier = AppleScriptLiteral.quoted(primaryIdentifier)
             let tapbackValue = tapbackType.rawValue
             let script = """
             tell application "Messages"
                 try
-                    set targetChat to 1st chat whose participants's handle contains "\(sanitizedIdentifier)"
+                    set targetChat to 1st chat whose participants's handle contains \(sanitizedIdentifier)
                     set lastMessage to last message of targetChat
                     tapback "\(tapbackValue)" to lastMessage
                 on error errMsg
@@ -140,11 +140,11 @@ class iMessageActionManager {
     }
     func replyToLastMessage() { if !NSWorkspace.shared.launchApplication("Messages") { print("iMessageActionManager: Could not launch Messages.app") } }
     func markConversationAsRead(senderName: String) {
-        let sanitizedSenderName = senderName.replacingOccurrences(of: "\"", with: "\\\"")
+        let sanitizedSenderName = AppleScriptLiteral.quoted(senderName)
         let script = """
         tell application "Messages"
             try
-                set targetChat to first chat whose name is "\(sanitizedSenderName)"
+                set targetChat to first chat whose name is \(sanitizedSenderName)
                 mark targetChat as read
             on error
             end try

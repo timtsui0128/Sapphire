@@ -87,7 +87,7 @@ private struct TidalLoginWebViewRepresentable: NSViewRepresentable {
                url.host?.lowercased() == "callback" {
                 if !isCompleting {
                     isCompleting = true
-                    print("[TidalLogin] Intercepted redirect: \(url.absoluteString)")
+                    print("[TidalLogin] Received authorization callback.")
                     let components = URLComponents(url: url, resolvingAgainstBaseURL: true)
                     let hasAuthorizationCode = components?.queryItems?.contains {
                         $0.name == "code" && $0.value?.isEmpty == false

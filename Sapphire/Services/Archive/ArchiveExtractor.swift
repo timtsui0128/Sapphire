@@ -278,16 +278,20 @@ final class ArchiveExtractor: ObservableObject {
         let totalEntries = listing?.count ?? 0
         let allowDitto = listing != nil
 
-        var result = await runExtraction(url: url, stagingDirectory: staging, displayDestination: displayDestination, passphrase: nil, totalEntries: totalEntries, totalBytes: archiveBytes, allowDitto: allowDitto)
+        let result = await runExtraction(url: url, stagingDirectory: staging, displayDestination: displayDestination, totalEntries: totalEntries, totalBytes: archiveBytes, allowDitto: allowDitto)
 
         if !result.success, result.needsPassphrase, settingsModel.current.archivePromptForPasswords {
-            if let password = await promptForPassword(archiveName: archiveName) {
-                await Task.detached(priority: .utility) {
-                    try? FileManager.default.removeItem(at: staging)
-                    try? FileManager.default.createDirectory(at: staging, withIntermediateDirectories: true)
-                }.value
-                result = await runExtraction(url: url, stagingDirectory: staging, displayDestination: displayDestination, passphrase: password, totalEntries: totalEntries, totalBytes: archiveBytes, allowDitto: allowDitto)
+            // Let the system collect the password in its own UI. Never expose it
+            // through a subprocess argument, environment variable, or log.
+            currentTransferTask = nil
+            do {
+                let utility = URL(fileURLWithPath: "/System/Library/CoreServices/Applications/Archive Utility.app")
+                let configuration = NSWorkspace.OpenConfiguration()
+                _ = try await NSWorkspace.shared.open([url], withApplicationAt: utility, configuration: configuration)
+            } catch {
+                await notify(title: "Sapphire Archives", body: "Open this password-protected archive in Archive Utility to extract it securely.")
             }
+            return
         }
 
         guard result.success else {
@@ -415,7 +419,7 @@ final class ArchiveExtractor: ObservableObject {
         let needsPassphrase: Bool
     }
 
-    private func runExtraction(url: URL, stagingDirectory: URL, displayDestination: URL, passphrase: String?, totalEntries: Int, totalBytes: Int64, allowDitto: Bool) async -> ExtractResult {
+    private func runExtraction(url: URL, stagingDirectory: URL, displayDestination: URL, totalEntries: Int, totalBytes: Int64, allowDitto: Bool) async -> ExtractResult {
         let startDate = Date()
         let archiveName = url.lastPathComponent
 
@@ -432,7 +436,7 @@ final class ArchiveExtractor: ObservableObject {
         )
 
         guard totalEntries > 0 else {
-            return await runExtractionProcess(url: url, destination: stagingDirectory, passphrase: passphrase, allowDitto: allowDitto, onOutputLine: nil)
+            return await runExtractionProcess(url: url, destination: stagingDirectory, allowDitto: allowDitto, onOutputLine: nil)
         }
 
         let throttle = ExtractionProgressThrottle(totalEntries: totalEntries)
@@ -445,12 +449,12 @@ final class ArchiveExtractor: ObservableObject {
                 self.updateExtractionProgress(bytesDone: bytesDone, speed: speed)
             }
         }
-        return await runExtractionProcess(url: url, destination: stagingDirectory, passphrase: passphrase, allowDitto: allowDitto, onOutputLine: onLine)
+        return await runExtractionProcess(url: url, destination: stagingDirectory, allowDitto: allowDitto, onOutputLine: onLine)
     }
 
-    private func runExtractionProcess(url: URL, destination: URL, passphrase: String?, allowDitto: Bool, onOutputLine: (@Sendable (String) -> Void)?) async -> ExtractResult {
+    private func runExtractionProcess(url: URL, destination: URL, allowDitto: Bool, onOutputLine: (@Sendable (String) -> Void)?) async -> ExtractResult {
 
-        if allowDitto, url.pathExtension.lowercased() == "zip", passphrase == nil {
+        if allowDitto, url.pathExtension.lowercased() == "zip" {
             let result = await ProcessRunner.runCapturing(
                 executableURL: URL(fileURLWithPath: "/usr/bin/ditto"),
                 arguments: ["-x", "-k", "-V", url.path, destination.path],
@@ -464,11 +468,7 @@ final class ArchiveExtractor: ObservableObject {
             try? FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
         }
 
-        var args: [String] = []
-        if let passphrase, !passphrase.isEmpty {
-            args += ["--passphrase", passphrase]
-        }
-        args += ["-xvf", url.path, "-C", destination.path]
+        let args = ["-xvf", url.path, "-C", destination.path]
 
         let result = await ProcessRunner.runCapturing(
             executableURL: URL(fileURLWithPath: "/usr/bin/bsdtar"),
@@ -542,26 +542,6 @@ final class ArchiveExtractor: ObservableObject {
             let name = String(first)
             return ignoredTopLevelEntries.contains(name) ? nil : name
         }).count
-    }
-
-    // MARK: - Password prompt
-
-    private func promptForPassword(archiveName: String) async -> String? {
-        let field = NSSecureTextField(frame: NSRect(x: 0, y: 0, width: 260, height: 24))
-        field.placeholderString = "Password"
-
-        return await withCheckedContinuation { continuation in
-            HelperAlertPresenter.presentModal(
-                messageText: "\"\(archiveName)\" is password protected",
-                informativeText: "Enter the password to extract this archive. Sapphire does not store it.",
-                alertStyle: .informational,
-                accessoryView: field,
-                buttonTitles: ["Extract", "Cancel"]
-            ) { index in
-                let password = field.stringValue
-                continuation.resume(returning: index == 0 && !password.isEmpty ? password : nil)
-            }
-        }
     }
 
     // MARK: - Notifications
