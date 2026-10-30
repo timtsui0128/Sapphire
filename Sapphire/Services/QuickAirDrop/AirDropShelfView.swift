@@ -134,8 +134,8 @@ struct QuickAirDropSettingsView: View {
         VStack(alignment: .leading, spacing: 8) {
             Label("AirDrop in TopLet", systemImage: QuickAirDrop.symbolName)
                 .font(.headline)
-            Toggle("Open AirDrop when dragging to the top", isOn: $opensAirDropOnDrag)
-            Text("Drag files or images to TopLet at the top of the screen, then release to choose your iPhone, iPad, or Mac in the system AirDrop window. Turn this off to show the usual file destinations.")
+            Toggle("Show AirDrop and Clipboard when dragging to the top", isOn: $opensAirDropOnDrag)
+            Text("Drag files to the top to choose AirDrop or Copy to Clipboard. Drop on AirDrop to choose a device; drop on Clipboard to paste the files later with Command-V. Turn this off to show the usual file destinations.")
                 .font(.callout).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             Text("Open File Shelf → AirDrop in TopLet to drop items, choose files, or share your clipboard. You can also AirDrop selected screenshots from the Screenshots tab.")

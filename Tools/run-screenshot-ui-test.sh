@@ -12,6 +12,7 @@ xcrun swiftc -swift-version 5 -parse-as-library \
   "$REPO_ROOT"/Sapphire/Widgets/Screenshots/*.swift \
   "$REPO_ROOT/Sapphire/Services/QuickAirDrop/AirDropPayload.swift" \
   "$REPO_ROOT/Sapphire/Services/QuickAirDrop/QuickAirDrop.swift" \
+  "$REPO_ROOT/Sapphire/Services/QuickAirDrop/TopDropClipboard.swift" \
   "$REPO_ROOT/Sapphire/Services/SessionPrivacy/SessionPrivacyState.swift" \
   "$REPO_ROOT/Tools/QuickAirDropTests/AlertFixture.swift" \
   "$REPO_ROOT/Tools/ScreenshotShelfTests/UIHarness.swift" \

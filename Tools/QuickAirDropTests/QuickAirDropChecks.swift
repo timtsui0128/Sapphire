@@ -36,6 +36,7 @@ private func check(_ condition: @autoclosure () throws -> Bool, _ message: Strin
         let board = NSPasteboard.withUniqueName()
         defer { board.releaseGlobally() }
         try checkTopDrop()
+        try checkClipboardDrop(root: root)
         let files = try (0..<5).map { index -> URL in
             let url = root.appendingPathComponent("Screenshot-\(index).png")
             try Data("source \(index)".utf8).write(to: url)
@@ -196,6 +197,27 @@ private func check(_ condition: @autoclosure () throws -> Bool, _ message: Strin
                     host.cacheDisplay(in: host.bounds, to: bitmap)
                     try bitmap.representation(using: .png, properties: [:])!.write(to: output.appendingPathComponent("airdrop-\(locale)-\(dark ? "dark" : "light").png"))
                     window.close()
+                    let cards = HStack(spacing: 15) {
+                        DropZoneView(zone: .airdrop, icon: QuickAirDrop.symbolName, text: "Drop to AirDrop", isTargeted: false)
+                        DropZoneView(zone: .clipboard, icon: "doc.on.clipboard", text: "Copy to Clipboard", isTargeted: true)
+                    }
+                    .padding(15).frame(width: 520, height: 150)
+                    .background(dark ? Color.black : Color.white)
+                    .environment(\.locale, Locale(identifier: locale))
+                    .environment(\.colorScheme, dark ? .dark : .light)
+                    let cardsHost = NSHostingView(rootView: cards)
+                    let cardsFrame = NSRect(x: 0, y: 0, width: 520, height: 150)
+                    let cardsWindow = NSWindow(contentRect: cardsFrame, styleMask: [.borderless], backing: .buffered, defer: false)
+                    cardsWindow.isReleasedWhenClosed = false
+                    cardsWindow.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+                    cardsWindow.contentView = cardsHost
+                    cardsHost.frame = cardsFrame
+                    cardsHost.layoutSubtreeIfNeeded()
+                    try await Task.sleep(nanoseconds: 80_000_000)
+                    let cardsBitmap = cardsHost.bitmapImageRepForCachingDisplay(in: cardsHost.bounds)!
+                    cardsHost.cacheDisplay(in: cardsHost.bounds, to: cardsBitmap)
+                    try cardsBitmap.representation(using: .png, properties: [:])!.write(to: output.appendingPathComponent("top-drop-\(locale)-\(dark ? "dark" : "light").png"))
+                    cardsWindow.close()
                 }
             }
             print("PASS: internal AirDrop shelf and settings render in English/Chinese, light/dark")

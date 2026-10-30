@@ -21,12 +21,6 @@ struct DropZonePreferenceKey: PreferenceKey {
 
 // MARK: - View Definitions
 
-enum DropZone: Hashable {
-    case shelf
-    case airdrop
-    case device(String)
-}
-
 enum FileDragMode {
     case newFile
     case existingFile
@@ -43,12 +37,16 @@ struct FileDragLandingView: View {
 
     @ObservedSettings private var settings: SettingsObserver
     @AppStorage(AirDropDragPreferences.key) private var opensAirDropOnDrag = true
+    @ObservedObject private var clipboard = TopDropClipboard.shared
     @State private var zoneFrames: [DropZone: CGRect] = [:]
 
     var body: some View {
         HStack(spacing: Self.cardSpacing) {
             if opensAirDropOnDrag {
                 standardCard(zone: .airdrop, icon: QuickAirDrop.symbolName, text: "Drop to AirDrop")
+                standardCard(zone: .clipboard,
+                             icon: clipboard.didCopy ? "checkmark.circle.fill" : "doc.on.clipboard",
+                             text: clipboard.didCopy ? "Copied to Clipboard" : "Copy to Clipboard")
             } else {
                 if mode == .newFile {
                     standardCard(
@@ -85,6 +83,7 @@ struct FileDragLandingView: View {
         .background {
             FileDropHitTestObserver(
                 zoneFrames: zoneFrames,
+                usesQuickActions: opensAirDropOnDrag,
                 onActiveZoneChange: { zone in
                     if activeZone != zone { activeZone = zone }
                 }
@@ -105,7 +104,7 @@ struct FileDragLandingView: View {
     }
 
     private var destinationCardCount: Int {
-        if opensAirDropOnDrag { return 1 }
+        if opensAirDropOnDrag { return TopDropTargets.quickActions.count }
         return (mode == .newFile ? 1 : 0)
             + (settings.settings.fileShelfAirDropDestinationEnabled ? 1 : 0)
             + (settings.settings.fileShelfDeviceDestinationsEnabled ? 1 : 0)
@@ -142,6 +141,7 @@ private struct FileDropHitTestObserver: View {
     @EnvironmentObject private var dragLocation: NotchDragLocationState
 
     let zoneFrames: [DropZone: CGRect]
+    let usesQuickActions: Bool
     let onActiveZoneChange: (DropZone?) -> Void
 
     @State private var lastZone: DropZone?
@@ -159,6 +159,10 @@ private struct FileDropHitTestObserver: View {
     }
 
     private func updateActiveState(at point: CGPoint?) {
+        if usesQuickActions {
+            publish(TopDropTargets.destination(at: point, frames: zoneFrames))
+            return
+        }
         guard let point, !zoneFrames.isEmpty else {
             publish(nil)
             return
@@ -450,6 +454,9 @@ private struct DropZoneView: View {
             Text(LocalizedStringKey(text)).font(.system(.headline, design: .rounded).weight(.medium))
             if zone == .airdrop {
                 Text("Choose your device after dropping")
+                    .font(.caption)
+            } else if zone == .clipboard {
+                Text("Paste files with ⌘V")
                     .font(.caption)
             }
         }

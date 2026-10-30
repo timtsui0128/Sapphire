@@ -2,7 +2,7 @@
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 CHECK_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/sapphire-quick-airdrop.XXXXXX")"
-trap 'rm -rf "$CHECK_ROOT"' EXIT
+trap '/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -u "$CHECK_ROOT/QuickAirDropChecks.app" >/dev/null 2>&1 || true; rm -rf "$CHECK_ROOT"' EXIT
 APP_ROOT="$CHECK_ROOT/QuickAirDropChecks.app/Contents"
 mkdir -p "$REPO_ROOT/output/swift-module-cache" "$APP_ROOT/MacOS" "$APP_ROOT/Resources"
 cat > "$APP_ROOT/Info.plist" <<'PLIST'
@@ -33,6 +33,8 @@ def block(source, marker):
 probe = block((root/'Sapphire/Notch/NotchHoverMonitor.swift').read_text(), 'final class HoverProbeWindow:')
 pasteboard = block((root/'Sapphire/Notch/DragStateManager.swift').read_text(), 'enum FileDragPasteboard {')
 (scratch/'ProductionTopDrop.swift').write_text('import AppKit\n'+probe+'\n'+pasteboard+'\n')
+card = block((root/'Sapphire/Widgets/Dropbox/FileDragLandingView.swift').read_text(), 'private struct DropZoneView:').replace('private struct', 'struct', 1)
+(scratch/'ProductionDropCard.swift').write_text('import SwiftUI\n'+card+'\n')
 PY
 xcrun swiftc -swift-version 5 -parse-as-library \
   -target "$(uname -m)-apple-macosx14.0" \
@@ -41,7 +43,9 @@ xcrun swiftc -swift-version 5 -parse-as-library \
   "$REPO_ROOT/Tools/QuickAirDropTests/Fixtures.swift" \
   "$REPO_ROOT/Tools/QuickAirDropTests/AlertFixture.swift" \
   "$CHECK_ROOT/ProductionTopDrop.swift" \
+  "$CHECK_ROOT/ProductionDropCard.swift" \
   "$REPO_ROOT/Tools/QuickAirDropTests/TopDropChecks.swift" \
+  "$REPO_ROOT/Tools/QuickAirDropTests/ClipboardDropChecks.swift" \
   "$REPO_ROOT/Tools/QuickAirDropTests/QuickAirDropChecks.swift" \
   -o "$APP_ROOT/MacOS/checks"
 "$APP_ROOT/MacOS/checks" "$REPO_ROOT/output/internal-airdrop/renders"

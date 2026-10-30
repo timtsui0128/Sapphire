@@ -54381,6 +54381,125 @@
           }
         }
       }
+    },
+    "Copy to Clipboard": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy to Clipboard"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制到剪贴板"
+          }
+        }
+      }
+    },
+    "Copied to Clipboard": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied to Clipboard"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已复制到剪贴板"
+          }
+        }
+      }
+    },
+    "Paste files with ⌘V": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste files with ⌘V"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按 ⌘V 粘贴文件"
+          }
+        }
+      }
+    },
+    "Couldn’t copy to clipboard": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t copy to clipboard"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法复制到剪贴板"
+          }
+        }
+      }
+    },
+    "The clipboard is unavailable. Please try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The clipboard is unavailable. Please try again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剪贴板暂不可用，请重试。"
+          }
+        }
+      }
+    },
+    "Show AirDrop and Clipboard when dragging to the top": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show AirDrop and Clipboard when dragging to the top"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拖到顶部时显示 AirDrop 和剪贴板"
+          }
+        }
+      }
+    },
+    "Drag files to the top to choose AirDrop or Copy to Clipboard. Drop on AirDrop to choose a device; drop on Clipboard to paste the files later with Command-V. Turn this off to show the usual file destinations.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag files to the top to choose AirDrop or Copy to Clipboard. Drop on AirDrop to choose a device; drop on Clipboard to paste the files later with Command-V. Turn this off to show the usual file destinations."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将文件拖到顶部，即可选择 AirDrop 或复制到剪贴板。放到 AirDrop 区域后选择接收设备；放到剪贴板区域后可按 Command-V 粘贴文件。关闭此选项可显示原有文件投放区域。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

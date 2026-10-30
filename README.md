@@ -23,7 +23,7 @@ These personal changes are relative to upstream commit [`2e8085676209cbbb424bc60
 | --- | --- | --- |
 | Screenshot shelf | Collect system screenshots, remember manual selection, automatically copy the latest capture for pasting, and drag multiple selected images together; choose immediate collection or keep the system floating preview; new captures take priority on the next notch click; history does not trigger a persistent capsule | [Screenshot workflow](docs/screenshot-shelf.md) |
 | Screenshot storage | Move automatically collected screenshots into TopLet's dedicated folder; choose manual removal, cleanup after 24 hours, or cleanup after a successful drag; manual import is also supported | [Storage and retention](docs/screenshot-shelf.md#保存与收集范围) |
-| Quick AirDrop | Automatically reveal AirDrop when dragging files toward TopLet at the top; AirDrop tab inside File Shelf, beside Screenshots and Files; drop items, choose files or clipboard content, and share multiple screenshots together | [Quick AirDrop](docs/quick-airdrop.md) |
+| Quick AirDrop | Reveal separate AirDrop and Copy to Clipboard targets when dragging files toward TopLet at the top; AirDrop tab inside File Shelf, beside Screenshots and Files; drop items, choose files or clipboard content, and share multiple screenshots together | [Quick AirDrop](docs/quick-airdrop.md) |
 | Football and F1 | Football schedules, scores, and followed teams; F1 calendar, results, positions, lap counts, followed drivers/constructors, and notch activity cards | [Sports / F1](docs/community-sports.md) |
 | Stock watchlist | AAPL, MSFT, and NVDA by default, with search, add/remove controls, quotes, historical charts, and notch widgets | [Stocks / Finance](docs/community-finance-and-appearance.md) |
 | In-app updates | Signed GitHub update channel with optional background preparation, byte/speed progress, and incremental updates from compatible builds | [App updates](docs/app-updates.md) |
@@ -46,7 +46,7 @@ Version 0.1.8 introduces the **TopLet** name and `TopLet.app` download. The repo
 
 ## Current version and supported scope
 
-- The current source build is labeled **TopLet 18** (version **0.1.8**, build **18**). A complete local app build and signature verification have been completed.
+- The current source build is labeled **TopLet 19** (version **0.1.9**, build **19**). A complete local app build and signature verification have been completed.
 - The default development branch is **`codex/personal-notched-tools`**. `main` retains the upstream state from the fork; this branch is based on the commit above and has not merged the later upstream macOS 27 charging-limit changes.
 - The minimum deployment target is macOS 14. Complete builds and local packages have been verified on Apple Silicon (arm64); Intel hardware and other macOS versions have not been fully validated.
 - Upstream paid modules whose source is not public continue to use public placeholders or compatibility implementations. The independently implemented Sports/Finance features do not require those private modules and do not connect or sync with Apple Sports/Stocks accounts.

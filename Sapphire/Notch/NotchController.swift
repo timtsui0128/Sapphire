@@ -128,6 +128,7 @@ struct NotchController: View {
         var lastCollapseReason = "unknown"
         var dragEndCollapseTask: Task<Void, Never>?
         var fileDragExitTask: Task<Void, Never>?
+        var clipboardDropFeedbackTask: Task<Void, Never>?
         var windowDragCleanupTask: Task<Void, Never>?
         var isCollapseTimerActive: Bool = false
         var widgetSwitchProtectionTask: Task<Void, Never>?
@@ -2394,10 +2395,42 @@ struct NotchController: View {
     private func handleFileDrop(pasteboard: NSPasteboard, at screenLocation: NSPoint, dragSequence: Int) -> Bool {
         guard !SessionPrivacyState.shouldSuppressUI() else { return false }
         let dropLocation = updateNotchDragLocation(from: screenLocation)
-        let zoneAtRelease = dropLocation.flatMap { location in
-            SnapZoneHitTesting.nearest(dropZoneFrames.map { (zone: $0.key, frame: $0.value) }, to: location) { $0.frame }?.zone
-        } ?? activeDropZone
-        if AirDropDragPreferences.isEnabled() || zoneAtRelease == .airdrop {
+        let usesQuickActions = AirDropDragPreferences.isEnabled()
+        let zoneAtRelease: DropZone?
+        if usesQuickActions {
+            zoneAtRelease = TopDropTargets.destination(at: dropLocation, frames: dropZoneFrames)
+            guard zoneAtRelease != nil else { return false }
+        } else {
+            zoneAtRelease = dropLocation.flatMap { location in
+                SnapZoneHitTesting.nearest(dropZoneFrames.map { (zone: $0.key, frame: $0.value) }, to: location) { $0.frame }?.zone
+            } ?? activeDropZone
+        }
+        if zoneAtRelease == .clipboard {
+            let files = FileDragPasteboard.fileURLs(from: pasteboard)
+            let items: [AirDropContent]
+            do {
+                items = try files.isEmpty ? AirDropPasteboard.read(pasteboard) : files.map(AirDropContent.file)
+            } catch { return false }
+            guard TopDropClipboard.shared.copy(items, dragSequence: dragSequence) else { return false }
+            dragState.didJustDrop = true
+            NotificationCenter.default.post(name: .fileDropFlowCompleted, object: nil)
+            scratch.clipboardDropFeedbackTask?.cancel()
+            scratch.clipboardDropFeedbackTask = Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(900))
+                guard !Task.isCancelled else { return }
+                scratch.clipboardDropFeedbackTask = nil
+                guard !SessionPrivacyState.shouldSuppressUI(), !isFileDragSessionInProgress,
+                      navigationStack.last == .fileShelfLanding else { return }
+                TopDropClipboard.shared.resetFeedback()
+                navigationStack = []
+                if !isPinned {
+                    noteCollapseReason("clipboard drop complete")
+                    notchState = isLiveActivityActive ? .autoExpanded : .initial
+                }
+            }
+            return true
+        }
+        if zoneAtRelease == .airdrop {
             // Begin while the native drag is still alive, so screenshot retention
             // waits for AirDrop delivery rather than treating the picker as success.
             let files = FileDragPasteboard.fileURLs(from: pasteboard)
@@ -2492,6 +2525,9 @@ struct NotchController: View {
                 navigationStack = [.fileShelf]
             case .airdrop:
                 QuickAirDrop.shared.share(result.copiedURLs.map(AirDropContent.file))
+                navigationStack = []
+            case .clipboard:
+                TopDropClipboard.shared.copy(result.copiedURLs.map(AirDropContent.file))
                 navigationStack = []
             case .device(let peerID):
                 ContinuityManager.shared.sendFiles(result.copiedURLs, toPeerID: peerID)
@@ -3215,6 +3251,9 @@ struct NotchController: View {
         }
 
         if isTargeted, !isFileDragSessionInProgress {
+            scratch.clipboardDropFeedbackTask?.cancel()
+            scratch.clipboardDropFeedbackTask = nil
+            TopDropClipboard.shared.resetFeedback()
             isFileDragSessionInProgress = true
             activeFileDragIsFromShelf = dragState.isDraggingFromShelf
             displayedFileDragMode = activeFileDragIsFromShelf ? .existingFile : .newFile

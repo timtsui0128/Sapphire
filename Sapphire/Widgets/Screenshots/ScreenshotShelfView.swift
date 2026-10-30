@@ -528,6 +528,7 @@ private final class ScreenshotBatchDragView: NSView, NSDraggingSource {
         mouseDownEvent = nil
         completedDrag?.onStateChanged?(false)
         if let completedDrag {
+            guard !TopDropClipboard.shared.consumePreservedScreenshotDrag(session.draggingSequenceNumber) else { return }
             guard !QuickAirDrop.shared.consumeDeferredScreenshotDrag(session.draggingSequenceNumber) else { return }
             completedDrag.onEnded?(
                 completedDrag.batch.ids,

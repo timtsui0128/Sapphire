@@ -46,10 +46,14 @@ Sapphire 0.1.2 将隔空投送放入 **文件架 → AirDrop** 独立标签，�
 
 原生专项检查覆盖多文件解析、图片／链接／文字、同名截图、取消与保留策略、锁屏、不可用服务和临时文件清理。检查使用模拟分享会话，没有实际向任何设备发送文件。设备发现与真实传输仍需要在接收设备上实际体验。
 
-## Top-edge drag shortcut / 拖向顶部快捷分享（0.1.7）
+## Top-edge drag actions / 顶部拖放操作（TopLet 0.1.9）
 
-Dragging files, PDFs, or images into Sapphire at the top now reveals one AirDrop drop zone automatically. Release there to open the macOS receiver picker. Hovering alone never sends files. Under **Settings → File Shelf → AirDrop in Sapphire**, turn off **Open AirDrop when dragging to the top** to restore the usual shelf/device destination cards. There is no separate menu-bar icon.
+Dragging files, PDFs, or images into TopLet at the top reveals two destinations: **AirDrop** on the left and **Copy to Clipboard** on the right. Hover highlights the target; releasing over AirDrop opens the system device picker, while releasing over Clipboard copies all files as native file URLs and shows a brief confirmation. Paste with Command-V in apps that accept file paste. Inline dragged images retain their image representation. A gap or release outside either card does nothing.
 
-将文件、PDF 或图片拖向屏幕顶部的 Sapphire，会自动展开 AirDrop 投放区；松手后在系统面板选择 iPhone、iPad 或 Mac。仅悬停不会发送文件。在 **设置 → 文件架 → Sapphire 内的隔空投送** 关闭“拖到顶部时自动打开 AirDrop”，可恢复原来的文件架／设备目标卡片。
+将文件、PDF 或图片拖向顶部的 TopLet，会展开两个区域：左侧 **AirDrop**，右侧 **复制到剪贴板**。悬停时高亮对应区域；放到 AirDrop 后选择接收设备，放到剪贴板后复制整批文件并显示成功提示，可在支持文件粘贴的应用中按 Command-V 粘贴。直接拖入的图片数据保留图片格式；两个区域中间或区域外松手不执行操作。
 
-The native drag sequence is forwarded before the source finishes, so opening AirDrop does not prematurely remove screenshots with “remove after successful drop” enabled. Automated tests exercise real AppKit drag callbacks using simulated drags and mock sharing sessions; no phone/iPad transfer is performed by the tests.
+Under **Settings → File Shelf → AirDrop in TopLet**, turn off **Show AirDrop and Clipboard when dragging to the top** to restore the usual shelf/device destinations. The existing preference is preserved. Copying files writes references, not file contents or path text, and does not move the originals. Copying a managed screenshot does not trigger its remove-after-drag policy; manual removal and timed retention still apply. Missing files reject the whole batch before changing the clipboard. Locking prevents either action.
+
+在 **设置 → 文件架 → TopLet 内的隔空投送** 关闭“拖到顶部时显示 AirDrop 和剪贴板”，可恢复原来的文件架／设备目标。保留已有开关设置。文件复制使用原生文件引用，不移动原文件；复制截图不触发“拖出后删除”，手动移除和定时保留策略仍有效。文件缺失时整批拒绝并保留原剪贴板，锁屏时禁止投放。
+
+Native regression checks use a private test pasteboard, real AppKit drag callbacks and mock AirDrop sessions. They cover left/right targeting, gaps, outside releases, multiple files, image/link/text formats, screenshot retention, invalid batches and locked sessions. The two cards render in English/Chinese, light/dark. No real device transfer is performed by tests.

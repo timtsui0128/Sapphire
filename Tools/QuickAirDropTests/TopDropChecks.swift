@@ -28,9 +28,21 @@ import AppKit
     let suite = "AirDropDragPreferencesTests.\(UUID())"
     let defaults = UserDefaults(suiteName: suite)!
     defer { defaults.removePersistentDomain(forName: suite) }
-    try check(AirDropDragPreferences.isEnabled(in: defaults), "Top drag should default to AirDrop")
+    try check(AirDropDragPreferences.isEnabled(in: defaults), "Top drag should default to quick actions")
     defaults.set(false, forKey: AirDropDragPreferences.key)
     try check(!AirDropDragPreferences.isEnabled(in: defaults), "The saved opt-out must retain ordinary shelf routing")
+
+    let frames: [DropZone: CGRect] = [
+        .airdrop: CGRect(x: 15, y: 15, width: 237.5, height: 120),
+        .clipboard: CGRect(x: 267.5, y: 15, width: 237.5, height: 120)
+    ]
+    try check(TopDropTargets.destination(at: CGPoint(x: 100, y: 60), frames: frames) == .airdrop, "Left target must choose AirDrop")
+    try check(TopDropTargets.destination(at: CGPoint(x: 360, y: 60), frames: frames) == .clipboard, "Right target must choose Clipboard, not AirDrop")
+    for point in [CGPoint(x: 260, y: 60), CGPoint(x: 100, y: 0), CGPoint(x: -1, y: 40), CGPoint(x: 800, y: 60)] {
+        try check(TopDropTargets.destination(at: point, frames: frames) == nil, "A gap or point outside the cards must not trigger an action")
+    }
+    try check(TopDropTargets.destination(at: .zero, frames: [:]) == nil, "An unmeasured panel must not default to AirDrop")
+    print("PASS: AirDrop and Clipboard hit regions route separately; gaps and unmeasured/outside drops perform no action")
 
     let board = NSPasteboard.withUniqueName()
     defer { board.releaseGlobally() }
