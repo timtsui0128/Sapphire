@@ -13,7 +13,7 @@ struct NotchHoverMonitorHandlers {
     var onMouseDragEnded: (_ screenLocation: NSPoint) -> Void
     var onFileDrag: (_ isTargeted: Bool, _ screenLocation: NSPoint) -> Void
     var onFileDragEnded: (_ screenLocation: NSPoint, _ dropWasAccepted: Bool) -> Void
-    var onFileDrop: (_ urls: [URL], _ screenLocation: NSPoint) -> Bool
+    var onFileDrop: (_ pasteboard: NSPasteboard, _ screenLocation: NSPoint, _ dragSequence: Int) -> Bool
 }
 
 // MARK: - Tracking View
@@ -49,7 +49,7 @@ final class HoverProbeWindow: NSPanel, NSDraggingDestination {
     var onFileDragMoved: ((NSPoint) -> Void)?
     var onFileDragExited: ((NSPoint) -> Void)?
     var onFileDragEnded: ((NSPoint, Bool) -> Void)?
-    var onFileDrop: (([URL], NSPoint) -> Bool)?
+    var onFileDrop: ((NSPasteboard, NSPoint, Int) -> Bool)?
 
     private(set) var isFileDragSessionActive = false
     private(set) var isArmedForMouseSequence = false
@@ -140,9 +140,8 @@ final class HoverProbeWindow: NSPanel, NSDraggingDestination {
     }
 
     func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        let urls = fileURLs(from: sender.draggingPasteboard)
-        guard !urls.isEmpty else { return false }
-        let wasAccepted = onFileDrop?(urls, screenLocation(for: sender)) ?? false
+        guard canAcceptFiles(from: sender) else { return false }
+        let wasAccepted = onFileDrop?(sender.draggingPasteboard, screenLocation(for: sender), sender.draggingSequenceNumber) ?? false
         didAcceptFileDropInCurrentSession = wasAccepted
         return wasAccepted
     }
@@ -166,10 +165,6 @@ final class HoverProbeWindow: NSPanel, NSDraggingDestination {
         if sourceOperations.contains(.copy) { return .copy }
         if sourceOperations.contains(.generic) { return .generic }
         return []
-    }
-
-    private func fileURLs(from pasteboard: NSPasteboard) -> [URL] {
-        FileDragPasteboard.droppedURLs(from: pasteboard)
     }
 
     private func screenLocation(for sender: NSDraggingInfo?) -> NSPoint {
@@ -293,8 +288,8 @@ final class NotchHoverMonitor {
         drop.onFileDragEnded = { [weak self] location, dropWasAccepted in
             self?.handleFileDragEnded(at: location, dropWasAccepted: dropWasAccepted)
         }
-        drop.onFileDrop = { [weak self] urls, location in
-            self?.handlers?.onFileDrop(urls, location) ?? false
+        drop.onFileDrop = { [weak self] pasteboard, location, sequence in
+            self?.handlers?.onFileDrop(pasteboard, location, sequence) ?? false
         }
         drop.enableFileDropDestination()
 

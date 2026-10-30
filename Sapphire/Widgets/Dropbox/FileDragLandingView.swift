@@ -42,37 +42,42 @@ struct FileDragLandingView: View {
     let onZoneFramesChange: ([DropZone: CGRect]) -> Void
 
     @ObservedSettings private var settings: SettingsObserver
+    @AppStorage(AirDropDragPreferences.key) private var opensAirDropOnDrag = true
     @State private var zoneFrames: [DropZone: CGRect] = [:]
 
     var body: some View {
         HStack(spacing: Self.cardSpacing) {
-            if mode == .newFile {
-                standardCard(
-                    zone: .shelf,
-                    icon: "tray.and.arrow.down.fill",
-                    text: "Add to Shelf"
-                )
-            }
+            if opensAirDropOnDrag {
+                standardCard(zone: .airdrop, icon: QuickAirDrop.symbolName, text: "Drop to AirDrop")
+            } else {
+                if mode == .newFile {
+                    standardCard(
+                        zone: .shelf,
+                        icon: "tray.and.arrow.down.fill",
+                        text: "Add to Shelf"
+                    )
+                }
 
-            if settings.settings.fileShelfAirDropDestinationEnabled {
-                standardCard(
-                    zone: .airdrop,
-                    icon: "airplayaudio",
-                    text: "AirDrop"
-                )
-            }
+                if settings.settings.fileShelfAirDropDestinationEnabled {
+                    standardCard(
+                        zone: .airdrop,
+                        icon: "airplayaudio",
+                        text: "AirDrop"
+                    )
+                }
 
-            if settings.settings.fileShelfDeviceDestinationsEnabled {
-                ContinuityDeviceDropZone(
-                    activeZone: activeZone,
-                    cardWidth: Self.cardWidth,
-                    cardHeight: Self.cardHeight
-                )
-            }
+                if settings.settings.fileShelfDeviceDestinationsEnabled {
+                    ContinuityDeviceDropZone(
+                        activeZone: activeZone,
+                        cardWidth: Self.cardWidth,
+                        cardHeight: Self.cardHeight
+                    )
+                }
 
-            if destinationCardCount == 0 {
-                EmptyDropZoneView()
-                    .frame(width: Self.cardWidth, height: Self.cardHeight)
+                if destinationCardCount == 0 {
+                    EmptyDropZoneView()
+                        .frame(width: Self.cardWidth, height: Self.cardHeight)
+                }
             }
         }
         .padding(15)
@@ -100,7 +105,8 @@ struct FileDragLandingView: View {
     }
 
     private var destinationCardCount: Int {
-        (mode == .newFile ? 1 : 0)
+        if opensAirDropOnDrag { return 1 }
+        return (mode == .newFile ? 1 : 0)
             + (settings.settings.fileShelfAirDropDestinationEnabled ? 1 : 0)
             + (settings.settings.fileShelfDeviceDestinationsEnabled ? 1 : 0)
     }
@@ -441,7 +447,11 @@ private struct DropZoneView: View {
         VStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.system(size: 28, weight: .light))
-            Text(text).font(.system(.headline, design: .rounded).weight(.medium))
+            Text(LocalizedStringKey(text)).font(.system(.headline, design: .rounded).weight(.medium))
+            if zone == .airdrop {
+                Text("Choose your device after dropping")
+                    .font(.caption)
+            }
         }
         .foregroundColor(isTargeted ? .white : .secondary)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

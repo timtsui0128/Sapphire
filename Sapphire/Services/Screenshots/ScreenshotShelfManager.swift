@@ -40,6 +40,13 @@ final class ScreenshotShelfManager: ObservableObject {
     @Published private(set) var lastError: String?
     @Published private(set) var captureTimingError: String?
     @Published private(set) var pendingScreenshotOpenIDs: Set<UUID> = []
+    @Published private(set) var selectedIDs: Set<UUID>
+    @Published var automaticallyCopyNewScreenshots: Bool {
+        didSet {
+            defaults.set(automaticallyCopyNewScreenshots, forKey: Self.copyKey)
+            if !automaticallyCopyNewScreenshots { cancelClipboardCopy() }
+        }
+    }
     let storageFolderURL: URL
     @Published var captureTiming: ScreenshotCaptureTiming {
         didSet {
@@ -65,15 +72,30 @@ final class ScreenshotShelfManager: ObservableObject {
     private static let folderKey = "ScreenshotShelfFolderOverride"
     private static let retentionKey = "ScreenshotShelfRetention"
     private static let timingKey = "ScreenshotShelfCaptureTiming"
+    private static let selectionKey = "ScreenshotShelfSelectedIDs"
+    private static let copyKey = "ScreenshotShelfAutomaticallyCopy"
     private let defaults: UserDefaults
+    private let clipboard: NSPasteboard
+    private let prepareClipboardImage: @Sendable (URL) async -> Data?
+    private var clipboardTask: Task<Void, Never>?
+    private var clipboardRequest: UUID?
+    private var latestClipboardCaptureDate = Date.distantPast
     private let worker: ScreenshotShelfWorker
     private let thumbnailLease: ScreenshotThumbnailLease
     private(set) var isSessionSuppressed = false
 
     /// An isolated directory and defaults suite can be supplied by tests.
     init(storageURL: URL? = nil, defaults: UserDefaults = .standard,
-         thumbnailPreferences: ScreenshotThumbnailPreferences = SystemScreenshotThumbnailPreferences()) {
+         thumbnailPreferences: ScreenshotThumbnailPreferences = SystemScreenshotThumbnailPreferences(),
+         clipboard: NSPasteboard = .general,
+         prepareClipboardImage: @escaping @Sendable (URL) async -> Data? = { url in
+             await Task.detached(priority: .userInitiated) { ScreenshotClipboardImage.png(from: url) }.value
+         }) {
         self.defaults = defaults
+        self.clipboard = clipboard
+        self.prepareClipboardImage = prepareClipboardImage
+        selectedIDs = Set((defaults.stringArray(forKey: Self.selectionKey) ?? []).compactMap(UUID.init(uuidString:)))
+        automaticallyCopyNewScreenshots = defaults.object(forKey: Self.copyKey) as? Bool ?? true
         thumbnailLease = ScreenshotThumbnailLease(defaults: defaults, preferences: thumbnailPreferences)
         let timing = defaults.string(forKey: Self.timingKey).flatMap(ScreenshotCaptureTiming.init(rawValue:)) ?? .floatingPreview
         captureTiming = timing
@@ -93,6 +115,8 @@ final class ScreenshotShelfManager: ObservableObject {
                 MainActor.assumeIsolated {
                     guard let self else { return }
                     self.items = items
+                    // Wait for history to load before pruning persisted selections.
+                    self.setSelection(self.selectedIDs.intersection(items.map(\.id)))
                     self.pendingScreenshotOpenIDs.formIntersection(items.map(\.id))
                 }
             }
@@ -103,6 +127,7 @@ final class ScreenshotShelfManager: ObservableObject {
                     guard let self, !self.isSessionSuppressed, self.captureEnabled,
                           self.worker.isCurrentSession(generation), self.items.contains(where: { $0.id == id }) else { return }
                     self.pendingScreenshotOpenIDs.insert(id)
+                    self.copyAutomaticCapture(id: id, generation: generation)
                 }
             }
         }
@@ -141,6 +166,7 @@ final class ScreenshotShelfManager: ObservableObject {
     }
 
     func stopMonitoring() {
+        cancelClipboardCopy()
         isMonitoring = false
         worker.stop()
         thumbnailLease.restore()
@@ -214,12 +240,53 @@ final class ScreenshotShelfManager: ObservableObject {
         if !pendingScreenshotOpenIDs.isEmpty { pendingScreenshotOpenIDs.removeAll() }
     }
 
+    func setSelection(_ ids: Set<UUID>) {
+        let valid = ids.intersection(items.map(\.id))
+        guard valid != selectedIDs else { return }
+        selectedIDs = valid
+        defaults.set(valid.map(\.uuidString).sorted(), forKey: Self.selectionKey)
+    }
+
+    private func cancelClipboardCopy() {
+        clipboardTask?.cancel()
+        clipboardTask = nil
+        clipboardRequest = nil
+    }
+
+    private func copyAutomaticCapture(id: UUID, generation: UInt64) {
+        guard automaticallyCopyNewScreenshots,
+              let item = items.first(where: { $0.id == id }),
+              item.capturedAt >= latestClipboardCaptureDate else { return }
+        latestClipboardCaptureDate = item.capturedAt
+        cancelClipboardCopy()
+        let request = UUID()
+        clipboardRequest = request
+        let changeCount = clipboard.changeCount
+        let prepare = prepareClipboardImage
+        clipboardTask = Task { [weak self] in
+            let png = await prepare(item.fileURL)
+            guard !Task.isCancelled, let self, self.clipboardRequest == request else { return }
+            self.clipboardTask = nil
+            self.clipboardRequest = nil
+            guard let png, self.automaticallyCopyNewScreenshots, self.captureEnabled,
+                  !self.isSessionSuppressed, self.worker.isCurrentSession(generation),
+                  self.items.contains(where: { $0.id == id }),
+                  self.clipboard.changeCount == changeCount else { return }
+            // Store image bytes, so pasting still works after shelf retention removes the file.
+            let payload = NSPasteboardItem()
+            payload.setData(png, forType: .png)
+            self.clipboard.clearContents()
+            self.clipboard.writeObjects([payload])
+        }
+    }
+
     @discardableResult
     func copyItems(ids: Set<UUID>) -> Bool {
         guard !isSessionSuppressed else { return false }
         let urls = items.filter { ids.contains($0.id) }.map(\.fileURL)
         guard !urls.isEmpty else { return false }
-        let pasteboard = NSPasteboard.general
+        cancelClipboardCopy()
+        let pasteboard = clipboard
         pasteboard.clearContents()
         return pasteboard.writeObjects(urls.map { $0 as NSURL })
     }

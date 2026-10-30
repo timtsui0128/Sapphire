@@ -35,6 +35,7 @@ private func check(_ condition: @autoclosure () throws -> Bool, _ message: Strin
         defer { try? FileManager.default.removeItem(at: root) }
         let board = NSPasteboard.withUniqueName()
         defer { board.releaseGlobally() }
+        try checkTopDrop()
         let files = try (0..<5).map { index -> URL in
             let url = root.appendingPathComponent("Screenshot-\(index).png")
             try Data("source \(index)".utf8).write(to: url)

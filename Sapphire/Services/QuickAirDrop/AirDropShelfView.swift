@@ -129,10 +129,15 @@ final class AirDropDropView: NSView {
 
 @MainActor
 struct QuickAirDropSettingsView: View {
+    @AppStorage(AirDropDragPreferences.key) private var opensAirDropOnDrag = true
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Label("AirDrop in Sapphire", systemImage: QuickAirDrop.symbolName)
                 .font(.headline)
+            Toggle("Open AirDrop when dragging to the top", isOn: $opensAirDropOnDrag)
+            Text("Drag files or images to Sapphire at the top of the screen, then release to choose your iPhone, iPad, or Mac in the system AirDrop window. Turn this off to show the usual file destinations.")
+                .font(.callout).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             Text("Open File Shelf → AirDrop in Sapphire to drop items, choose files, or share your clipboard. You can also AirDrop selected screenshots from the Screenshots tab.")
                 .font(.callout).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

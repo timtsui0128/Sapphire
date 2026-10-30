@@ -14,8 +14,7 @@ struct ScreenshotShelfView: View {
     @ObservedObject private var language = AppLanguageController.shared
     @ObservedObject private var manager: ScreenshotShelfManager
     @ObservedObject private var airDrop = QuickAirDrop.shared
-    @State private var selectedIDs: Set<UUID> = []
-    @State private var knownIDs: Set<UUID> = []
+    private var selectedIDs: Set<UUID> { manager.selectedIDs }
     @State private var copyMessage: String?
 
     var onDragStateChanged: ((Bool) -> Void)? = nil
@@ -68,11 +67,9 @@ struct ScreenshotShelfView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .appContentAppearance()
         .onAppear {
-            reconcileSelection()
             if manager.captureEnabled { manager.startMonitoring() }
         }
         .onChange(of: manager.items.map(\.id)) { _, _ in
-            reconcileSelection()
             copyMessage = nil
         }
     }
@@ -91,6 +88,8 @@ struct ScreenshotShelfView: View {
                 .font(.caption)
                 .help("Move newly saved screenshots into Sapphire's storage folder.")
             Menu {
+                Toggle("Copy new screenshots to clipboard", isOn: $manager.automaticallyCopyNewScreenshots)
+                Divider()
                 Picker("Collect screenshots", selection: $manager.captureTiming) {
                     ForEach(ScreenshotCaptureTiming.allCases) { timing in
                         Text(LocalizedStringKey(timing.title)).tag(timing)
@@ -153,7 +152,7 @@ struct ScreenshotShelfView: View {
     private var selectionBar: some View {
         HStack(spacing: 8) {
             Button(allSelected ? "Deselect all" : "Select all") {
-                selectedIDs = allSelected ? [] : Set(manager.items.map(\.id))
+                manager.setSelection(allSelected ? [] : Set(manager.items.map(\.id)))
                 copyMessage = nil
             }
             .disabled(manager.items.isEmpty)
@@ -184,7 +183,7 @@ struct ScreenshotShelfView: View {
 
             Button {
                 manager.removeItems(ids: selectedIDs)
-                selectedIDs.removeAll()
+                manager.setSelection([])
                 copyMessage = nil
             } label: {
                 Image(systemName: "trash")
@@ -278,19 +277,8 @@ struct ScreenshotShelfView: View {
         }
     }
 
-    private func reconcileSelection() {
-        let currentIDs = Set(manager.items.map(\.id))
-        // New captures join the batch automatically; existing deselections are respected.
-        selectedIDs = selectedIDs.intersection(currentIDs).union(currentIDs.subtracting(knownIDs))
-        knownIDs = currentIDs
-    }
-
     private func toggleSelection(_ id: UUID) {
-        if selectedIDs.contains(id) {
-            selectedIDs.remove(id)
-        } else {
-            selectedIDs.insert(id)
-        }
+        manager.setSelection(selectedIDs.symmetricDifference([id]))
         copyMessage = nil
     }
 

@@ -14,6 +14,10 @@ struct ScreenshotShelfSettingsView: View {
             Label("Screenshots", systemImage: "camera.viewfinder")
                 .font(.headline)
             Toggle("Collect new screenshots into Sapphire", isOn: $manager.captureEnabled)
+            Toggle("Copy new screenshots to clipboard", isOn: $manager.automaticallyCopyNewScreenshots)
+            Text("After collection, the latest screenshot replaces your clipboard image so you can paste with Command-V. History and imports are not copied. Choose immediate collection to paste sooner.")
+                .font(.caption).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             Picker("Collect screenshots", selection: $manager.captureTiming) {
                 ForEach(ScreenshotCaptureTiming.allCases) { timing in
                     Text(LocalizedStringKey(timing.title)).tag(timing)

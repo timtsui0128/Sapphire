@@ -22,7 +22,7 @@ struct DraggedFilePreview: Identifiable, Equatable {
 
 enum FileDragPasteboard {
     static let legacyFilenamesType = NSPasteboard.PasteboardType("NSFilenamesPboardType")
-    static let droppableTypes: [NSPasteboard.PasteboardType] = [.fileURL, legacyFilenamesType, .string]
+    static let droppableTypes: [NSPasteboard.PasteboardType] = [.fileURL, legacyFilenamesType, .string, .png, .tiff, .URL]
 
     static func containsDroppableContent(
         _ pasteboard: NSPasteboard,
@@ -32,6 +32,7 @@ enum FileDragPasteboard {
             return false
         }
         return containsFiles(pasteboard) || pasteboard.availableType(from: [.string]) != nil
+            || (AirDropDragPreferences.isEnabled() && pasteboard.availableType(from: [.png, .tiff, .URL]) != nil)
     }
 
     static func containsFiles(_ pasteboard: NSPasteboard) -> Bool {

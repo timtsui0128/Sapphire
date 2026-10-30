@@ -17,12 +17,31 @@ cat > "$APP_ROOT/Info.plist" <<'PLIST'
 </dict></plist>
 PLIST
 xcrun xcstringstool compile --output-directory "$APP_ROOT/Resources" "$REPO_ROOT/Sapphire/Resources/Localizable.xcstrings"
+python3 - "$REPO_ROOT" "$CHECK_ROOT" <<'PY'
+from pathlib import Path
+import sys
+root, scratch = map(Path, sys.argv[1:])
+def block(source, marker):
+    start = source.index(marker)
+    end = source.index('{', start) + 1
+    depth = 1
+    while depth:
+        if source[end] == '{': depth += 1
+        elif source[end] == '}': depth -= 1
+        end += 1
+    return source[start:end]
+probe = block((root/'Sapphire/Notch/NotchHoverMonitor.swift').read_text(), 'final class HoverProbeWindow:')
+pasteboard = block((root/'Sapphire/Notch/DragStateManager.swift').read_text(), 'enum FileDragPasteboard {')
+(scratch/'ProductionTopDrop.swift').write_text('import AppKit\n'+probe+'\n'+pasteboard+'\n')
+PY
 xcrun swiftc -swift-version 5 -parse-as-library \
   -target "$(uname -m)-apple-macosx14.0" \
   -module-cache-path "$REPO_ROOT/output/swift-module-cache" \
   "$REPO_ROOT"/Sapphire/Services/QuickAirDrop/*.swift \
   "$REPO_ROOT/Tools/QuickAirDropTests/Fixtures.swift" \
   "$REPO_ROOT/Tools/QuickAirDropTests/AlertFixture.swift" \
+  "$CHECK_ROOT/ProductionTopDrop.swift" \
+  "$REPO_ROOT/Tools/QuickAirDropTests/TopDropChecks.swift" \
   "$REPO_ROOT/Tools/QuickAirDropTests/QuickAirDropChecks.swift" \
   -o "$APP_ROOT/MacOS/checks"
 "$APP_ROOT/MacOS/checks" "$REPO_ROOT/output/internal-airdrop/renders"

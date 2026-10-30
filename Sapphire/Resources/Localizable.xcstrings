@@ -54143,6 +54143,108 @@
           }
         }
       }
+    },
+    "Copy new screenshots to clipboard": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy new screenshots to clipboard"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动复制新截图到剪贴板"
+          }
+        }
+      }
+    },
+    "After collection, the latest screenshot replaces your clipboard image so you can paste with Command-V. History and imports are not copied. Choose immediate collection to paste sooner.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After collection, the latest screenshot replaces your clipboard image so you can paste with Command-V. History and imports are not copied. Choose immediate collection to paste sooner."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收集后，最新截图会替换剪贴板内容，可直接按 Command-V 粘贴。历史截图和手动导入不会自动复制。选择立即收集可更快粘贴。"
+          }
+        }
+      }
+    },
+    "Open AirDrop when dragging to the top": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open AirDrop when dragging to the top"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拖到顶部时自动打开 AirDrop"
+          }
+        }
+      }
+    },
+    "Drag files or images to Sapphire at the top of the screen, then release to choose your iPhone, iPad, or Mac in the system AirDrop window. Turn this off to show the usual file destinations.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag files or images to Sapphire at the top of the screen, then release to choose your iPhone, iPad, or Mac in the system AirDrop window. Turn this off to show the usual file destinations."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将文件或图片拖到屏幕顶部的 Sapphire，松手后在系统 AirDrop 窗口选择 iPhone、iPad 或 Mac。关闭此选项可恢复文件投放目标列表。"
+          }
+        }
+      }
+    },
+    "Drop to AirDrop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drop to AirDrop"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "松手以 AirDrop 分享"
+          }
+        }
+      }
+    },
+    "Choose your device after dropping": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose your device after dropping"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "松手后选择接收设备"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

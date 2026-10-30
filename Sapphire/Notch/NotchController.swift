@@ -2391,7 +2391,27 @@ struct NotchController: View {
         }
     }
 
-    private func handleFileDrop(urls: [URL], at screenLocation: NSPoint) -> Bool {
+    private func handleFileDrop(pasteboard: NSPasteboard, at screenLocation: NSPoint, dragSequence: Int) -> Bool {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return false }
+        let dropLocation = updateNotchDragLocation(from: screenLocation)
+        let zoneAtRelease = dropLocation.flatMap { location in
+            SnapZoneHitTesting.nearest(dropZoneFrames.map { (zone: $0.key, frame: $0.value) }, to: location) { $0.frame }?.zone
+        } ?? activeDropZone
+        if AirDropDragPreferences.isEnabled() || zoneAtRelease == .airdrop {
+            // Begin while the native drag is still alive, so screenshot retention
+            // waits for AirDrop delivery rather than treating the picker as success.
+            let files = FileDragPasteboard.fileURLs(from: pasteboard)
+            let accepted = files.isEmpty
+                ? QuickAirDrop.shared.sharePasteboard(pasteboard, dragSequence: dragSequence)
+                : QuickAirDrop.shared.share(files.map(AirDropContent.file), dragSequence: dragSequence)
+            if accepted {
+                dragState.didJustDrop = true
+                NotificationCenter.default.post(name: .fileDropFlowCompleted, object: nil)
+                navigationStack = []
+            }
+            return accepted
+        }
+        let urls = FileDragPasteboard.droppedURLs(from: pasteboard)
         let fileManager = FileManager.default
         let readableURLs = urls.filter {
             $0.isFileURL
@@ -2471,7 +2491,7 @@ struct NotchController: View {
                 FileShelfManager.shared.addFiles(from: result.copiedURLs)
                 navigationStack = [.fileShelf]
             case .airdrop:
-                SharingManager.shared.share(items: result.copiedURLs, via: .sendViaAirDrop)
+                QuickAirDrop.shared.share(result.copiedURLs.map(AirDropContent.file))
                 navigationStack = []
             case .device(let peerID):
                 ContinuityManager.shared.sendFiles(result.copiedURLs, toPeerID: peerID)
@@ -3065,8 +3085,8 @@ struct NotchController: View {
                         dropWasAccepted: dropWasAccepted
                     )
                 },
-                onFileDrop: { urls, location in
-                    handleFileDrop(urls: urls, at: location)
+                onFileDrop: { pasteboard, location, sequence in
+                    handleFileDrop(pasteboard: pasteboard, at: location, dragSequence: sequence)
                 }
             )
         )

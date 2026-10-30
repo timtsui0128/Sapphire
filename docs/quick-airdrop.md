@@ -45,3 +45,11 @@ Sapphire 0.1.2 将隔空投送放入 **文件架 → AirDrop** 独立标签，�
 锁屏或会话不活跃时隐藏入口、阻止新分享，并取消尚未完成的准备和文件选择。已经交给 macOS 的传输继续由系统管理，当前公开接口无法替应用取消这些传输。
 
 原生专项检查覆盖多文件解析、图片／链接／文字、同名截图、取消与保留策略、锁屏、不可用服务和临时文件清理。检查使用模拟分享会话，没有实际向任何设备发送文件。设备发现与真实传输仍需要在接收设备上实际体验。
+
+## Top-edge drag shortcut / 拖向顶部快捷分享（0.1.7）
+
+Dragging files, PDFs, or images into Sapphire at the top now reveals one AirDrop drop zone automatically. Release there to open the macOS receiver picker. Hovering alone never sends files. Under **Settings → File Shelf → AirDrop in Sapphire**, turn off **Open AirDrop when dragging to the top** to restore the usual shelf/device destination cards. There is no separate menu-bar icon.
+
+将文件、PDF 或图片拖向屏幕顶部的 Sapphire，会自动展开 AirDrop 投放区；松手后在系统面板选择 iPhone、iPad 或 Mac。仅悬停不会发送文件。在 **设置 → 文件架 → Sapphire 内的隔空投送** 关闭“拖到顶部时自动打开 AirDrop”，可恢复原来的文件架／设备目标卡片。
+
+The native drag sequence is forwarded before the source finishes, so opening AirDrop does not prematurely remove screenshots with “remove after successful drop” enabled. Automated tests exercise real AppKit drag callbacks using simulated drags and mock sharing sessions; no phone/iPad transfer is performed by the tests.

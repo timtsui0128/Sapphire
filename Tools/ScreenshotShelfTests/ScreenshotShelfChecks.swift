@@ -19,12 +19,26 @@ private enum CheckError: Error, CustomStringConvertible {
     }
 }
 
+private actor ClipboardPreparationGate {
+    private var waiters: [String: CheckedContinuation<Void, Never>] = [:]
+    func prepare(_ url: URL) async -> Data? {
+        let data = ScreenshotClipboardImage.png(from: url)
+        await withCheckedContinuation { waiters[url.lastPathComponent] = $0 }
+        return data
+    }
+    func contains(_ name: String) -> Bool { waiters[name] != nil }
+    func release(_ name: String) { waiters.removeValue(forKey: name)?.resume() }
+}
+
 /// Exercises the real capture worker and AppKit drag payload without starting Sapphire.
 @main
 struct ScreenshotShelfChecks {
+    @MainActor private static let testClipboard = NSPasteboard.withUniqueName()
     @MainActor
     static func main() async {
+        defer { testClipboard.releaseGlobally() }
         do {
+            try await checkAutomaticClipboard()
             try await checkCaptureAndPersistence()
             try await checkSessionPrivacy()
             try await checkStorageRetry()
@@ -38,6 +52,91 @@ struct ScreenshotShelfChecks {
             fputs("FAIL: \(error)\n", stderr)
             exit(1)
         }
+    }
+
+    @MainActor
+    private static func checkAutomaticClipboard() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("ScreenshotClipboard-\(UUID())")
+        let source = root.appendingPathComponent("source")
+        try FileManager.default.createDirectory(at: source, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let suite = "ScreenshotClipboard.\(UUID())"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        defaults.set(source.path, forKey: "ScreenshotShelfFolderOverride")
+        let board = NSPasteboard.withUniqueName()
+        defer { board.releaseGlobally() }
+        board.setString("original clipboard", forType: .string)
+        let gate = ClipboardPreparationGate()
+        let manager = ScreenshotShelfManager(storageURL: root.appendingPathComponent("shelf"), defaults: defaults,
+            clipboard: board, prepareClipboardImage: { await gate.prepare($0) })
+        defer { manager.stopMonitoring() }
+        try check(manager.automaticallyCopyNewScreenshots, "Automatic screenshot copying should default on")
+        manager.startMonitoring()
+        try await eventually("clipboard monitor starts") { manager.isMonitoring }
+
+        func capture(_ name: String) async throws {
+            try writeImage(to: source.appendingPathComponent(name), screenshotMetadata: true)
+            let deadline = Date().addingTimeInterval(8)
+            while !(await gate.contains(name)) {
+                guard Date() < deadline else { throw CheckError.failed("Clipboard preparation never started: \(name)") }
+                try await pause(0.05)
+            }
+        }
+        try await capture("first.png")
+        let first = manager.items.first!
+        await gate.release("first.png")
+        try await eventually("new screenshot is immediately pasteable") { board.data(forType: .png) != nil }
+        try check(board.data(forType: .png) == Data(contentsOf: first.fileURL), "Clipboard must contain original PNG image bytes")
+        try check(NSImage(pasteboard: board) != nil, "Native image consumers must read the screenshot")
+        manager.removeItems(ids: [first.id])
+        try await eventually("first removed") { manager.items.isEmpty }
+        try check(NSImage(pasteboard: board) != nil, "Removing a screenshot must not invalidate copied image bytes")
+
+        try await capture("manual-wins.png")
+        board.clearContents(); board.setString("user copied something else", forType: .string)
+        await gate.release("manual-wins.png")
+        try await pause(0.15)
+        try check(board.string(forType: .string) == "user copied something else", "Delayed work overwrote a newer manual copy")
+
+        try await capture("older.png")
+        try await capture("newer.png")
+        await gate.release("newer.png")
+        try await eventually("newest capture finishes first") { board.data(forType: .png) != nil }
+        let latestChange = board.changeCount
+        await gate.release("older.png")
+        try await pause(0.15)
+        try check(board.changeCount == latestChange, "Older preparation replaced a newer screenshot")
+
+        try await capture("locked.png")
+        board.clearContents(); board.setString("lock sentinel", forType: .string)
+        manager.setSessionSuppressed(true)
+        await gate.release("locked.png")
+        try await pause(0.15)
+        try check(board.string(forType: .string) == "lock sentinel", "Queued copy wrote to the clipboard while locked")
+        manager.setSessionSuppressed(false)
+        try await eventually("clipboard monitor resumes") { manager.isMonitoring }
+
+        try await capture("disable-in-flight.png")
+        manager.automaticallyCopyNewScreenshots = false
+        await gate.release("disable-in-flight.png")
+        try await pause(0.15)
+        try check(board.string(forType: .string) == "lock sentinel", "Disabling copying did not cancel in-flight work")
+        let beforeCount = manager.items.count
+        try writeImage(to: source.appendingPathComponent("disabled.png"), screenshotMetadata: true)
+        try await eventually("disabled copying still collects screenshots") { manager.items.count == beforeCount + 1 }
+        try check(board.string(forType: .string) == "lock sentinel", "Disabled automatic copying changed the clipboard")
+        manager.stopMonitoring()
+        let reloaded = ScreenshotShelfManager(storageURL: manager.storageFolderURL, defaults: defaults, clipboard: board)
+        try await eventually("clipboard history reloads") { reloaded.items.count == manager.items.count }
+        try check(!reloaded.automaticallyCopyNewScreenshots, "Copy preference did not persist")
+        reloaded.automaticallyCopyNewScreenshots = true
+        let imported = root.appendingPathComponent("import.png")
+        try writeImage(to: imported, screenshotMetadata: false)
+        reloaded.importFiles(from: [imported])
+        try await eventually("manual import loads") { reloaded.items.count == manager.items.count + 1 }
+        try check(board.string(forType: .string) == "lock sentinel", "History/imports unexpectedly overwrote the clipboard")
+        print("PASS: clipboard stores pasteable image bytes; latest capture wins; manual copies, lock, disabled setting and history/imports are respected")
     }
 
     @MainActor
@@ -62,7 +161,7 @@ struct ScreenshotShelfChecks {
             [.creationDate: Date(timeIntervalSinceNow: -60)],
             ofItemAtPath: oldScreenshot.path
         )
-        let manager = ScreenshotShelfManager(storageURL: storage, defaults: defaults)
+        let manager = ScreenshotShelfManager(storageURL: storage, defaults: defaults, clipboard: testClipboard)
         manager.startMonitoring()
         defer { manager.stopMonitoring() }
         try await eventually("screenshot folder monitor starts") { manager.isMonitoring }
@@ -90,6 +189,8 @@ struct ScreenshotShelfChecks {
             )
         }
         let captured = manager.items
+        try check(manager.selectedIDs.isEmpty, "New screenshots must not start selected")
+        manager.setSelection([captured[0].id, captured[1].id])
         try check(
             captured.map(\.capturedAt) == captured.map(\.capturedAt).sorted(by: >),
             "Collected screenshots are not ordered by capture date"
@@ -150,8 +251,9 @@ struct ScreenshotShelfChecks {
         print("PASS: renaming a captured screenshot does not create a second attachment")
 
         manager.stopMonitoring()
-        let reloaded = ScreenshotShelfManager(storageURL: storage, defaults: defaults)
+        let reloaded = ScreenshotShelfManager(storageURL: storage, defaults: defaults, clipboard: testClipboard)
         try await eventually("persisted screenshot collection reloads") { reloaded.items.count == 5 }
+        try check(reloaded.selectedIDs == manager.selectedIDs, "Manual multi-selection must survive reopening/relaunch")
         try check(reloaded.items == captured, "Reload changed screenshot IDs, paths, or order")
         try check(reloaded.pendingScreenshotOpenIDs.isEmpty && !reloaded.consumeScreenshotOpenRequest(),
                   "Reloading history armed an unwanted screenshot shortcut")
@@ -166,8 +268,9 @@ struct ScreenshotShelfChecks {
             FileManager.default.fileExists(atPath: removed.fileURL.path),
             "Removal deleted its copy immediately while an in-flight drag may still read it"
         )
-        let afterRemoval = ScreenshotShelfManager(storageURL: storage, defaults: defaults)
+        let afterRemoval = ScreenshotShelfManager(storageURL: storage, defaults: defaults, clipboard: testClipboard)
         try await eventually("removal is persisted") { afterRemoval.items.count == 4 }
+        try check(afterRemoval.selectedIDs == [captured[1].id], "Deleted selection must be pruned and persisted")
         try check(!afterRemoval.items.contains(where: { $0.id == removed.id }), "Removed item reappeared on reload")
         print("PASS: removal persists, leaves unrelated files, and preserves in-flight drag grace")
 
@@ -188,6 +291,11 @@ struct ScreenshotShelfChecks {
         try await eventually("replacement screenshot at the same path is collected", timeout: 10) {
             afterRemoval.items.count == 5
         }
+        try check(afterRemoval.selectedIDs == [captured[1].id], "New screenshots must not join an existing multi-selection")
+        afterRemoval.setSelection([])
+        let emptySelection = ScreenshotShelfManager(storageURL: storage, defaults: defaults, clipboard: testClipboard)
+        try await eventually("empty selection reloads") { emptySelection.items.count == 5 }
+        try check(emptySelection.selectedIDs.isEmpty, "Explicit deselect all must survive reload")
         try check(
             afterRemoval.items.filter { $0.name == replaced.lastPathComponent }.count == 2,
             "A new screenshot reusing a filename replaced its earlier retained copy"
@@ -211,7 +319,7 @@ struct ScreenshotShelfChecks {
             ["ScreenshotShelfFolderOverride": source.path, "ScreenshotShelfCaptureEnabled": true],
             forName: UserDefaults.argumentDomain
         )
-        let manager = ScreenshotShelfManager(storageURL: storage, defaults: defaults)
+        let manager = ScreenshotShelfManager(storageURL: storage, defaults: defaults, clipboard: testClipboard)
         manager.startMonitoring()
         defer { manager.stopMonitoring() }
         try await eventually("privacy fixture starts") { manager.isMonitoring }
@@ -269,7 +377,7 @@ struct ScreenshotShelfChecks {
             ["ScreenshotShelfFolderOverride": source.path, "ScreenshotShelfCaptureEnabled": true],
             forName: UserDefaults.argumentDomain
         )
-        let manager = ScreenshotShelfManager(storageURL: storage, defaults: defaults)
+        let manager = ScreenshotShelfManager(storageURL: storage, defaults: defaults, clipboard: testClipboard)
         manager.startMonitoring()
         defer { manager.stopMonitoring() }
         try await eventually("unavailable storage is reported") { manager.lastError != nil }
@@ -313,7 +421,7 @@ struct ScreenshotShelfChecks {
             ["ScreenshotShelfCaptureEnabled": false], forName: UserDefaults.argumentDomain
         )
         defer { defaults.removePersistentDomain(forName: suiteName) }
-        let manager = ScreenshotShelfManager(storageURL: storage, defaults: defaults)
+        let manager = ScreenshotShelfManager(storageURL: storage, defaults: defaults, clipboard: testClipboard)
         try check(manager.retention == .persistent, "Default retention is not persistent")
         try check(manager.storageFolderURL == storage.standardizedFileURL, "Storage folder URL is incorrect")
 
@@ -375,7 +483,7 @@ struct ScreenshotShelfChecks {
             to: storage.appendingPathComponent("manifest.json"), options: .atomic
         )
         defaults.set(ScreenshotShelfRetention.twentyFourHours.rawValue, forKey: "ScreenshotShelfRetention")
-        let reloaded = ScreenshotShelfManager(storageURL: storage, defaults: defaults)
+        let reloaded = ScreenshotShelfManager(storageURL: storage, defaults: defaults, clipboard: testClipboard)
         try await eventually("paused collection loads old and timed records") { reloaded.items.count == 2 }
         try await eventually("expiry runs while screenshot capture is disabled") {
             reloaded.items.map(\.id) == [permanent.id]
@@ -400,7 +508,7 @@ struct ScreenshotShelfChecks {
             ["ScreenshotShelfFolderOverride": source.path, "ScreenshotShelfCaptureEnabled": true],
             forName: UserDefaults.argumentDomain
         )
-        let manager = ScreenshotShelfManager(storageURL: storage, defaults: defaults)
+        let manager = ScreenshotShelfManager(storageURL: storage, defaults: defaults, clipboard: testClipboard)
         manager.startMonitoring()
         defer { manager.stopMonitoring() }
         try await eventually("transaction fixture monitor starts") { manager.isMonitoring }
@@ -436,7 +544,7 @@ struct ScreenshotShelfChecks {
         let replacement = Data("newer file must not be overwritten".utf8)
         try replacement.write(to: recoverySource)
         let recovered = source.appendingPathComponent("Interrupted (Recovered \(journal.itemID.uuidString)).png")
-        let recoveryManager = ScreenshotShelfManager(storageURL: recoveryStorage, defaults: defaults)
+        let recoveryManager = ScreenshotShelfManager(storageURL: recoveryStorage, defaults: defaults, clipboard: testClipboard)
         try await eventually("interrupted move recovers without overwriting a newer file") {
             recoveryManager.lastError?.contains("recovered as") == true
         }
@@ -460,7 +568,7 @@ struct ScreenshotShelfChecks {
         try FileManager.default.setAttributes(
             [.modificationDate: Date(timeIntervalSinceNow: -600)], ofItemAtPath: ownedDirectory.path
         )
-        let blockedManager = ScreenshotShelfManager(storageURL: blockedStorage, defaults: defaults)
+        let blockedManager = ScreenshotShelfManager(storageURL: blockedStorage, defaults: defaults, clipboard: testClipboard)
         try await eventually("unavailable recovery destination reports a safe retained file") {
             blockedManager.lastError?.contains("files were preserved") == true
         }
@@ -556,7 +664,7 @@ struct ScreenshotShelfChecks {
         defer { defaults.removePersistentDomain(forName: name) }
         defaults.setVolatileDomain(["ScreenshotShelfFolderOverride": source.path, "ScreenshotShelfCaptureEnabled": true], forName: UserDefaults.argumentDomain)
         let preference = ThumbnailPreferencesFixture(true)
-        let manager = ScreenshotShelfManager(storageURL: root.appendingPathComponent("owned"), defaults: defaults, thumbnailPreferences: preference)
+        let manager = ScreenshotShelfManager(storageURL: root.appendingPathComponent("owned"), defaults: defaults, thumbnailPreferences: preference, clipboard: testClipboard)
         manager.startMonitoring()
         defer { manager.stopMonitoring() }
         try await eventually("timing monitor starts") { manager.isMonitoring }
