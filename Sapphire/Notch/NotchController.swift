@@ -3158,8 +3158,9 @@ struct NotchController: View {
             finalSnapZone = activeSnapZone
         }
 
-        if let finalSnapZone {
-            SnappingManager.snap(zone: finalSnapZone)
+        if let finalSnapZone, NSEvent.pressedMouseButtons & 1 == 0, !windowDrag.shouldIgnoreSnapRelease {
+            SnappingManager.snap(zone: finalSnapZone, target: windowDrag.snapTarget,
+                                 screen: assignedScreen, afterWindowDrag: true)
         }
         activeSnapZone = nil
         notchDragLocationState.update(nil)

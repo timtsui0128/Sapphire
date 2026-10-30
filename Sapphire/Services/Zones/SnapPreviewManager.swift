@@ -25,15 +25,8 @@ class SnapPreviewManager {
             createPreviewWindow()
         }
 
-        guard let screen = NSScreen.main else { return }
-        let visibleFrame = screen.visibleFrame
-
-        let targetFrame = CGRect(
-            x: visibleFrame.origin.x + visibleFrame.width * zone.x,
-            y: visibleFrame.origin.y + visibleFrame.height * (1 - zone.y - zone.height),
-            width: visibleFrame.width * zone.width,
-            height: visibleFrame.height * zone.height
-        )
+        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(NSEvent.mouseLocation) }) ?? NSScreen.main,
+              let targetFrame = SnapWindowPlacement.frame(for: zone, in: screen.visibleFrame) else { return }
 
         if !(previewWindow?.isVisible ?? false) {
             previewWindow?.contentView?.alphaValue = 0

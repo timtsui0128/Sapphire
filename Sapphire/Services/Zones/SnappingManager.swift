@@ -9,6 +9,19 @@ import AppKit
 import ApplicationServices
 import QuartzCore
 
+/// Keep the moved AX window, rather than choosing a new frontmost window at drop.
+struct SnapWindowTarget: @unchecked Sendable {
+    let pid: pid_t
+    let window: AXUIElement
+
+    init?(window: AXUIElement) {
+        guard AX.role(of: window) == kAXWindowRole as String,
+              let pid = AX.pid(of: window), pid != ProcessInfo.processInfo.processIdentifier else { return nil }
+        self.pid = pid
+        self.window = window
+    }
+}
+
 enum SnapZoneHitTesting {
     static let tolerance: CGFloat = 18
 
@@ -61,40 +74,54 @@ final class SnappingManager {
         snap(zone: zone)
     }
 
-    static func snap(zone: SnapZone) {
-        guard let app = frontmostApplication() else {
-            print("[SnappingManager] Could not identify a frontmost application to snap.")
+    static func snap(zone: SnapZone, target: SnapWindowTarget? = nil, screen: NSScreen? = nil, afterWindowDrag: Bool = false) {
+        guard AccessibilityPermission.isProcessTrusted else {
+            presentFailure(.permission)
             return
         }
-        snap(app: app, to: zone)
+        if let target {
+            guard let app = NSRunningApplication(processIdentifier: target.pid) else {
+                presentFailure(.windowUnavailable)
+                return
+            }
+            snap(app: app, to: zone, target: target, screen: screen, afterWindowDrag: afterWindowDrag)
+            return
+        }
+        guard let app = frontmostApplication() else {
+            presentFailure(.windowUnavailable)
+            return
+        }
+        snap(app: app, to: zone, screen: screen, afterWindowDrag: afterWindowDrag)
     }
 
-    static func snap(app: NSRunningApplication, to zone: SnapZone) {
-        guard app.bundleIdentifier != Bundle.main.bundleIdentifier else { return }
-
-        let normalizedX = max(0, min(1, zone.x))
-        let normalizedY = max(0, min(1, zone.y))
-        let normalizedWidth = max(0, min(1 - normalizedX, zone.width))
-        let normalizedHeight = max(0, min(1 - normalizedY, zone.height))
-        guard normalizedWidth > 0, normalizedHeight > 0 else {
-            print("[SnappingManager] Ignoring an empty snap zone.")
+    static func snap(app: NSRunningApplication, to zone: SnapZone, target: SnapWindowTarget? = nil, screen: NSScreen? = nil, afterWindowDrag: Bool = false) {
+        guard !SessionPrivacyState.shouldSuppressUI() else { return }
+        guard AccessibilityPermission.isProcessTrusted else {
+            presentFailure(.permission)
             return
         }
+        guard app.bundleIdentifier != Bundle.main.bundleIdentifier else { return }
 
         let displays = NSScreen.screens.map { Display(frame: $0.frame, visibleFrame: $0.visibleFrame) }
         let fallbackDisplay = NSScreen.main.map { Display(frame: $0.frame, visibleFrame: $0.visibleFrame) }
+        let requestedDisplay = screen.map { Display(frame: $0.frame, visibleFrame: $0.visibleFrame) }
         let mainDisplayFrame = self.mainDisplayFrame
         let animation = SettingsModel.shared.current.snapWindowAnimation
         let pid = app.processIdentifier
-        let appName = app.bundleIdentifier ?? "unknown app"
         let generation = nextGeneration(for: pid)
 
-        queue.async {
-            guard isCurrent(generation, for: pid) else { return }
-            guard let windowElement = mostLikelyMainWindow(pid: pid),
+        // Let the source application's mouse-up/tiling transaction finish first.
+        queue.asyncAfter(deadline: .now() + (afterWindowDrag ? 0.12 : 0)) {
+            guard isCurrent(generation, for: pid), !SessionPrivacyState.shouldSuppressUI(),
+                  !CGEventSource.buttonState(.combinedSessionState, button: .left) else { return }
+            guard let windowElement = target?.window ?? mostLikelyMainWindow(pid: pid),
                   let axFrame = AX.windowFrame(of: windowElement),
                   axFrame.width > 0, axFrame.height > 0 else {
-                print("[SnappingManager] Could not find a usable window for \(appName)")
+                reportFailure(.windowUnavailable, pid: pid, generation: generation)
+                return
+            }
+            guard AX.bool("AXFullScreen", of: windowElement) != true else {
+                reportFailure(.unsupportedWindow, pid: pid, generation: generation)
                 return
             }
 
@@ -104,48 +131,31 @@ final class SnappingManager {
                 width: axFrame.width,
                 height: axFrame.height
             )
-            guard let display = display(for: cocoaFrame, in: displays) ?? fallbackDisplay else {
-                print("[SnappingManager] Could not find a display for \(appName)")
-                return
-            }
-
-            let visibleFrame = display.visibleFrame
-            let targetFrame = CGRect(
-                x: visibleFrame.origin.x + visibleFrame.width * normalizedX,
-                y: visibleFrame.origin.y + visibleFrame.height * (1 - normalizedY - normalizedHeight),
-                width: visibleFrame.width * normalizedWidth,
-                height: visibleFrame.height * normalizedHeight
-            )
+            guard let display = requestedDisplay ?? display(for: cocoaFrame, in: displays) ?? fallbackDisplay,
+                  let targetFrame = SnapWindowPlacement.frame(for: zone, in: display.visibleFrame) else { return }
             let mainDisplayMaxY = mainDisplayFrame?.maxY ?? display.frame.maxY
-            let targetAXFrame = CGRect(
-                x: targetFrame.minX,
-                y: mainDisplayMaxY - targetFrame.maxY,
-                width: targetFrame.width,
-                height: targetFrame.height
-            )
+            let targetAXFrame = SnapWindowPlacement.axFrame(from: targetFrame, primaryDisplayMaxY: mainDisplayMaxY)
 
             if animation == .smooth {
                 animate(windowElement, from: axFrame, to: targetAXFrame, pid: pid, generation: generation)
                 guard isCurrent(generation, for: pid) else { return }
             }
 
-            if !applyFrame(targetAXFrame, to: windowElement) {
-                print("[SnappingManager] Failed to move/resize \(appName)")
+            let result = SnapWindowPlacement.apply(targetAXFrame,
+                read: { AX.windowFrame(of: windowElement) },
+                setSize: { _ = AX.set(kAXSizeAttribute as String, toSize: $0, on: windowElement) },
+                setPosition: { _ = AX.set(kAXPositionAttribute as String, toPoint: $0, on: windowElement) },
+                shouldContinue: { isCurrent(generation, for: pid) && AXIsProcessTrusted()
+                    && !SessionPrivacyState.isSuppressedSnapshot
+                    && !CGEventSource.buttonState(.combinedSessionState, button: .left) },
+                pause: { Thread.sleep(forTimeInterval: $0) })
+            if result == .failed {
+                reportFailure(.unsupportedWindow, pid: pid, generation: generation)
             }
         }
     }
 
     // MARK: - Moving the window (snapping queue)
-
-    @discardableResult
-    private nonisolated static func applyFrame(_ frame: CGRect, to window: AXUIElement) -> Bool {
-        let sized = AX.set(kAXSizeAttribute as String, toSize: frame.size, on: window)
-        let positioned = AX.set(kAXPositionAttribute as String, toPoint: frame.origin, on: window)
-        if positioned {
-            AX.set(kAXSizeAttribute as String, toSize: frame.size, on: window)
-        }
-        return sized && positioned
-    }
 
     private nonisolated static func animate(
         _ window: AXUIElement,
@@ -155,7 +165,8 @@ final class SnappingManager {
         generation: UInt64
     ) {
         let startTime = CACurrentMediaTime()
-        while isCurrent(generation, for: pid) {
+        while isCurrent(generation, for: pid), AXIsProcessTrusted(), !SessionPrivacyState.isSuppressedSnapshot,
+              !CGEventSource.buttonState(.combinedSessionState, button: .left) {
             let elapsed = CACurrentMediaTime() - startTime
             let progress = elapsed / smoothDuration
             guard progress < 1 else { return }
@@ -192,6 +203,40 @@ final class SnappingManager {
     }
 
     // MARK: - Lookup
+
+    private enum Failure { case permission, windowUnavailable, unsupportedWindow }
+    private static var isPresentingFailure = false
+
+    private nonisolated static func reportFailure(_ failure: Failure, pid: pid_t, generation: UInt64) {
+        Task { @MainActor in
+            guard isCurrent(generation, for: pid) else { return }
+            presentFailure(AccessibilityPermission.isProcessTrusted ? failure : .permission)
+        }
+    }
+
+    private static func presentFailure(_ failure: Failure) {
+        guard !isPresentingFailure, !SessionPrivacyState.shouldSuppressUI() else { return }
+        let message: String
+        switch failure {
+        case .permission:
+            if #available(macOS 27.0, *) {
+                message = "Allow Sapphire in System Settings → Privacy & Security → Device Control and Data Access to move and resize windows. If it is already enabled after an update, remove the old entry and add the Sapphire app you are currently using."
+            } else {
+                message = "Allow Sapphire in System Settings → Privacy & Security → Accessibility to move and resize windows. If it is already enabled after an update, remove the old entry and add the Sapphire app you are currently using."
+            }
+        case .windowUnavailable:
+            message = "The dragged window is no longer available. Drag a normal application window to a layout and try again."
+        case .unsupportedWindow:
+            message = "This window did not accept the selected layout. Exit full screen and try a larger zone; some apps limit how small their windows can be."
+        }
+        isPresentingFailure = true
+        HelperAlertPresenter.presentModal(messageText: "Couldn’t arrange this window",
+            informativeText: message, alertStyle: .warning,
+            buttonTitles: failure == .permission ? ["Open Window Control Settings", "Cancel"] : ["OK"]) { index in
+                isPresentingFailure = false
+                if failure == .permission, index == 0 { AccessibilityPermission.openSystemSettings() }
+            }
+    }
 
     private static func frontmostApplication() -> NSRunningApplication? {
         let ownBundleID = Bundle.main.bundleIdentifier

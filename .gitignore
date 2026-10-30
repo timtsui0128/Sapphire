@@ -40,6 +40,7 @@ Sapphire/App/GoogleService-Info.plist
 !/Tools/ClipboardPrivacyTests/
 !/Tools/SecurityRegressionTests/
 !/Tools/WindowFitTests/
+!/Tools/SnapZoneTests/
 !/Tools/NotchScreenFitTests/
 !/Tools/NotchPinTests/
 !/Tools/build-screenshot-shelf.sh

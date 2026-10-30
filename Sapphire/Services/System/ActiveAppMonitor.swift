@@ -26,11 +26,25 @@ final class WindowDragState: ObservableObject {
     @Published private(set) var cursorDisplayID: CGDirectDisplayID?
     private var modifierFlagsMonitorToken: UUID?
     private var dragPollingTimer: Timer?
+    private var draggedWindow: SnapWindowTarget?
+    private var lastDragEnd: CFTimeInterval = -.infinity
+    private var cancelledLastDrag = false
+    // Global mouse-up, polling and the hover probe can finish in either order.
+    // Keep the actual dragged window through their short release grace period.
+    var snapTarget: SnapWindowTarget? {
+        isDragging || CACurrentMediaTime() - lastDragEnd < 1 ? draggedWindow : nil
+    }
+    var shouldIgnoreSnapRelease: Bool {
+        !isDragging && cancelledLastDrag && CACurrentMediaTime() - lastDragEnd < 1
+    }
     private init() {}
 
     func beginDrag(
+        target: SnapWindowTarget? = nil,
         bypassModifierIsPressed: Bool = NSEvent.modifierFlags.contains(.command)
     ) {
+        draggedWindow = target
+        cancelledLastDrag = false
         isSnapZoneDismissedForCurrentDrag = false
         isDragging = true
         isSnapZoneBypassModifierPressed = bypassModifierIsPressed
@@ -44,12 +58,20 @@ final class WindowDragState: ObservableObject {
         isSnapZoneDismissedForCurrentDrag = true
     }
 
+    func recordDraggedWindowIfNeeded(_ target: SnapWindowTarget?) {
+        guard isDragging, draggedWindow == nil else { return }
+        draggedWindow = target
+    }
+
     func setSnapZoneBypassModifierPressed(_ isPressed: Bool) {
         guard isDragging else { return }
         isSnapZoneBypassModifierPressed = isPressed
     }
 
     func endDrag() {
+        guard isDragging else { return }
+        lastDragEnd = CACurrentMediaTime()
+        cancelledLastDrag = isSnapZoneDismissedForCurrentDrag || isSnapZoneBypassModifierPressed
         stopModifierFlagsMonitoring()
         dragPollingTimer?.invalidate()
         dragPollingTimer = nil
@@ -164,6 +186,11 @@ class ActiveAppMonitor: ObservableObject {
             .map(\.snapOnWindowDragEnabled)
             .removeDuplicates()
             .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshWindowDragObservation() }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: AccessibilityTrustMonitor.trustDidChange)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.refreshWindowDragObservation() }
             .store(in: &cancellables)
@@ -286,10 +313,10 @@ class ActiveAppMonitor: ObservableObject {
         teardownAXObserver()
         observedPID = pid
 
-        guard settingsModel.current.snapOnWindowDragEnabled else { return }
+        guard settingsModel.current.snapOnWindowDragEnabled, AccessibilityPermission.isProcessTrusted else { return }
 
-        let observer = AXObserverHandle(pid: pid) { _, _ in
-            ActiveAppMonitor.shared.handleWindowMoved()
+        let observer = AXObserverHandle(pid: pid) { window, _ in
+            ActiveAppMonitor.shared.handleWindowMoved(window)
         }
         guard let observer else {
             print("[ActiveAppMonitor] Failed to create AXObserver for PID \(pid)")
@@ -316,7 +343,8 @@ class ActiveAppMonitor: ObservableObject {
         }
     }
 
-    nonisolated func handleWindowMoved() {
+    nonisolated func handleWindowMoved(_ window: AXUIElement) {
+        let target = SnapWindowTarget(window: window)
         Task { @MainActor in
             let now = CACurrentMediaTime()
             if now - lastMoveTime < 0.016 { return }
@@ -325,8 +353,10 @@ class ActiveAppMonitor: ObservableObject {
             guard NSEvent.pressedMouseButtons & 1 != 0 else { return }
 
             if !self.windowDrag.isDragging {
-                self.windowDrag.beginDrag()
+                self.windowDrag.beginDrag(target: target)
                 self.startMouseUpMonitoring()
+            } else {
+                self.windowDrag.recordDraggedWindowIfNeeded(target)
             }
         }
     }

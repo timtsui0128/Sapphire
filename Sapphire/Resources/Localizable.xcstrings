@@ -54043,6 +54043,106 @@
           }
         }
       }
+    },
+    "Allow Sapphire in System Settings → Privacy & Security → Accessibility to move and resize windows. If it is already enabled after an update, remove the old entry and add the Sapphire app you are currently using.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow Sapphire in System Settings → Privacy & Security → Accessibility to move and resize windows. If it is already enabled after an update, remove the old entry and add the Sapphire app you are currently using."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在“系统设置 → 隐私与安全性 → 辅助功能”中允许 Sapphire 移动和调整窗口。如果更新后开关已经打开但仍无效，请移除旧条目，并重新添加当前使用的 Sapphire 应用。"
+          }
+        }
+      }
+    },
+    "Couldn’t arrange this window": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t arrange this window"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法排列此窗口"
+          }
+        }
+      }
+    },
+    "The dragged window is no longer available. Drag a normal application window to a layout and try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The dragged window is no longer available. Drag a normal application window to a layout and try again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刚才拖动的窗口已不可用。请将普通应用窗口拖到分屏布局上重试。"
+          }
+        }
+      }
+    },
+    "This window did not accept the selected layout. Exit full screen and try a larger zone; some apps limit how small their windows can be.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This window did not accept the selected layout. Exit full screen and try a larger zone; some apps limit how small their windows can be."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此窗口未接受所选布局。请退出全屏并尝试更大的分区；部分应用限制窗口的最小尺寸。"
+          }
+        }
+      }
+    },
+    "Open Window Control Settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Window Control Settings"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开窗口控制权限设置"
+          }
+        }
+      }
+    },
+    "Allow Sapphire in System Settings → Privacy & Security → Device Control and Data Access to move and resize windows. If it is already enabled after an update, remove the old entry and add the Sapphire app you are currently using.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow Sapphire in System Settings → Privacy & Security → Device Control and Data Access to move and resize windows. If it is already enabled after an update, remove the old entry and add the Sapphire app you are currently using."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在系统设置 → 隐私与安全性 → 设备控制与数据访问中允许 Sapphire 移动和调整窗口。如果更新后开关已开启但仍无效，请移除旧条目，并添加你当前使用的 Sapphire 应用。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
