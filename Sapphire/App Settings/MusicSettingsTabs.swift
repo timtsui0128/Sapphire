@@ -130,7 +130,7 @@ struct AppleMusicAccountCard: View {
     var body: some View {
         SettingsCard(
             title: "Apple Music",
-            description: "Sapphire uses MusicKit for Apple Music artwork, artist details, the queue and your library. No login is needed beyond Apple Music access."
+            description: "TopLet uses MusicKit for Apple Music artwork, artist details, the queue and your library. No login is needed beyond Apple Music access."
         ) {
             HStack(spacing: 10) {
                 Image(systemName: statusIcon).foregroundStyle(statusColor)

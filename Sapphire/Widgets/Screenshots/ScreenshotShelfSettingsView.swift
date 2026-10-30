@@ -13,7 +13,7 @@ struct ScreenshotShelfSettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             Label("Screenshots", systemImage: "camera.viewfinder")
                 .font(.headline)
-            Toggle("Collect new screenshots into Sapphire", isOn: $manager.captureEnabled)
+            Toggle("Collect new screenshots into TopLet", isOn: $manager.captureEnabled)
             Toggle("Copy new screenshots to clipboard", isOn: $manager.automaticallyCopyNewScreenshots)
             Text("After collection, the latest screenshot replaces your clipboard image so you can paste with Command-V. History and imports are not copied. Choose immediate collection to paste sooner.")
                 .font(.caption).foregroundStyle(.secondary)
@@ -28,8 +28,8 @@ struct ScreenshotShelfSettingsView: View {
                 Text(error).font(.caption).foregroundStyle(.secondary)
             }
             Text(manager.captureTiming == .immediate
-                 ? "Skips the macOS floating thumbnail while collection is enabled. Sapphire collects the image as soon as the saved file is complete. Your previous thumbnail setting is restored when collection stops or Sapphire quits."
-                 : "Keeps the macOS floating thumbnail available for editing and sharing. Sapphire collects the file after the preview finishes and macOS saves it.")
+                 ? "Skips the macOS floating thumbnail while collection is enabled. TopLet collects the image as soon as the saved file is complete. Your previous thumbnail setting is restored when collection stops or TopLet quits."
+                 : "Keeps the macOS floating thumbnail available for editing and sharing. TopLet collects the file after the preview finishes and macOS saves it.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -39,7 +39,7 @@ struct ScreenshotShelfSettingsView: View {
                 }
             }
             .pickerStyle(.menu)
-            Text("New system screenshots move from their save folder into Sapphire. Manually imported images are copied. The selected retention applies to new items.")
+            Text("New system screenshots move from their save folder into TopLet. Manually imported images are copied. The selected retention applies to new items.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -50,7 +50,7 @@ struct ScreenshotShelfSettingsView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             HStack {
-                Button("Show Sapphire folder") { NSWorkspace.shared.open(manager.storageFolderURL) }
+                Button("Show TopLet folder") { NSWorkspace.shared.open(manager.storageFolderURL) }
                 Button("Choose source folder…") { manager.chooseFolder() }
             }
             if let error = manager.lastError {

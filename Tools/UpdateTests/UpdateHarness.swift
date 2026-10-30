@@ -19,9 +19,16 @@ final class HarnessDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         if Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String == "2" {
+            if mode == "rename" {
+                precondition(UserDefaults.standard.string(forKey: "TopLetRenameFixture") == "keep-existing-selection")
+            }
             record("relaunched")
             NSApp.terminate(nil)
             return
+        }
+        if mode == "rename" {
+            UserDefaults.standard.set("keep-existing-selection", forKey: "TopLetRenameFixture")
+            UserDefaults.standard.synchronize()
         }
         checkPolicyAndCallbacks()
         let feed = URL(string: Bundle.main.object(forInfoDictionaryKey: "SUFeedURL") as! String)!
@@ -70,6 +77,8 @@ final class HarnessDelegate: NSObject, NSApplicationDelegate {
 
     private func checkPolicyAndCallbacks() {
         assert(PersonalUpdateChannel.allowsArchive(URL(string: "https://github.com/timtsui0128/Sapphire/releases/download/personal-v0.2.0/Sapphire.zip")!))
+        assert(PersonalUpdateChannel.allowsArchive(URL(string: "https://github.com/timtsui0128/Sapphire/releases/download/personal-v0.1.8/TopLet-0.1.8-arm64.zip")!))
+        assert(PersonalUpdateChannel.allowsArchive(URL(string: "https://github.com/timtsui0128/Sapphire/releases/download/personal-v0.1.8/TopLet18-17.delta")!))
         assert(PersonalUpdateChannel.allowsArchive(URL(string: "https://github.com/timtsui0128/Sapphire/releases/download/personal-v0.2.0/Sapphire13-12.delta")!))
         for value in ["https://github.com/cshariq/Sapphire/releases/download/personal-v0.2.0/Sapphire.zip",
                       "https://github.com/timtsui0128/Other/releases/download/personal-v0.2.0/Sapphire.zip",

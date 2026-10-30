@@ -363,7 +363,7 @@
 		DA262AF32EA5D1A20027CA69 /* PrivateFrameworks */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PrivateFrameworks; path = ../../../../System/Library/PrivateFrameworks; sourceTree = "<group>"; };
 		DA262AF42EA5D1B70027CA69 /* MultitouchSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MultitouchSupport.framework; path = ../../../../System/Library/PrivateFrameworks/MultitouchSupport.framework; sourceTree = "<group>"; };
 		DA452EAF2EAA57C90070E5C9 /* com.shariq.sapphireHelper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = com.shariq.sapphireHelper; sourceTree = BUILT_PRODUCTS_DIR; };
-		DA46CF762DCBCA0000F00EC5 /* Sapphire.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sapphire.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA46CF762DCBCA0000F00EC5 /* TopLet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TopLet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA46CF872DCBCA0100F00EC5 /* SapphireTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SapphireTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA5256782E162B9F00D8F42E /* NearbyTransferDisplayState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearbyTransferDisplayState.swift; sourceTree = "<group>"; };
 		DA52567A2E162FA900D8F42E /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
@@ -800,7 +800,7 @@
 				A17D00000000000000000001 /* SapphireAndroidWidgets.appex */,
 				F1CE000000000000000001AA /* SapphireFinderSync.appex */,
 				F2DE000000000000000001BB /* SapphireFileProvider.appex */,
-				DA46CF762DCBCA0000F00EC5 /* Sapphire.app */,
+				DA46CF762DCBCA0000F00EC5 /* TopLet.app */,
 				DA46CF872DCBCA0100F00EC5 /* SapphireTests.xctest */,
 				DA7C49802E15CCA50049937A /* libNearbyShare.dylib */,
 				DAA7D9D42E8633B20032748B /* abt */,
@@ -1178,8 +1178,8 @@
 				350EC0B0ACC04131989F6CB6 /* FirebaseAppCheck */,
 				FD831867A2F947938E17E286 /* FirebaseFirestore */,
 			);
-			productName = Sapphire;
-			productReference = DA46CF762DCBCA0000F00EC5 /* Sapphire.app */;
+			productName = TopLet;
+			productReference = DA46CF762DCBCA0000F00EC5 /* TopLet.app */;
 			productType = "com.apple.product-type.application";
 		};
 		DA46CF862DCBCA0100F00EC5 /* SapphireTests */ = {
@@ -1937,7 +1937,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Sapphire.app/Contents/MacOS/Sapphire";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TopLet.app/Contents/MacOS/TopLet";
 			};
 			name = Debug;
 		};
@@ -1960,7 +1960,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Sapphire.app/Contents/MacOS/Sapphire";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TopLet.app/Contents/MacOS/TopLet";
 			};
 			name = Release;
 		};
@@ -2105,7 +2105,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = KVQFWJ7C7S;
@@ -2125,29 +2125,29 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/PrivateHeaders";
 				INFOPLIST_FILE = Sapphire/App/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Sapphire;
+				INFOPLIST_KEY_CFBundleDisplayName = TopLet;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSAppleEventsUsageDescription = "Sapphire controls playback in Music and Spotify, and reads and types into your Terminal or iTerm tabs when you send a message or command to a running task from the notch.";
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "TopLet controls playback in Music and Spotify, and reads and types into your Terminal or iTerm tabs when you send a message or command to a running task from the notch.";
 				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Used to show upcming songs and playlists within apple music";
-				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Sapphire needs bluetooth to show new connections and battery low notifications";
-				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Sapphire needs calendar permission to show upcoming events";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "TopLet needs bluetooth to show new connections and battery low notifications";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "TopLet needs calendar permission to show upcoming events";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "Blip can learn from your calendar patterns to better understand your schedule and preferences.";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Sapphire uses the camera for the Mirror widget so you can see yourself in the notch.";
-				INFOPLIST_KEY_NSContactsUsageDescription = "Sapphire needs access to your contacts to find the correct phone number or email when sending a reply from a notification.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "TopLet uses the camera for the Mirror widget so you can see yourself in the notch.";
+				INFOPLIST_KEY_NSContactsUsageDescription = "TopLet needs access to your contacts to find the correct phone number or email when sending a reply from a notification.";
 				INFOPLIST_KEY_NSFocusStatusUsageDescription = "Needed to provide live focus updates";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2025 Shariq Charolia. All rights reserved.";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Sapphire needs this to provide nearby share functionality";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "TopLet needs this to provide nearby share functionality";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Needed to provide live weather updates";
-				INFOPLIST_KEY_NSLocationUsageDescription = "Sapphire needs this to weather";
+				INFOPLIST_KEY_NSLocationUsageDescription = "TopLet needs this to weather";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Blip uses your location for local weather, nearby places, and location-aware tasks.";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Sapphire uses the microphone for Gemini Live voice conversations.";
-				INFOPLIST_KEY_NSNetworkVolumesUsageDescription = "Sapphire needs this to provide nearby share functionality";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "TopLet uses the microphone for Gemini Live voice conversations.";
+				INFOPLIST_KEY_NSNetworkVolumesUsageDescription = "TopLet needs this to provide nearby share functionality";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "Sapphire needs this to show upcoming reminders";
+				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "TopLet needs this to show upcoming reminders";
 				INFOPLIST_KEY_NSRemindersUsageDescription = "Needed to show reminders";
-				INFOPLIST_KEY_NSSystemExtensionUsageDescription = "Sapphire needs this extension to create a virtual multi-output audio device.";
+				INFOPLIST_KEY_NSSystemExtensionUsageDescription = "TopLet needs this extension to create a virtual multi-output audio device.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -2157,13 +2157,14 @@
 					"$(PROJECT_DIR)/Sapphire/Services/Music",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1.7;
+				MARKETING_VERSION = 0.1.8;
 				OTHER_CODE_SIGN_FLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "";
 				"OTHER_SWIFT_FLAGS[arch=*]" = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cshariq.sapphire;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_MODULE_NAME = Sapphire;
+				PRODUCT_NAME = TopLet;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = YES;
 				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
@@ -2191,7 +2192,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = KVQFWJ7C7S;
 				ENABLE_APP_SANDBOX = NO;
@@ -2209,29 +2210,29 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/PrivateHeaders";
 				INFOPLIST_FILE = Sapphire/App/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Sapphire;
+				INFOPLIST_KEY_CFBundleDisplayName = TopLet;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSAppleEventsUsageDescription = "Sapphire controls playback in Music and Spotify, and reads and types into your Terminal or iTerm tabs when you send a message or command to a running task from the notch.";
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "TopLet controls playback in Music and Spotify, and reads and types into your Terminal or iTerm tabs when you send a message or command to a running task from the notch.";
 				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Used to show upcming songs and playlists within apple music";
-				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Sapphire needs bluetooth to show new connections and battery low notifications";
-				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Sapphire needs calendar permission to show upcoming events";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "TopLet needs bluetooth to show new connections and battery low notifications";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "TopLet needs calendar permission to show upcoming events";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "Blip can learn from your calendar patterns to better understand your schedule and preferences.";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Sapphire uses the camera for the Mirror widget so you can see yourself in the notch.";
-				INFOPLIST_KEY_NSContactsUsageDescription = "Sapphire needs access to your contacts to find the correct phone number or email when sending a reply from a notification.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "TopLet uses the camera for the Mirror widget so you can see yourself in the notch.";
+				INFOPLIST_KEY_NSContactsUsageDescription = "TopLet needs access to your contacts to find the correct phone number or email when sending a reply from a notification.";
 				INFOPLIST_KEY_NSFocusStatusUsageDescription = "Needed to provide live focus updates";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2025 Shariq Charolia. All rights reserved.";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Sapphire needs this to provide nearby share functionality";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "TopLet needs this to provide nearby share functionality";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Needed to provide live weather updates";
-				INFOPLIST_KEY_NSLocationUsageDescription = "Sapphire needs this to weather";
+				INFOPLIST_KEY_NSLocationUsageDescription = "TopLet needs this to weather";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Blip uses your location for local weather, nearby places, and location-aware tasks.";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Sapphire uses the microphone for Gemini Live voice conversations.";
-				INFOPLIST_KEY_NSNetworkVolumesUsageDescription = "Sapphire needs this to provide nearby share functionality";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "TopLet uses the microphone for Gemini Live voice conversations.";
+				INFOPLIST_KEY_NSNetworkVolumesUsageDescription = "TopLet needs this to provide nearby share functionality";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "Sapphire needs this to show upcoming reminders";
+				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "TopLet needs this to show upcoming reminders";
 				INFOPLIST_KEY_NSRemindersUsageDescription = "Needed to show reminders";
-				INFOPLIST_KEY_NSSystemExtensionUsageDescription = "Sapphire needs this extension to create a virtual multi-output audio device.";
+				INFOPLIST_KEY_NSSystemExtensionUsageDescription = "TopLet needs this extension to create a virtual multi-output audio device.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -2241,12 +2242,13 @@
 					"$(PROJECT_DIR)/Sapphire/Services/Music",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1.7;
+				MARKETING_VERSION = 0.1.8;
 				OTHER_CODE_SIGN_FLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cshariq.sapphire;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_MODULE_NAME = Sapphire;
+				PRODUCT_NAME = TopLet;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = YES;
 				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;

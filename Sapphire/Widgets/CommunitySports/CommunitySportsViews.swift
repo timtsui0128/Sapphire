@@ -357,7 +357,7 @@ struct CommunitySportsSettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 Text("Sports").font(.largeTitle.bold())
-                Text("Follow football and Formula 1 from Sapphire.")
+                Text("Follow football and Formula 1 from TopLet.")
                     .foregroundStyle(.secondary)
                 VStack(alignment: .leading, spacing: 12) {
                     Toggle("Show Sports widget in the notch", isOn: $settings.settings.sportsWidgetEnabled)

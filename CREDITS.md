@@ -1,10 +1,14 @@
 # Acknowledgments & Third-Party Licenses
 ---
 
+## TopLet and Sapphire
+
+TopLet is maintained by **Ho Tim Tsui (timtsui0128)** and is based on [Sapphire](https://github.com/cshariq/Sapphire), originally developed by **Shariq Charolia and upstream contributors**. The original copyright notices and GNU AGPLv3 license are retained. TopLet is an independently maintained, unofficial fork. Renaming the app does not change its source provenance or license.
+
 ## Menu Drop (interaction inspiration)
 
 - **App and author**: [Menu Drop by Sindre Sorhus](https://sindresorhus.com/menu-drop).
-- **Relationship**: Inspiration for dropping files onto a menu-bar AirDrop destination. Sapphire's Quick AirDrop implementation uses public AppKit APIs independently; no Menu Drop code, icon, or binary is included. No license for Menu Drop itself is asserted here.
+- **Relationship**: Inspiration for dropping files onto a menu-bar AirDrop destination. TopLet's Quick AirDrop implementation uses public AppKit APIs independently; no Menu Drop code, icon, or binary is included. No license for Menu Drop itself is asserted here.
 
 ## Sparkle (personal fork updater)
 

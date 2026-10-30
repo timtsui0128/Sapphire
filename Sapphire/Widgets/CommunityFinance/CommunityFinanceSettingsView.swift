@@ -8,7 +8,7 @@ struct CommunityFinanceSettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 Text("Finance").font(.largeTitle.bold())
-                Text("Follow your favorite stocks from Sapphire.")
+                Text("Follow your favorite stocks from TopLet.")
                     .foregroundStyle(.secondary)
                 VStack(alignment: .leading, spacing: 12) {
                     Toggle("Show Stocks widget in the notch", isOn: $settings.settings.financeWidgetEnabled)

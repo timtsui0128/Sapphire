@@ -19,7 +19,7 @@ for key, entry in catalog["strings"].items():
 
 for key in ["Language", "Follow System", "General", "Screenshots", "Collect immediately",
             "Keep floating preview", "Keep until I remove", "Show Sports widget in the notch",
-            "Finance", "Pin", "Unpin", "Quit Sapphire"]:
+            "Finance", "Pin", "Unpin", "Quit TopLet"]:
     assert catalog["strings"][key]["localizations"]["zh-Hans"]["stringUnit"]["value"] != key, key
 
 print(f"PASS: {len(catalog['strings'])} complete English/Chinese entries; format arguments preserved")

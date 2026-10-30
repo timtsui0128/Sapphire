@@ -1065,9 +1065,9 @@ final class StatusBarController {
         zenItem.state = isZenModeActive ? .on : .off
         menu.addItem(zenItem)
         menu.addItem(.separator())
-        menu.addItem(withTitle: L10n.string("Open Sapphire Setting"), action: #selector(openPreferences), keyEquivalent: ",").target = self
+        menu.addItem(withTitle: L10n.string("Open TopLet Setting"), action: #selector(openPreferences), keyEquivalent: ",").target = self
         menu.addItem(.separator())
-        menu.addItem(withTitle: L10n.string("Quit Sapphire"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        menu.addItem(withTitle: L10n.string("Quit TopLet"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         return menu
     }
 
@@ -1084,7 +1084,7 @@ final class StatusBarController {
         }
         menu.addItem(withTitle: L10n.string("Preferences"), action: #selector(openPreferences), keyEquivalent: ",").target = self
         menu.addItem(.separator())
-        menu.addItem(withTitle: L10n.string("Quit Sapphire"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        menu.addItem(withTitle: L10n.string("Quit TopLet"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         return menu
     }
 

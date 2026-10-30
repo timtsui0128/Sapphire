@@ -461,7 +461,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 if let menu = self.statusItem?.menu {
                     for item in menu.items {
                         if item.action == #selector(self.showLaunchpadAction) { item.title = L10n.string("Show Launchpad") }
-                        if item.action == #selector(NSApplication.terminate(_:)) { item.title = L10n.string("Quit Sapphire") }
+                        if item.action == #selector(NSApplication.terminate(_:)) { item.title = L10n.string("Quit TopLet") }
                     }
                 }
                 SapphireStandardMenu.refreshLanguage()
@@ -800,7 +800,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             window.standardWindowButton(.closeButton)?.isHidden = true
             window.standardWindowButton(.miniaturizeButton)?.isHidden = true
             window.standardWindowButton(.zoomButton)?.isHidden = true
-            window.title = L10n.string("Sapphire Onboarding")
+            window.title = L10n.string("TopLet Onboarding")
             window.isMovableByWindowBackground = true
             window.isOpaque = false
             window.backgroundColor = .clear
@@ -1277,7 +1277,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
         DispatchQueue.main.async {
             HelperAlertPresenter.presentModal(
-                messageText: "Signed Out of Sapphire",
+                messageText: "Signed Out of TopLet",
                 informativeText: reason.alertMessage,
                 alertStyle: .warning,
                 buttonTitles: ["Open Account Settings", "OK"]
@@ -1592,7 +1592,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
         HelperAlertPresenter.presentModal(
             messageText: "Sapphire VM Isn’t Available",
-            informativeText: "Sapphire couldn’t open this virtual machine link. Make sure the standalone Sapphire VM app is installed, then try again.",
+            informativeText: "TopLet couldn’t open this virtual machine link. Make sure the standalone Sapphire VM app is installed, then try again.",
             alertStyle: .warning,
             buttonTitles: ["OK"]
         ) { [weak self] _ in
@@ -1622,12 +1622,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
                 statusItem?.button?.image = NSImage(
                     systemSymbolName: "square.grid.3x3.fill",
-                    accessibilityDescription: "Sapphire Launchpad"
+                    accessibilityDescription: "TopLet Launchpad"
                 )
                 let menu = NSMenu()
                 menu.addItem(NSMenuItem(title: L10n.string("Show Launchpad"), action: #selector(showLaunchpadAction), keyEquivalent: ""))
                 menu.addItem(.separator())
-                menu.addItem(NSMenuItem(title: L10n.string("Quit Sapphire"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+                menu.addItem(NSMenuItem(title: L10n.string("Quit TopLet"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
                 for item in menu.items { item.target = self }
                 statusItem?.menu = menu
             }

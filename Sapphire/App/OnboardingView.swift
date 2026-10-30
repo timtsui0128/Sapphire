@@ -101,7 +101,7 @@ private struct WelcomeStepView: View {
                 .frame(width: 80, height: 80)
                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
 
-            Text("Welcome to Sapphire")
+            Text("Welcome to TopLet")
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .multilineTextAlignment(.center)
 
@@ -128,7 +128,7 @@ private struct PermissionsStepView: View {
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .padding(.top, 40).padding(.bottom, 10)
 
-            Text("Sapphire needs a few permissions for its core features.")
+            Text("TopLet needs a few permissions for its core features.")
                 .font(.body)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.secondary)
@@ -176,7 +176,7 @@ private struct HelperInstallationStepView: View {
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .padding(.top, 40).padding(.bottom, 10)
 
-            Text("Sapphire needs a privileged helper for battery management and system integrations. macOS will ask you to allow it under Login Items → Background Activity.")
+            Text("TopLet needs a privileged helper for battery management and system integrations. macOS will ask you to allow it under Login Items → Background Activity.")
                 .font(.body)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.secondary)
@@ -261,15 +261,15 @@ private struct HelperInstallationStepView: View {
     private var stepGuidance: String {
         switch helperManager.status {
         case .requiresApproval:
-            return "System Settings should be open. Under Allow in the Background, turn on both Sapphire and Sapphire Helper, then return here."
+            return "System Settings should be open. Under Allow in the Background, turn on both TopLet and Sapphire Helper, then return here."
         case .enabled where !helperManager.isRunning:
-            return "The helper is approved but not responding. Tap Reset Helper so Sapphire can unregister its own background items and reinstall the helper."
+            return "The helper is approved but not responding. Tap Reset Helper so TopLet can unregister its own background items and reinstall the helper."
         case .enabled:
             return "Helper is ready. You can continue."
         case .notFound:
-            return "macOS lost the helper registration (SAP-H3). Tap Reset Helper to rebuild it; Sapphire relaunches itself if the helper stays stuck."
+            return "macOS lost the helper registration (SAP-H3). Tap Reset Helper to rebuild it; TopLet relaunches itself if the helper stays stuck."
         default:
-            return "Tap Install Helper. Approve the macOS prompt, then enable Sapphire under System Settings → General → Login Items → Background Activity."
+            return "Tap Install Helper. Approve the macOS prompt, then enable TopLet under System Settings → General → Login Items → Background Activity."
         }
     }
 
@@ -301,7 +301,7 @@ private struct PrivacyStepView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     PrivacySection(
                         title: "Data We Collect (Analytics)",
-                        content: "To improve Sapphire, we collect completely anonymous, aggregated usage data. This helps us understand which features are popular, identify bugs, and make the app better for everyone."
+                        content: "To improve TopLet, we collect completely anonymous, aggregated usage data. This helps us understand which features are popular, identify bugs, and make the app better for everyone."
                     )
 
                     PrivacySection(
@@ -330,7 +330,7 @@ private struct PrivacyStepView: View {
             .padding(.top, 20)
 
             Toggle(isOn: $settings.settings.googleAnalyticsEnabled) {
-                Text("Share anonymous usage data with Google Analytics to help improve Sapphire. You can change this anytime in Settings > General.")
+                Text("Share anonymous usage data with Google Analytics to help improve TopLet. You can change this anytime in Settings > General.")
                     .font(.callout)
             }
             .padding(.horizontal, 50)
@@ -511,7 +511,7 @@ private struct CorePreferencesStepView: View {
                     SettingsSwitch(isOn: $settings.settings.eyeBreakLiveActivityEnabled)
                 }
                 ModernOnboardingRow(iconName: "thermometer.sun.fill", iconColor: .orange, title: "Temperature Unit", description: "Preferred unit for weather forecasts.") { Picker("", selection: $settings.settings.weatherUseCelsius) { Text("°C").tag(true); Text("°F").tag(false) }.pickerStyle(.segmented).labelsHidden().frame(width: 100) }
-                ModernOnboardingRow(iconName: "bolt.horizontal.circle.fill", iconColor: .purple, title: "Launch at Login", description: "Start Sapphire automatically with your Mac.") { SettingsSwitch(isOn: $settings.settings.launchAtLogin) }
+                ModernOnboardingRow(iconName: "bolt.horizontal.circle.fill", iconColor: .purple, title: "Launch at Login", description: "Start TopLet automatically with your Mac.") { SettingsSwitch(isOn: $settings.settings.launchAtLogin) }
             }.padding(50)
             Spacer()
             OnboardingButton(title: "Continue", action: onNext)
@@ -536,7 +536,7 @@ private struct LockScreenSetupStepView: View {
                 .padding(.horizontal, 50)
 
             VStack(spacing: 15) {
-                ModernOnboardingRow(iconName: "lock.display", iconColor: .red, title: "Enable on Lock Screen", description: "Show Sapphire's notch and features when your Mac is locked.") {
+                ModernOnboardingRow(iconName: "lock.display", iconColor: .red, title: "Enable on Lock Screen", description: "Show TopLet's notch and features when your Mac is locked.") {
                     SettingsSwitch(isOn: $settings.settings.lockScreenShowNotch)
                 }
 
@@ -875,7 +875,7 @@ private struct FinishStepView: View {
                 .padding(.top)
 
             Spacer()
-            OnboardingButton(title: "Explore Sapphire", action: onComplete)
+            OnboardingButton(title: "Explore TopLet", action: onComplete)
 
             Text("© 2025 Shariq Charolia. All rights reserved.")
                 .font(.caption).foregroundStyle(.tertiary).padding(.bottom, 20)

@@ -1,8 +1,10 @@
-# Sapphire · Personal Fork
+# TopLet
 
 **English** | [简体中文](README.zh-CN.md)
 
-A personal macOS notch utility based on [cshariq/Sapphire](https://github.com/cshariq/Sapphire), maintained by [Ho Tim Tsui / timtsui0128](https://github.com/timtsui0128). This vibe coding project gradually improves everyday screenshot, file shelf, information card, and interface workflows.
+**Your Mac, one drop away.**
+
+TopLet is a personal macOS notch utility based on [cshariq/Sapphire](https://github.com/cshariq/Sapphire), maintained by [Ho Tim Tsui / timtsui0128](https://github.com/timtsui0128). This vibe coding project gradually improves everyday screenshot, file shelf, information card, and interface workflows.
 
 **This is an independently maintained, unofficial fork.** The original Sapphire app, architecture, and existing features were developed by **Shariq Charolia ([@cshariq](https://github.com/cshariq)) and upstream contributors**. This fork preserves the original attribution, copyright notices, third-party credits, and **GNU AGPLv3** license.
 
@@ -20,14 +22,14 @@ These personal changes are relative to upstream commit [`2e8085676209cbbb424bc60
 | Feature | Behavior in this fork | Details |
 | --- | --- | --- |
 | Screenshot shelf | Collect system screenshots, remember manual selection, automatically copy the latest capture for pasting, and drag multiple selected images together; choose immediate collection or keep the system floating preview; new captures take priority on the next notch click; history does not trigger a persistent capsule | [Screenshot workflow](docs/screenshot-shelf.md) |
-| Screenshot storage | Move automatically collected screenshots into Sapphire's dedicated folder; choose manual removal, cleanup after 24 hours, or cleanup after a successful drag; manual import is also supported | [Storage and retention](docs/screenshot-shelf.md#保存与收集范围) |
-| Quick AirDrop | Automatically reveal AirDrop when dragging files toward Sapphire at the top; AirDrop tab inside File Shelf, beside Screenshots and Files; drop items, choose files or clipboard content, and share multiple screenshots together | [Quick AirDrop](docs/quick-airdrop.md) |
+| Screenshot storage | Move automatically collected screenshots into TopLet's dedicated folder; choose manual removal, cleanup after 24 hours, or cleanup after a successful drag; manual import is also supported | [Storage and retention](docs/screenshot-shelf.md#保存与收集范围) |
+| Quick AirDrop | Automatically reveal AirDrop when dragging files toward TopLet at the top; AirDrop tab inside File Shelf, beside Screenshots and Files; drop items, choose files or clipboard content, and share multiple screenshots together | [Quick AirDrop](docs/quick-airdrop.md) |
 | Football and F1 | Football schedules, scores, and followed teams; F1 calendar, results, positions, lap counts, followed drivers/constructors, and notch activity cards | [Sports / F1](docs/community-sports.md) |
 | Stock watchlist | AAPL, MSFT, and NVDA by default, with search, add/remove controls, quotes, historical charts, and notch widgets | [Stocks / Finance](docs/community-finance-and-appearance.md) |
 | In-app updates | Signed GitHub update channel with optional background preparation, byte/speed progress, and incremental updates from compatible builds | [App updates](docs/app-updates.md) |
 | App language | Follow System (default), English, or Simplified Chinese; changes apply immediately and persist across launches | [Language settings](docs/app-language.md) |
 | Appearance and glass | Follow the system or choose light/dark mode; expanded top bar and panel support Match Panel, Liquid Glass, White, and Black; Sports/Stocks show the panel material underneath | [Panel materials](docs/panel-surface.md) |
-| Silent Bluetooth alerts | Sapphire's Bluetooth connect/disconnect sounds are off by default, with a settings toggle | [Bluetooth sounds](docs/community-finance-and-appearance.md#蓝牙连接静音) |
+| Silent Bluetooth alerts | TopLet's Bluetooth connect/disconnect sounds are off by default, with a settings toggle | [Bluetooth sounds](docs/community-finance-and-appearance.md#蓝牙连接静音) |
 | Lock screen privacy | Hide the interface, prevent reopening, and pause screenshot/clipboard collection when locked or switching user sessions; do not collect missed locked-session content after unlocking | [Session privacy](docs/session-privacy.md) |
 | Display switching | Keep the settings window and expanded notch within the available screen after switching displays; scroll overflowing content | [Window and notch sizing](docs/window-fit.md) |
 | External display line | Click the line from the screen's top edge; retain the original curved transition when expanded; match Liquid Glass tone to the wallpaper or choose light/dark glass | [External display appearance](docs/external-display-bar.md) |
@@ -38,10 +40,14 @@ These personal changes are relative to upstream commit [`2e8085676209cbbb424bc60
 
 Open **File Shelf → Screenshots** for screenshots, and use its gear menu to change retention. Configure Sports, Finance, and Appearance in their respective settings pages.
 
+## Name and upgrade compatibility
+
+Version 0.1.8 introduces the **TopLet** name and `TopLet.app` download. The repository URL, bundle identifier, settings/storage keys, custom URL schemes and Sparkle signing identity remain unchanged so existing Sapphire Personal installations can update and keep their data. Sparkle updates the existing application in place: the physical Finder filename may remain `Sapphire.app`, while the app identifies itself as TopLet. The legacy filename does not mean it is still the old version. External Sapphire companion products and original copyright notices keep their names. See [rename details](docs/toplet-branding.md).
+
 ## Current version and supported scope
 
-- The current source build is labeled **Capture & Share 17** (version **0.1.7**, build **17**). A complete local app build and signature verification have been completed.
-- Personal development takes place on **`codex/personal-notched-tools`**. `main` retains the upstream state from the fork; this branch is based on the commit above and has not merged the later upstream macOS 27 charging-limit changes.
+- The current source build is labeled **TopLet 18** (version **0.1.8**, build **18**). A complete local app build and signature verification have been completed.
+- The default development branch is **`codex/personal-notched-tools`**. `main` retains the upstream state from the fork; this branch is based on the commit above and has not merged the later upstream macOS 27 charging-limit changes.
 - The minimum deployment target is macOS 14. Complete builds and local packages have been verified on Apple Silicon (arm64); Intel hardware and other macOS versions have not been fully validated.
 - Upstream paid modules whose source is not public continue to use public placeholders or compatibility implementations. The independently implemented Sports/Finance features do not require those private modules and do not connect or sync with Apple Sports/Stocks accounts.
 - This is a personal experimental project. Regression checks are included, but they do not cover every device, permission state, or interaction. Implementation and validation notes are in `docs/`.
@@ -63,7 +69,7 @@ bash Tools/build-sapphire-public.sh
 Build output:
 
 ```text
-output/public-build/Build/Products/Debug/Sapphire.app
+output/public-build/Build/Products/Debug/TopLet.app
 ```
 
 The script generates an isolated Xcode project in `output/` for the current toolchain, preserves the original project, uses the repository's dependency lockfile, and ad-hoc signs and verifies the local build. Build output, caches, and local configuration are excluded from Git.

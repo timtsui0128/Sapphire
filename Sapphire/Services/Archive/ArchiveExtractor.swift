@@ -195,7 +195,7 @@ final class ArchiveExtractor: ObservableObject {
                 for: url,
                 preferredBundleIdentifiers: Self.systemArchiveHandlers
             ) else {
-                Task { await notify(title: "Sapphire Archives", body: "No other app can open \(url.lastPathComponent). Turn on Auto-Extract Archives to let Sapphire extract it.") }
+                Task { await notify(title: "TopLet Archives", body: "No other app can open \(url.lastPathComponent). Turn on Auto-Extract Archives to let Sapphire extract it.") }
                 continue
             }
             NSWorkspace.shared.open([url], withApplicationAt: app, configuration: NSWorkspace.OpenConfiguration()) { _, _ in }
@@ -227,7 +227,7 @@ final class ArchiveExtractor: ObservableObject {
         await requestNotificationAuthorizationIfNeeded()
 
         guard FileManager.default.fileExists(atPath: url.path) else {
-            await notify(title: "Sapphire Archives", body: "\(archiveName) could not be found.")
+            await notify(title: "TopLet Archives", body: "\(archiveName) could not be found.")
             return
         }
 
@@ -241,7 +241,7 @@ final class ArchiveExtractor: ObservableObject {
 
         if let listing, Self.hasUnsafeEntry(listing) {
             await notify(
-                title: "Sapphire Archives",
+                title: "TopLet Archives",
                 body: "\(archiveName) was not extracted: it contains entries that would be written outside the destination folder."
             )
             return
@@ -264,7 +264,7 @@ final class ArchiveExtractor: ObservableObject {
             appropriateFor: parent,
             create: true
         ) else {
-            await notify(title: "Sapphire Archives", body: "Could not prepare a temporary folder to extract \(archiveName).")
+            await notify(title: "TopLet Archives", body: "Could not prepare a temporary folder to extract \(archiveName).")
             return
         }
         defer {
@@ -289,7 +289,7 @@ final class ArchiveExtractor: ObservableObject {
                 let configuration = NSWorkspace.OpenConfiguration()
                 _ = try await NSWorkspace.shared.open([url], withApplicationAt: utility, configuration: configuration)
             } catch {
-                await notify(title: "Sapphire Archives", body: "Open this password-protected archive in Archive Utility to extract it securely.")
+                await notify(title: "TopLet Archives", body: "Open this password-protected archive in Archive Utility to extract it securely.")
             }
             return
         }
@@ -297,7 +297,7 @@ final class ArchiveExtractor: ObservableObject {
         guard result.success else {
             currentTransferTask = nil
             await notify(
-                title: "Sapphire Archives",
+                title: "TopLet Archives",
                 body: "Could not extract \(archiveName). It may be damaged, unsupported, or password protected."
             )
             return
@@ -317,7 +317,7 @@ final class ArchiveExtractor: ObservableObject {
             }.value
         } catch {
             currentTransferTask = nil
-            await notify(title: "Sapphire Archives", body: "Could not move the extracted files of \(archiveName) into \(parent.lastPathComponent).")
+            await notify(title: "TopLet Archives", body: "Could not move the extracted files of \(archiveName) into \(parent.lastPathComponent).")
             return
         }
 
@@ -338,7 +338,7 @@ final class ArchiveExtractor: ObservableObject {
             break
         }
 
-        await notify(title: "Sapphire Archives", body: "\(archiveName) extracted successfully.")
+        await notify(title: "TopLet Archives", body: "\(archiveName) extracted successfully.")
     }
 
     // MARK: - Placement

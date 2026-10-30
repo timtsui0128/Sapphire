@@ -3901,16 +3901,16 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .appActivities: "Live activities and controls for Zoom, Google Meet, Teams, Slack, Discord, FaceTime, recorders and more."
         case .fileProgress: "Download, copy and AirDrop progress per app — Safari, Chrome, Edge, Firefox, Finder and others."
         case .appearance: "Tune the notch look, materials, colors, and layout styling."
-        case .lockScreen: "Sapphire stays hidden and unavailable while your Mac is locked."
+        case .lockScreen: "TopLet stays hidden and unavailable while your Mac is locked."
         case .bluetoothUnlock: "Set up proximity-based authentication and trusted device behavior."
-        case .shortcuts: "Manage quick actions and shortcut surfaces shown in Sapphire."
-        case .keyboardShortcuts: "Reference page listing every keyboard shortcut in Sapphire — global hotkeys, snap zones, and in-app shortcuts."
+        case .shortcuts: "Manage quick actions and shortcut surfaces shown in TopLet."
+        case .keyboardShortcuts: "Reference page listing every keyboard shortcut in TopLet — global hotkeys, snap zones, and in-app shortcuts."
         case .snapZones: "Configure window snapping behavior, layouts, and zone actions."
         case .audio: "Audio adjustments, EQ, and per-app volume adjustments."
         case .battery: "Battery widgets, history, charging preferences, and power-related controls."
         case .bluetooth: "Bluetooth device integrations, visibility, and connection behavior."
         case .hud: "Heads-up display overlays for volume, brightness, keyboard, and media feedback."
-        case .notifications: "Choose which system notifications Sapphire mirrors or enhances."
+        case .notifications: "Choose which system notifications TopLet mirrors or enhances."
         case .nearbyShare: "Nearby sharing preferences, transfers, and device discovery options."
         case .continuity: "Pair an Android phone for clipboard, notifications, media, battery, and Instant Hotspot."
         case .fileShelf: "Manage temporary file storage, drag targets, and shelf behavior."
@@ -3935,7 +3935,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .dockLayouts: "Save Dock layouts as presets and switch between them with a click or hotkey."
         case .mediaOptimizer: "Automatically shrink images, compress media, and extract text with OCR."
 
-        case .about: "App version details, Sapphire updates, release channels, credits, links, and project information."
+        case .about: "App version details, TopLet updates, release channels, credits, links, and project information."
         }
     }
 

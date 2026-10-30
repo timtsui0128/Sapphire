@@ -116,6 +116,22 @@ with tempfile.TemporaryDirectory() as temp:
         (directory / "release.json").write_text(json.dumps(receipt))
     with patch.object(release, "ROOT", root):
         assert [base["build"] for base in release.delta_bases("15", "fixture-key")] == ["14", "13"]
+        assert all(base["app_bundle_name"] == "Sapphire.app" for base in release.delta_bases("15", "fixture-key"))
+        receipt_path = root / "output/releases/personal-v0.1.14/release.json"
+        renamed = json.loads(receipt_path.read_text())
+        renamed["app_bundle_name"] = "TopLet.app"
+        receipt_path.write_text(json.dumps(renamed))
+        assert [base["app_bundle_name"] for base in release.delta_bases("15", "fixture-key")] == ["TopLet.app", "Sapphire.app"]
+        renamed["app_bundle_name"] = "../Other.app"
+        receipt_path.write_text(json.dumps(renamed))
+        try:
+            release.delta_bases("15", "fixture-key")
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("An unsafe baseline bundle path was accepted")
+        renamed["app_bundle_name"] = "TopLet.app"
+        receipt_path.write_text(json.dumps(renamed))
         assert release.delta_bases("12", "fixture-key") == [], "ZIP-only clients must not receive deltas"
         assert release.delta_bases("15", "different-key") == []
         (root / "output/releases/personal-v0.1.14/Sapphire.zip").write_bytes(b"changed")
@@ -126,3 +142,4 @@ with tempfile.TemporaryDirectory() as temp:
         else:
             raise AssertionError("A rebuilt/tampered baseline was accepted")
     print("PASS: delta baselines exclude ZIP-only builds, select the latest two compatible releases, and reject changed bytes")
+    print("PASS: renamed TopLet bundles and legacy Sapphire receipts coexist; unsafe baseline bundle paths are rejected")

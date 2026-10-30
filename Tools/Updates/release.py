@@ -24,6 +24,7 @@ TOOLS = ROOT / "output/updater-tools"
 FEED = f"https://github.com/{CONFIG['repository']}/releases/latest/download/appcast.xml"
 NS = {"s": "http://www.andymatuschak.org/xml-namespaces/sparkle"}
 MAXIMUM_DELTA_BASES = 2
+APP_BUNDLE_NAME = "TopLet.app"
 
 
 def run(args, **kwargs):
@@ -104,7 +105,13 @@ def delta_bases(build, public_key):
         archive = directory / name
         if not name.endswith(".zip") or sha256(archive) != old["assets"][name]["sha256"]:
             raise RuntimeError("A previous distributed archive changed; cannot generate a delta")
-        bases.append({"build": str(old["build"]), "archive": archive, "directory": directory})
+        # Before 0.1.8 this channel shipped Sapphire.app. Keep those exact signed
+        # archives as baselines; rebuilding or renaming them invalidates deltas.
+        bundle_name = old.get("app_bundle_name", "Sapphire.app")
+        if bundle_name not in {"Sapphire.app", APP_BUNDLE_NAME}:
+            raise RuntimeError("Unrecognized app bundle in a delta baseline")
+        bases.append({"build": str(old["build"]), "archive": archive, "directory": directory,
+                      "app_bundle_name": bundle_name})
     return bases
 
 
@@ -145,13 +152,14 @@ def prepare(args):
     env["SAPPHIRE_BUILD_NUMBER"] = args.build
     env.setdefault("SAPPHIRE_PACKAGE_CACHE", str(ROOT / "output/language-package-cache"))
     run(["bash", "Tools/build-sapphire-public.sh"], env=env)
-    app = ROOT / "output/public-build/Build/Products/Debug/Sapphire.app"
+    app = ROOT / "output/public-build/Build/Products/Debug" / APP_BUNDLE_NAME
     info = plistlib.loads((app / "Contents/Info.plist").read_bytes())
     expected = {"CFBundleShortVersionString": args.version, "CFBundleVersion": args.build,
                 "SUFeedURL": FEED, "SUPublicEDKey": public_key,
                 "SUVerifyUpdateBeforeExtraction": True, "SURequireSignedFeed": True,
                 "SUSignedFeedFailureExpirationInterval": 0,
-                "CFBundleIdentifier": "com.cshariq.sapphire"}
+                "CFBundleIdentifier": "com.cshariq.sapphire",
+                "CFBundleName": "TopLet", "CFBundleDisplayName": "TopLet"}
     if any(info.get(k) != v for k, v in expected.items()):
         raise RuntimeError("Built app metadata does not match the requested signed update channel")
     run(["codesign", "--verify", "--deep", "--strict", app])
@@ -165,7 +173,7 @@ def prepare(args):
     if architectures != "arm64":
         raise RuntimeError("This personal release channel currently supports arm64 only")
     destination.mkdir(parents=True)
-    archive = destination / f"Sapphire-{args.version}-arm64.zip"
+    archive = destination / f"TopLet-{args.version}-arm64.zip"
     run(["/usr/bin/ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", app, archive])
     # Inline plain-text notes remain covered by the appcast signature.
     archive.with_suffix(".txt").write_text(note_text)
@@ -199,21 +207,23 @@ def prepare(args):
         with tempfile.TemporaryDirectory(prefix="SapphireDeltaCheck-") as scratch:
             old = Path(scratch) / "old"
             run(["ditto", "-x", "-k", baseline["archive"], old])
-            patched = Path(scratch) / "Sapphire.app"
-            run([binaries / "BinaryDelta", "apply", old / "Sapphire.app", patched, path])
+            patched = Path(scratch) / APP_BUNDLE_NAME
+            run([binaries / "BinaryDelta", "apply", old / baseline["app_bundle_name"], patched, path])
             run(["codesign", "--verify", "--deep", "--strict", patched])
-            if plistlib.loads((patched / "Contents/Info.plist").read_bytes())["CFBundleVersion"] != args.build:
+            patched_info = plistlib.loads((patched / "Contents/Info.plist").read_bytes())
+            if any(patched_info.get(k) != v for k, v in expected.items()):
                 raise RuntimeError("Applied delta produced the wrong application version")
         deltas.append(path)
     (destination / "release-notes.md").write_text(
         note_text + f"\n\nSource: https://github.com/{CONFIG['repository']}/commit/{commit}\n"
-        "\nUnofficial personal fork of cshariq/Sapphire by Shariq Charolia. GNU AGPLv3.\n"
+        "\nTopLet is an unofficial personal fork of cshariq/Sapphire by Shariq Charolia. GNU AGPLv3.\n"
         "Apple Silicon / macOS 14+. Locally ad-hoc signed; not Apple notarized.\n")
     checksum = destination / "SHA256SUMS.txt"
     checksum.write_text("".join(f"{sha256(p)}  {p.name}\n" for p in [archive, *deltas, feed]))
     assets = [archive, *deltas, feed, checksum]
     receipt = {"tag": tag, "version": args.version, "build": args.build, "commit": commit,
                "repository": CONFIG["repository"], "public_key": public_key,
+               "app_bundle_name": APP_BUNDLE_NAME,
                "supports_delta_updates": True, "delta_bases": [base["build"] for base in bases],
                "assets": {p.name: {"sha256": sha256(p), "size": p.stat().st_size} for p in assets}}
     (destination / "release.json").write_text(json.dumps(receipt, indent=2) + "\n")
@@ -267,7 +277,7 @@ def publish(args):
                         raise RuntimeError("A new release must have a larger build number")
     if pending_draft is None:
         gh(["release", "create", receipt["tag"], *assets, "--repo", CONFIG["repository"],
-            "--target", receipt["commit"], "--title", f"Sapphire Personal {receipt['version']}",
+            "--target", receipt["commit"], "--title", f"TopLet {receipt['version']}",
             "--notes-file", directory / "release-notes.md", "--draft"])
     # A draft's Git tag may not exist until publication. Resolve its release ID
     # from the authenticated listing, rather than GET /releases/tags/{tag}.

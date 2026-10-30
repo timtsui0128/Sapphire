@@ -220,9 +220,9 @@ final class SnappingManager {
         switch failure {
         case .permission:
             if #available(macOS 27.0, *) {
-                message = "Allow Sapphire in System Settings → Privacy & Security → Device Control and Data Access to move and resize windows. If it is already enabled after an update, remove the old entry and add the Sapphire app you are currently using."
+                message = "Allow TopLet in System Settings → Privacy & Security → Device Control and Data Access to move and resize windows. If it is already enabled after an update, remove the old entry and add the TopLet app you are currently using."
             } else {
-                message = "Allow Sapphire in System Settings → Privacy & Security → Accessibility to move and resize windows. If it is already enabled after an update, remove the old entry and add the Sapphire app you are currently using."
+                message = "Allow TopLet in System Settings → Privacy & Security → Accessibility to move and resize windows. If it is already enabled after an update, remove the old entry and add the TopLet app you are currently using."
             }
         case .windowUnavailable:
             message = "The dragged window is no longer available. Drag a normal application window to a layout and try again."

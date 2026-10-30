@@ -62,13 +62,17 @@ with tempfile.TemporaryDirectory(prefix="SapphireUpdateTests-") as temp:
     origin = f"http://127.0.0.1:{server.server_port}"
     results = []
     try:
-        for mode in ["install", "automatic", "quit", "cancel", "lock", "bad-archive", "bad-feed", "delta", "delta-fallback"]:
+        modes = ["install", "automatic", "quit", "cancel", "lock", "bad-archive", "bad-feed", "delta", "delta-fallback", "rename"]
+        if os.environ.get("TOPLET_UPDATE_TEST_MODE"):
+            modes = [os.environ["TOPLET_UPDATE_TEST_MODE"]]
+            assert modes[0] in {"install", "automatic", "quit", "cancel", "lock", "bad-archive", "bad-feed", "delta", "delta-fallback", "rename"}
+        for mode in modes:
             case = root / mode
             downloads = case / "downloads"
             downloads.mkdir(parents=True)
             result = case / "result.json"
-            app = case / "installed/UpdateCheck.app"
-            candidate = case / "candidate/UpdateCheck.app"
+            app = case / "installed" / ("Sapphire.app" if mode == "rename" else "UpdateCheck.app")
+            candidate = case / "candidate" / ("TopLet.app" if mode == "rename" else "UpdateCheck.app")
             payload = secrets.token_bytes(1024 * 1024) if mode.startswith("delta") else None
             for bundle, build in [(app, "1"), (candidate, "2")]:
                 (bundle / "Contents/MacOS").mkdir(parents=True)
@@ -76,10 +80,12 @@ with tempfile.TemporaryDirectory(prefix="SapphireUpdateTests-") as temp:
                 if payload is not None:
                     (bundle / "Contents/Resources").mkdir()
                     (bundle / "Contents/Resources/unchanged-fixture.bin").write_bytes(payload)
-                shutil.copy2(executable, bundle / "Contents/MacOS/UpdateHarness")
+                executable_name = "TopLetFixture" if mode == "rename" and build == "2" else "UpdateHarness"
+                shutil.copy2(executable, bundle / "Contents/MacOS" / executable_name)
                 shutil.copytree(framework, bundle / "Contents/Frameworks/Sparkle.framework", symlinks=True)
                 info = {"CFBundleIdentifier": f"local.sapphire.update-tests.{mode}.{secrets.token_hex(4)}" if build == "1" else bundle_id,
-                        "CFBundleName": "UpdateCheck", "CFBundleExecutable": "UpdateHarness", "CFBundlePackageType": "APPL",
+                        "CFBundleName": bundle.stem, "CFBundleDisplayName": bundle.stem,
+                        "CFBundleExecutable": executable_name, "CFBundlePackageType": "APPL",
                         "CFBundleVersion": build, "CFBundleShortVersionString": f"0.{build}.0", "LSUIElement": True,
                         "LSMinimumSystemVersion": "14.0", "SUFeedURL": f"{origin}/{mode}/downloads/appcast.xml",
                         "SUPublicEDKey": public_key, "SUVerifyUpdateBeforeExtraction": True,
@@ -119,7 +125,7 @@ with tempfile.TemporaryDirectory(prefix="SapphireUpdateTests-") as temp:
             with (case / "process.log").open("w") as log:
                 process = subprocess.Popen([str(app / "Contents/MacOS/UpdateHarness")], stdout=log, stderr=log)
                 deadline = time.monotonic() + 65
-                expected = "relaunched" if mode in {"install", "automatic", "delta", "delta-fallback"} else "rejected" if mode.startswith("bad-") else "cancelled"
+                expected = "relaunched" if mode in {"install", "automatic", "delta", "delta-fallback", "rename"} else "rejected" if mode.startswith("bad-") else "cancelled"
                 data = {}
                 while time.monotonic() < deadline:
                     if result.exists():
@@ -139,7 +145,12 @@ with tempfile.TemporaryDirectory(prefix="SapphireUpdateTests-") as temp:
             if data.get("state") != expected:
                 raise AssertionError(f"{mode}: {data}\n{(case / 'process.log').read_text()[-10000:]}")
             installed_info = plistlib.loads((app / "Contents/Info.plist").read_bytes())
-            assert installed_info["CFBundleVersion"] == ("2" if mode in {"install", "automatic", "quit", "delta", "delta-fallback"} else "1")
+            assert installed_info["CFBundleVersion"] == ("2" if mode in {"install", "automatic", "quit", "delta", "delta-fallback", "rename"} else "1")
+            if mode == "rename":
+                assert installed_info["CFBundleName"] == installed_info["CFBundleDisplayName"] == "TopLet"
+                assert installed_info["CFBundleExecutable"] == "TopLetFixture"
+                assert app.name == "Sapphire.app" and not (app.parent / "TopLet.app").exists()
+                print("PASS: renamed bundle/executable installs in place, relaunches under TopLet, and retains existing preferences")
             if payload is not None:
                 requested = [path for path in QuietHandler.requests if path.startswith(f"/{mode}/downloads/")]
                 assert any(path.endswith(".delta") for path in requested), requested

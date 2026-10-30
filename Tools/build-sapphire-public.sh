@@ -46,7 +46,7 @@ xcodebuild \
   ${VERSION_ARGS[@]+"${VERSION_ARGS[@]}"} \
   build
 
-APP_PATH="$BUILD_ROOT/Build/Products/Debug/Sapphire.app"
+APP_PATH="$BUILD_ROOT/Build/Products/Debug/TopLet.app"
 # Include the original license/attribution and updater notices in the distributed app.
 APP_LEGAL="$APP_PATH/Contents/Resources/Legal"
 mkdir -p "$APP_LEGAL"

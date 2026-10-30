@@ -42,9 +42,9 @@ enum HelperIssue: Equatable {
         case .spawnFailed:
             return "Permission is granted, but macOS still will not launch the helper."
         case .needsApproval:
-            return "Turn on Sapphire and Sapphire Helper in Login Items."
+            return "Turn on TopLet and Sapphire Helper in Login Items."
         case .notFound:
-            return "macOS lost the helper (status 3). Reset the helper; Sapphire will relaunch if it stays stuck."
+            return "macOS lost the helper (status 3). Reset the helper; TopLet will relaunch if it stays stuck."
         }
     }
 

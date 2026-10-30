@@ -392,7 +392,7 @@ private final class ScreenshotShelfWorker {
                 let manifest = try JSONDecoder().decode(Manifest.self, from: Data(contentsOf: manifestURL))
                 guard manifest.version == 1 else {
                     throw NSError(domain: "ScreenshotShelf", code: 1, userInfo: [
-                        NSLocalizedDescriptionKey: "This screenshot collection was saved by a newer version of Sapphire."
+                        NSLocalizedDescriptionKey: "This screenshot collection was saved by a newer version of TopLet."
                     ])
                 }
                 items = manifest.items.filter {

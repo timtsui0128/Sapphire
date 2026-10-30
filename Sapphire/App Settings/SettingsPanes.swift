@@ -1130,7 +1130,7 @@ private struct AppUninstallReviewSheet: View {
                                             if artifact.requiresAuthorization {
                                                 Image(systemName: "lock.fill")
                                                     .foregroundStyle(.secondary)
-                                                    .help("Requires administrator access; Sapphire cannot remove this item")
+                                                    .help("Requires administrator access; TopLet cannot remove this item")
                                             }
                                             Text(artifact.formattedSize)
                                                 .font(.caption.monospacedDigit())
@@ -1268,7 +1268,7 @@ private struct InstalledAppUpdateRowView: View {
                         }
                     }
                     if checker.buttonLabel(for: entry) == "Open App" {
-                        Text("Uses its own signed updater — Sapphire will open the app.")
+                        Text("Uses its own signed updater — TopLet will open the app.")
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
                     }
@@ -1652,16 +1652,16 @@ struct GeneralSettingsView: View {
 
                 SettingsCard(title: "System") {
 
-                    ToggleRow(title: "Launch at Login", description: "Start Sapphire automatically when you log in to your Mac.", isOn: $settings.settings.launchAtLogin)
+                    ToggleRow(title: "Launch at Login", description: "Start TopLet automatically when you log in to your Mac.", isOn: $settings.settings.launchAtLogin)
                     Divider().padding(.leading, 20)
 
                     ToggleRow(title: "Enable Haptic Feedback", description: "Provide tactile feedback for certain interactions.", isOn: $settings.settings.hapticFeedbackEnabled)
                     Divider().padding(.leading, 20)
 
-                    ToggleRow(title: "Hide from Screen Sharing", description: "Never include Sapphire in screen sharing, screenshots, or screen recordings.", isOn: $settings.settings.hideFromScreenSharing)
+                    ToggleRow(title: "Hide from Screen Sharing", description: "Never include TopLet in screen sharing, screenshots, or screen recordings.", isOn: $settings.settings.hideFromScreenSharing)
                     Divider().padding(.leading, 20)
 
-                    ToggleRow(title: "Google Analytics", description: "Send anonymous usage events to Google to help improve Sapphire. Disable this to opt out of analytics collection.", isOn: $settings.settings.googleAnalyticsEnabled)
+                    ToggleRow(title: "Google Analytics", description: "Send anonymous usage events to Google to help improve TopLet. Disable this to opt out of analytics collection.", isOn: $settings.settings.googleAnalyticsEnabled)
                     Divider().padding(.leading, 20)
 
                     ToggleRow(
@@ -2250,7 +2250,7 @@ struct ClipboardSettingsView: View {
         VStack(alignment: .leading, spacing: 0) {
             PremiumFeatureView(feature: .clipboardPicker) {
                 VStack(alignment: .leading, spacing: 0) {
-                    SettingsSectionHeader(title: "Quick Picker", description: "Open the unified Sapphire picker right where you're typing with a global shortcut. Selecting a clipboard item copies it and pastes it at the cursor; the Emoji tab types emoji directly. (The emoji shortcut opens the same panel on its Emoji tab.)")
+                    SettingsSectionHeader(title: "Quick Picker", description: "Open the unified TopLet picker right where you're typing with a global shortcut. Selecting a clipboard item copies it and pastes it at the cursor; the Emoji tab types emoji directly. (The emoji shortcut opens the same panel on its Emoji tab.)")
 
                     ToggleRow(
                         title: "Enable Quick Picker",
@@ -2357,7 +2357,7 @@ struct ClipboardSettingsView: View {
 
                     ToggleRow(
                         title: "Monitor Clipboard",
-                        description: "Continuously capture newly copied text and images into Sapphire history.",
+                        description: "Continuously capture newly copied text and images into TopLet history.",
                         isOn: $settings.settings.clipboardMonitoringEnabled
                     )
                     .onChange(of: settings.settings.clipboardMonitoringEnabled) { _, enabled in
@@ -2590,7 +2590,7 @@ struct ClipboardSettingsView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     PremiumFeatureView(feature: .clipboardAdvancedTools) {
                         VStack(alignment: .leading, spacing: 0) {
-                            SettingsSectionHeader(title: "Text Snippets", description: "Type a short trigger anywhere and it becomes your text. Use \"{{date}}\", \"{{time}}\", \"{{date:MMMM d}}\" or \"{{clipboard}}\" in the replacement. Sapphire never expands while you type inside Sapphire itself.")
+                            SettingsSectionHeader(title: "Text Snippets", description: "Type a short trigger anywhere and it becomes your text. Use \"{{date}}\", \"{{time}}\", \"{{date:MMMM d}}\" or \"{{clipboard}}\" in the replacement. TopLet never expands while you type inside TopLet itself.")
 
                             ToggleRow(
                                 title: "Enable Text Snippets",
@@ -2750,7 +2750,7 @@ struct CaffeineSettingsView: View {
 
                     ToggleRow(
                         title: "Prevent Sleep in Clamshell Mode",
-                        description: "Keep your Mac awake while Sapphire's caffeinate mode is active, even with the lid closed.",
+                        description: "Keep your Mac awake while TopLet's caffeinate mode is active, even with the lid closed.",
                         isOn: $settings.settings.sleepInClamshell
                     )
 
@@ -2838,7 +2838,7 @@ struct WidgetsSettingsView: View {
                     ToggleRow(title: "Show Dividers Between Widgets", description: "Display a subtle line separating each widget.", isOn: $settings.settings.showDividersBetweenWidgets)
                     ToggleRow(
                         title: "Ignore Widget Space Limit",
-                        description: "Allow any widget to be enabled even when Sapphire estimates there is not enough notch space.",
+                        description: "Allow any widget to be enabled even when TopLet estimates there is not enough notch space.",
                         isOn: $settings.settings.bypassWidgetSpaceLimit
                     )
                 }
@@ -3821,9 +3821,9 @@ struct LockScreenSettingsView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Hidden while your Mac is locked")
                             .font(.headline)
-                        Text("Sapphire hides its windows, notch, widgets, and overlays on the lock screen. Its interface cannot be opened or interacted with until you unlock your Mac.")
+                        Text("TopLet hides its windows, notch, widgets, and overlays on the lock screen. Its interface cannot be opened or interacted with until you unlock your Mac.")
                             .foregroundStyle(.secondary)
-                        Text("Your usual Sapphire interface becomes available again after you unlock.")
+                        Text("Your usual TopLet interface becomes available again after you unlock.")
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -5955,7 +5955,7 @@ struct FanControlSectionView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("No fans detected on this system.")
                         .foregroundColor(.secondary)
-                    Text("Fanless Macs (some MacBook Air models) will show this permanently. Otherwise, ensure the Sapphire helper is installed and retry.")
+                    Text("Fanless Macs (some MacBook Air models) will show this permanently. Otherwise, ensure the TopLet helper is installed and retry.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Button("Retry Detection") {
@@ -5973,7 +5973,7 @@ struct FanControlSectionView: View {
                 }
                 if fanManager.hasNonAutomaticFans {
                     HStack {
-                        Text("Fans return to automatic when Sapphire quits.")
+                        Text("Fans return to automatic when TopLet quits.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Spacer()
@@ -6202,7 +6202,7 @@ private struct FanCurveEditorView: View {
                 .buttonStyle(.borderless)
             }
 
-            Text("Set RPM at each temperature. Sapphire interpolates between points.")
+            Text("Set RPM at each temperature. TopLet interpolates between points.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -7977,7 +7977,7 @@ struct BatteryConfigurationView: View {
             Text("Battery Management Features").font(.headline).padding([.top, .horizontal])
             if ProcessInfo.processInfo.operatingSystemVersion.majorVersion >= 27 {
                 InfoContainer(
-                    text: "Due to changes on macOS 27 charge limiting may not work for some users. If a limit is set, Sapphire will fallback to adapter mode (which cuts power from the adapter) when the limit is reach in order to enforce it. This method is under beta and may not always work, especially when the device is asleep.",
+                    text: "Due to changes on macOS 27 charge limiting may not work for some users. If a limit is set, TopLet will fallback to adapter mode (which cuts power from the adapter) when the limit is reach in order to enforce it. This method is under beta and may not always work, especially when the device is asleep.",
                     iconName: "exclamationmark.triangle.fill",
                     color: .orange
                 )
@@ -8032,7 +8032,7 @@ struct BatteryConfigurationView: View {
                 CustomSliderRowView(label: "Log every", value: Binding(get: { Double(settings.settings.sleepLoggingIntervalMinutes) }, set: { settings.settings.sleepLoggingIntervalMinutes = Int($0) }), range: 15...120, specifier: "%.0f min")
             }
             Divider().padding(.leading, 20)
-            ToggleRow(title: "Stop charging when app closed", description: "The helper tool ensures your charging rules are still applied even if the Sapphire app isn't running.", isOn: .constant(true)).disabled(true)
+            ToggleRow(title: "Stop charging when app closed", description: "The helper tool ensures your charging rules are still applied even if the TopLet app isn't running.", isOn: .constant(true)).disabled(true)
             Divider().padding(.leading, 20)
             ToggleRow(title: "Disable Sleep until Charge Limit", description: "Keeps your Mac awake to ensure it reaches the charge limit, useful for 'top-up' schedules before you need to leave.", isOn: $settings.settings.disableSleepUntilChargeLimit)
         }.modifier(SettingsContainerModifier())
@@ -8948,7 +8948,7 @@ struct MusicSettingsView: View {
                     switch settings.settings.spotifyAPIMode {
                     case .privateAPI:
                         InfoContainer(text: "WARNING: This method uses Spotify’s internal APIs to unlock standard and additional features for both Premium and non-Premium users. Use at your own risk, usage may be subject to Spotify’s Terms of Service.", iconName: "exclamationmark.triangle.fill", color: .yellow).padding(.horizontal)
-                        InfoContainer(text: "Sapphire is a Connect controller only, audio always plays on the Spotify desktop app or another speaker.", iconName: "hifispeaker", color: .blue).padding(.horizontal)
+                        InfoContainer(text: "TopLet is a Connect controller only, audio always plays on the Spotify desktop app or another speaker.", iconName: "hifispeaker", color: .blue).padding(.horizontal)
                         if isOfficialAuth {
                             Text("You are also signed in with the Official API.").font(.caption).foregroundColor(.secondary).padding(.horizontal)
                         }
@@ -10311,7 +10311,8 @@ struct AboutSettingsView: View {
                         .onTapGesture { handleDebugIconTap() }
                         .help(debugMode.isEnabled ? "Debug mode is ON — tap 5× quickly to disable" : "Tap 5× quickly to enable debug mode")
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Sapphire").font(.largeTitle.weight(.bold))
+                        Text("TopLet").font(.largeTitle.weight(.bold))
+                        Text("Your Mac, one drop away.").font(.subheadline).foregroundStyle(.secondary)
                         Text(versionLabel).foregroundStyle(.secondary).textSelection(.enabled)
 
                         if debugMode.isEnabled {
@@ -10320,43 +10321,11 @@ struct AboutSettingsView: View {
                                 .foregroundStyle(.orange)
                         }
 
-                        HStack(spacing: 10) {
-                            Link(destination: URL(string: "https://sapphire-app.tech/")!) {
-                                Image(systemName: "link")
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(width: 18, height: 18)
-                                    .foregroundColor(.white)
-                                    .padding(6)
-                                    .background(Color.blue)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            }
-                            .buttonStyle(PlainButtonStyle())
-
-                            Link(destination: URL(string: "https://github.com/cshariq/Sapphire")!) {
-                                Image("github_logo")
-                                    .resizable()
-                                    .renderingMode(.template)
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(width: 18, height: 18)
-                                    .foregroundColor(.white)
-                                    .padding(6)
-                                    .background(Color.black)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            }
-                            .buttonStyle(PlainButtonStyle())
-
-                            Link(destination: URL(string: "https://discord.gg/TdRjC2kNnU")!) {
-                                Image("discord_logo")
-                                    .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                    .frame(width: 18, height: 18)
-                                    .padding(6)
-                                    .background(Color(red: 0.35, green: 0.40, blue: 0.95))
-                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            }
-                            .buttonStyle(PlainButtonStyle())
+                        VStack(alignment: .leading, spacing: 6) {
+                            Link("TopLet source and releases", destination: URL(string: "https://github.com/timtsui0128/Sapphire")!)
+                            Link("Original Sapphire project", destination: URL(string: "https://github.com/cshariq/Sapphire")!)
                         }
+                        .font(.caption)
                         .padding(.top, 6)
                     }
                     Spacer()
@@ -10374,7 +10343,17 @@ struct AboutSettingsView: View {
                     }
                 }.modifier(SettingsContainerModifier()).onAppear(perform: permissionsManager.checkAllPermissions)
 
-                Text("© 2025 Shariq Charolia. All rights reserved.").font(.caption).foregroundStyle(.tertiary).frame(maxWidth: .infinity, alignment: .center).padding(.top, 20)
+                VStack(spacing: 6) {
+                    Text("Maintained by Ho Tim Tsui (timtsui0128).")
+                    Text("Based on Sapphire by Shariq Charolia and contributors. Licensed under GNU AGPLv3.")
+                    Text("© 2025 Shariq Charolia. All rights reserved.")
+                    if let licenses = Bundle.main.resourceURL?.appendingPathComponent("Legal/CREDITS.md") {
+                        Link("Open-source licenses", destination: licenses)
+                    }
+                }
+                .font(.caption).foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity).padding(.top, 20)
             }.padding(25).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .onAppear {
                 ReleaseChannelPolicy.reconcileStoredPreference(&settingsModel.settings.value)
@@ -10460,7 +10439,7 @@ struct AboutSettingsView: View {
                 backupStatusMessage = BackupStatusMessage(
                     icon: "arrow.counterclockwise.circle.fill",
                     color: .orange,
-                    message: "All Sapphire settings were reset to defaults."
+                    message: "All TopLet settings were reset to defaults."
                 )
             }
             Button("Cancel", role: .cancel) {}
@@ -10477,7 +10456,7 @@ struct AboutSettingsView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Settings Backup")
                         .font(.headline)
-                    Text("Save a portable copy of your Sapphire preferences or restore one you exported earlier.")
+                    Text("Save a portable copy of your TopLet preferences or restore one you exported earlier.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -10533,7 +10512,7 @@ struct AboutSettingsView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Start Fresh")
                         .font(.subheadline.weight(.medium))
-                    Text("Restore all Sapphire preferences to their defaults.")
+                    Text("Restore all TopLet preferences to their defaults.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -10621,7 +10600,7 @@ struct AboutSettingsView: View {
                     .padding([.horizontal, .top])
                 ToggleRow(
                     title: "Automatic update checks",
-                    description: "Check periodically while Sapphire is running.",
+                    description: "Check periodically while TopLet is running.",
                     isOn: $settingsModel.settings.automaticUpdateChecksEnabled
                 )
                 Divider().padding(.leading)
@@ -10636,7 +10615,7 @@ struct AboutSettingsView: View {
 #else
                 ToggleRow(
                     title: "Prepare updates automatically",
-                    description: "Download and verify in the background. Restart when ready, or install when you next quit Sapphire.",
+                    description: "Download and verify in the background. Restart when ready, or install when you next quit TopLet.",
                     isOn: Binding(get: { updateChecker.automaticallyDownloadsUpdates }, set: updateChecker.setAutomaticDownloadsEnabled)
                 )
                 .disabled(!settingsModel.settings.automaticUpdateChecksEnabled)
@@ -10645,7 +10624,7 @@ struct AboutSettingsView: View {
                 Divider().padding(.leading)
                 ToggleRow(
                     title: "Update notifications",
-                    description: "Notify you when a verified Sapphire release is ready.",
+                    description: "Notify you when a verified TopLet release is ready.",
                     isOn: $settingsModel.settings.updateAvailableNotificationsEnabled
                 )
                 .disabled(!settingsModel.settings.automaticUpdateChecksEnabled)
@@ -10653,7 +10632,7 @@ struct AboutSettingsView: View {
                 Divider().padding(.leading)
                 ToggleRow(
                     title: "Show update Live Activity",
-                    description: "Show an alert in the notch when a new Sapphire version is available.",
+                    description: "Show an alert in the notch when a new TopLet version is available.",
                     isOn: $settingsModel.settings.showUpdateAvailableLiveActivity
                 )
             }
@@ -10684,7 +10663,7 @@ struct AboutSettingsView: View {
     }
 
     private var backupFilename: String {
-        "Sapphire-Settings-\(Self.backupDateFormatter.string(from: .now))"
+        "TopLet-Settings-\(Self.backupDateFormatter.string(from: .now))"
     }
 }
 
@@ -10790,7 +10769,7 @@ struct ModernUpdateStatusView: View {
                     Text("Update is ready to install")
                         .font(.system(size: 16, weight: .bold))
 #if !SAPPHIRE_FULL_BUILD
-                    Text("Restart now, or the prepared update will install when you quit Sapphire.")
+                    Text("Restart now, or the prepared update will install when you quit TopLet.")
                         .font(.caption).foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
 #endif
@@ -11206,7 +11185,7 @@ struct MenuBarHidingSettingsView: View {
             if settings.settings.menuBarEnabled {
                 if ProcessInfo.processInfo.operatingSystemVersion.majorVersion >= 26 {
                     HStack(alignment: .center, spacing: 12) {
-                        InfoContainer(text: "Sapphire's menu bar icons need Sapphire to be allowed under System Settings → Menu Bar → Allow in the Menu Bar. If the control item never appears, check that switch.", iconName: "menubar.rectangle", color: .blue)
+                        InfoContainer(text: "TopLet's menu bar icons need TopLet to be allowed under System Settings → Menu Bar → Allow in the Menu Bar. If the control item never appears, check that switch.", iconName: "menubar.rectangle", color: .blue)
                         Button("Open Menu Bar Settings…") {
                             if let url = URL(string: "x-apple.systempreferences:com.apple.ControlCenter-Settings.extension") {
                                 NSWorkspace.shared.open(url)
@@ -11236,7 +11215,7 @@ struct MenuBarHidingSettingsView: View {
                 if MenuBarAgentHost.isActive && MenuBarVisibilityRestrictor.isUsable {
                     MenuBarLayoutEditorView()
                 } else if MenuBarAgentHost.isActive && MenuBarVisibilityRestrictor.isAvailable {
-                    InfoContainer(text: "Sapphire hides items with macOS's own menu bar controls only when it is installed in the Applications folder. This copy runs from elsewhere, so it falls back to stretching the divider up to the app menus.", iconName: "exclamationmark.triangle", color: .orange)
+                    InfoContainer(text: "TopLet hides items with macOS's own menu bar controls only when it is installed in the Applications folder. This copy runs from elsewhere, so it falls back to stretching the divider up to the app menus.", iconName: "exclamationmark.triangle", color: .orange)
                         .padding()
                         .modifier(SettingsContainerModifier())
                 }
@@ -13252,7 +13231,7 @@ struct FocusSessionSettingsView: View {
                     .font(.system(size: 12, weight: .semibold))
             }
             .padding(.top, 10).padding(.horizontal, 16).padding(.bottom, 6)
-            Text("Sapphire automatically uses Apple's standard Clock shortcut names (\"Start Timer\", \"Start Stopwatch\", etc.). If iCloud sync is enabled and those Clock shortcuts are present on this Mac, they run automatically during sessions.")
+            Text("TopLet automatically uses Apple's standard Clock shortcut names (\"Start Timer\", \"Start Stopwatch\", etc.). If iCloud sync is enabled and those Clock shortcuts are present on this Mac, they run automatically during sessions.")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .padding(.horizontal, 16).padding(.top, 2).padding(.bottom, 8)

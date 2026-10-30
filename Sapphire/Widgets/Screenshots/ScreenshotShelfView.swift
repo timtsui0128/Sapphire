@@ -86,7 +86,7 @@ struct ScreenshotShelfView: View {
                 .toggleStyle(.switch)
                 .controlSize(.mini)
                 .font(.caption)
-                .help("Move newly saved screenshots into Sapphire's storage folder.")
+                .help("Move newly saved screenshots into TopLet's storage folder.")
             Menu {
                 Toggle("Copy new screenshots to clipboard", isOn: $manager.automaticallyCopyNewScreenshots)
                 Divider()
@@ -106,9 +106,9 @@ struct ScreenshotShelfView: View {
                 .pickerStyle(.inline)
                 Text("Changes apply to new screenshots and imports.")
                 Divider()
-                Text("Auto-collected screenshots move into Sapphire.")
+                Text("Auto-collected screenshots move into TopLet.")
                 Text("Manually added files are copied.")
-                Button("Show Sapphire storage folder") {
+                Button("Show TopLet storage folder") {
                     NSWorkspace.shared.open(manager.storageFolderURL)
                 }
                 Divider()
@@ -140,7 +140,7 @@ struct ScreenshotShelfView: View {
                 .foregroundStyle(.secondary)
             Text("Your screenshots, ready together.")
                 .font(.subheadline.weight(.medium))
-            Text("Take a screenshot with ⇧⌘4 or ⇧⌘3 and let it save.\nSapphire moves it here, ready to select and drag together.")
+            Text("Take a screenshot with ⇧⌘4 or ⇧⌘3 and let it save.\nTopLet moves it here, ready to select and drag together.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -189,7 +189,7 @@ struct ScreenshotShelfView: View {
                 Image(systemName: "trash")
             }
             .disabled(selectedItems.isEmpty)
-            .help("Remove the selected screenshots from Sapphire storage. Originals of manually added files are kept.")
+            .help("Remove the selected screenshots from TopLet storage. Originals of manually added files are kept.")
             .accessibilityLabel("Remove selected screenshots from shelf")
 
             Spacer(minLength: 6)

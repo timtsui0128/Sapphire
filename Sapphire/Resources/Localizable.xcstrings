@@ -2840,23 +2840,6 @@
         }
       }
     },
-    "Add a symbol to follow its price in Sapphire.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add a symbol to follow its price in Sapphire."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "添加股票代码，在 Sapphire 中关注价格。"
-          }
-        }
-      }
-    },
     "Add and reorder the layouts that appear in the Multi-View widget by default.": {
       "extractionState": "manual",
       "localizations": {
@@ -3571,23 +3554,6 @@
         }
       }
     },
-    "All Sapphire settings were reset to defaults.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "All Sapphire settings were reset to defaults."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "所有 Sapphire 设置已恢复默认。"
-          }
-        }
-      }
-    },
     "All data is AES-256 encrypted": {
       "extractionState": "manual",
       "localizations": {
@@ -3737,74 +3703,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "允许以下来源的通知："
-          }
-        }
-      }
-    },
-    "Allow Sapphire to adjust scrolling, pointer acceleration, and mouse buttons system-wide.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow Sapphire to adjust scrolling, pointer acceleration, and mouse buttons system-wide."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "允许 Sapphire 在全系统调整滚动、指针加速与鼠标按键。"
-          }
-        }
-      }
-    },
-    "Allow Sapphire to detect :shortcode: patterns and show emoji suggestions as you type.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow Sapphire to detect :shortcode: patterns and show emoji suggestions as you type."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "允许 Sapphire 检测 :shortcode: 格式，并在输入时显示表情建议。"
-          }
-        }
-      }
-    },
-    "Allow Sapphire under System Settings → Privacy & Security → Media & Apple Music.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow Sapphire under System Settings → Privacy & Security → Media & Apple Music."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "请在“系统设置 → 隐私与安全性 → 媒体与 Apple Music”中允许 Sapphire。"
-          }
-        }
-      }
-    },
-    "Allow any widget to be enabled even when Sapphire estimates there is not enough notch space.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow any widget to be enabled even when Sapphire estimates there is not enough notch space."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "即使 Sapphire 判断刘海空间不足，也允许启用任意小组件。"
           }
         }
       }
@@ -4812,23 +4710,6 @@
         }
       }
     },
-    "App version details, Sapphire updates, release channels, credits, links, and project information.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "App version details, Sapphire updates, release channels, credits, links, and project information."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "应用版本、Sapphire 更新、发布渠道、致谢、链接与项目信息。"
-          }
-        }
-      }
-    },
     "App-Specific Overrides": {
       "extractionState": "manual",
       "localizations": {
@@ -4978,23 +4859,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "应用未退出。"
-          }
-        }
-      }
-    },
-    "Applies gain to Sapphire's live level meter so you can check clipping. Other apps still receive the original microphone signal.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Applies gain to Sapphire's live level meter so you can check clipping. Other apps still receive the original microphone signal."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "为 Sapphire 实时电平表增加增益，便于检查削波。其他应用仍接收原始麦克风信号。"
           }
         }
       }
@@ -5407,23 +5271,6 @@
         }
       }
     },
-    "Ask Sapphire": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ask Sapphire"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "询问 Sapphire"
-          }
-        }
-      }
-    },
     "Ask about a setting, or say what to change…": {
       "extractionState": "manual",
       "localizations": {
@@ -5454,23 +5301,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "了解各项设置、获取建议并更改常用选项。"
-          }
-        }
-      }
-    },
-    "Ask about any setting, get suggestions, or have Sapphire change things for you.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ask about any setting, get suggestions, or have Sapphire change things for you."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "了解各项设置、获取建议，或让 Sapphire 帮你调整。"
           }
         }
       }
@@ -5845,23 +5675,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "自动收集已暂停"
-          }
-        }
-      }
-    },
-    "Auto-collected screenshots move into Sapphire.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Auto-collected screenshots move into Sapphire."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "自动收集的截图会移入 Sapphire。"
           }
         }
       }
@@ -9300,23 +9113,6 @@
         }
       }
     },
-    "Choose where each app's items go. Option-click the control item to arrange them in the menu bar instead; Sapphire learns the new layout when you click it again.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose where each app's items go. Option-click the control item to arrange them in the menu bar instead; Sapphire learns the new layout when you click it again."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "选择各应用项目的归属区域。也可按住 Option 点击控制项目，在菜单栏中排列；再次点击后 Sapphire 会记住新布局。"
-          }
-        }
-      }
-    },
     "Choose which apps can appear in the music widget and media switcher. All apps, including browsers, are on by default.": {
       "extractionState": "manual",
       "localizations": {
@@ -9347,23 +9143,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择将文件拖入刘海时显示的目标位置。"
-          }
-        }
-      }
-    },
-    "Choose which system notifications Sapphire mirrors or enhances.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose which system notifications Sapphire mirrors or enhances."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "选择由 Sapphire 镜像或增强的系统通知。"
           }
         }
       }
@@ -10575,23 +10354,6 @@
         }
       }
     },
-    "Collect new screenshots into Sapphire": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Collect new screenshots into Sapphire"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "将新截图收集到 Sapphire"
-          }
-        }
-      }
-    },
     "Collect screenshots": {
       "extractionState": "manual",
       "localizations": {
@@ -11302,23 +11064,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "连续互通麦克风"
-          }
-        }
-      }
-    },
-    "Continuously capture newly copied text and images into Sapphire history.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Continuously capture newly copied text and images into Sapphire history."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "持续将新复制的文本和图片收集到 Sapphire 历史记录。"
           }
         }
       }
@@ -14893,23 +14638,6 @@
         }
       }
     },
-    "Due to changes on macOS 27 charge limiting may not work for some users. If a limit is set, Sapphire will fallback to adapter mode (which cuts power from the adapter) when the limit is reach in order to enforce it. This method is under beta and may not always work, especially when the device is asleep.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Due to changes on macOS 27 charge limiting may not work for some users. If a limit is set, Sapphire will fallback to adapter mode (which cuts power from the adapter) when the limit is reach in order to enforce it. This method is under beta and may not always work, especially when the device is asleep."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "由于 macOS 27 的变化，部分用户的充电限制可能失效。达到已设上限时，Sapphire 会尝试适配器模式，通过切断适配器供电执行限制。此方式仍在测试，尤其在设备睡眠时可能不生效。"
-          }
-        }
-      }
-    },
     "Duplicate": {
       "extractionState": "manual",
       "localizations": {
@@ -17001,23 +16729,6 @@
         }
       }
     },
-    "Explore Sapphire": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Explore Sapphire"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "探索 Sapphire"
-          }
-        }
-      }
-    },
     "Export Backup": {
       "extractionState": "manual",
       "localizations": {
@@ -17575,40 +17286,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "风扇数量：%lld"
-          }
-        }
-      }
-    },
-    "Fanless Macs (some MacBook Air models) will show this permanently. Otherwise, ensure the Sapphire helper is installed and retry.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fanless Macs (some MacBook Air models) will show this permanently. Otherwise, ensure the Sapphire helper is installed and retry."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "无风扇 Mac（部分 MacBook Air）会始终显示此状态。其他机型请确认已安装 Sapphire 辅助服务，然后重试。"
-          }
-        }
-      }
-    },
-    "Fans return to automatic when Sapphire quits.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fans return to automatic when Sapphire quits."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "退出 Sapphire 时，风扇会恢复自动控制。"
           }
         }
       }
@@ -18633,23 +18310,6 @@
         }
       }
     },
-    "Follow football and Formula 1 from Sapphire.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Follow football and Formula 1 from Sapphire."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在 Sapphire 中关注足球与 F1。"
-          }
-        }
-      }
-    },
     "Follow playback between devices": {
       "extractionState": "manual",
       "localizations": {
@@ -18680,23 +18340,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "关注球队"
-          }
-        }
-      }
-    },
-    "Follow your favorite stocks from Sapphire.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Follow your favorite stocks from Sapphire."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在 Sapphire 中关注喜爱的股票。"
           }
         }
       }
@@ -19037,23 +18680,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "可用空间阈值"
-          }
-        }
-      }
-    },
-    "Free on iPhone and Android. Drop files onto Sapphire to send them to the phone; received files land in Downloads. A Continuity Live Activity tracks progress in the notch. Local Wi-Fi is fastest, with Bluetooth fallback up to 32 MB.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Free on iPhone and Android. Drop files onto Sapphire to send them to the phone; received files land in Downloads. A Continuity Live Activity tracks progress in the notch. Local Wi-Fi is fastest, with Bluetooth fallback up to 32 MB."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iPhone 与安卓均可免费使用。将文件拖入 Sapphire 即可发送到手机，接收文件保存在下载中，刘海实时活动显示进度。优先使用本地 Wi-Fi，蓝牙备用传输最大支持 32 MB。"
           }
         }
       }
@@ -22611,23 +22237,6 @@
         }
       }
     },
-    "Join your phone's hotspot from the Sapphire menu without typing the password.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Join your phone's hotspot from the Sapphire menu without typing the password."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "从 Sapphire 菜单加入手机热点，无需输入密码。"
-          }
-        }
-      }
-    },
     "Keep ANC while talking": {
       "extractionState": "manual",
       "localizations": {
@@ -23019,23 +22628,6 @@
         }
       }
     },
-    "Keep the Sapphire notch bar visible at the top of the lock screen.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keep the Sapphire notch bar visible at the top of the lock screen."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在锁屏顶部保持显示 Sapphire 刘海顶栏。"
-          }
-        }
-      }
-    },
     "Keep the face recognition and liveness models loaded between unlocks so Face ID recognizes you from the first camera frame.": {
       "extractionState": "manual",
       "localizations": {
@@ -23104,23 +22696,6 @@
         }
       }
     },
-    "Keep your Mac awake while Sapphire's caffeinate mode is active, even with the lid closed.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keep your Mac awake while Sapphire's caffeinate mode is active, even with the lid closed."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire 保持唤醒开启时，即使合盖也不让 Mac 睡眠。"
-          }
-        }
-      }
-    },
     "Keep your Mac awake, clamshell sleep behavior, and lid-angle display controls.": {
       "extractionState": "manual",
       "localizations": {
@@ -23151,23 +22726,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在保持唤醒"
-          }
-        }
-      }
-    },
-    "Keeps the macOS floating thumbnail available for editing and sharing. Sapphire collects the file after the preview finishes and macOS saves it.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keeps the macOS floating thumbnail available for editing and sharing. Sapphire collects the file after the preview finishes and macOS saves it."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保留 macOS 浮动缩略图，方便编辑和分享。预览结束且 macOS 保存文件后，Sapphire 再收集截图。"
           }
         }
       }
@@ -25773,23 +25331,6 @@
         }
       }
     },
-    "Manage quick actions and shortcut surfaces shown in Sapphire.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Manage quick actions and shortcut surfaces shown in Sapphire."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "管理 Sapphire 中显示的快捷操作与入口。"
-          }
-        }
-      }
-    },
     "Manage temporary file storage, drag targets, and shelf behavior.": {
       "extractionState": "manual",
       "localizations": {
@@ -27320,23 +26861,6 @@
         }
       }
     },
-    "Move newly saved screenshots into Sapphire's storage folder.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Move newly saved screenshots into Sapphire's storage folder."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "将新保存的截图移入 Sapphire 专用文件夹。"
-          }
-        }
-      }
-    },
     "Move to Trash": {
       "extractionState": "manual",
       "localizations": {
@@ -27418,23 +26942,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "刘海中的多音频"
-          }
-        }
-      }
-    },
-    "Multi-audio won't work without Screen Recording permission. Sapphire needs it to adjust app volumes, eqs and more.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Multi-audio won't work without Screen Recording permission. Sapphire needs it to adjust app volumes, eqs and more."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "多音频需要屏幕录制权限，Sapphire 使用该权限调整应用音量、均衡器等。"
           }
         }
       }
@@ -27639,23 +27146,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "原生"
-          }
-        }
-      }
-    },
-    "Native drives the phone as a real Bluetooth keyboard and mouse — Android's own pointer, hover, right-click and wheel. Sapphire cursor draws an overlay pointer and injects gestures instead.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Native drives the phone as a real Bluetooth keyboard and mouse — Android's own pointer, hover, right-click and wheel. Sapphire cursor draws an overlay pointer and injects gestures instead."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "原生模式将手机作为真正的蓝牙键鼠控制，使用安卓自身的指针、悬停、右键与滚轮。Sapphire 指针模式则绘制覆盖指针并模拟手势。"
           }
         }
       }
@@ -27983,23 +27473,6 @@
         }
       }
     },
-    "Never include Sapphire in screen sharing, screenshots, or screen recordings.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Never include Sapphire in screen sharing, screenshots, or screen recordings."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "始终在屏幕共享、截图和屏幕录制中隐藏 Sapphire。"
-          }
-        }
-      }
-    },
     "New Focus Schedule": {
       "extractionState": "manual",
       "localizations": {
@@ -28081,23 +27554,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "手机新照片与截图会下载到手机磁盘，关联到 ~/Pictures/（手机名称）/ 并显示在照片应用中，也包括断开连接期间拍摄的内容。"
-          }
-        }
-      }
-    },
-    "New system screenshots move from their save folder into Sapphire. Manually imported images are copied. The selected retention applies to new items.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "New system screenshots move from their save folder into Sapphire. Manually imported images are copied. The selected retention applies to new items."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "新的系统截图会从保存位置移入 Sapphire，手动导入的图片会复制一份。所选保留策略适用于新项目。"
           }
         }
       }
@@ -28608,23 +28064,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有待播放歌曲"
-          }
-        }
-      }
-    },
-    "No Spotify speakers online. Open the Spotify desktop app (or another Connect device) to play audio — Sapphire only controls playback.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No Spotify speakers online. Open the Spotify desktop app (or another Connect device) to play audio — Sapphire only controls playback."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "没有在线的 Spotify 扬声器。请打开 Spotify 桌面应用或其他 Connect 设备播放音频；Sapphire 仅控制播放。"
           }
         }
       }
@@ -30244,23 +29683,6 @@
         }
       }
     },
-    "Notify when the CPU stays above the threshold for 30 seconds. Requires the Sapphire helper.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notify when the CPU stays above the threshold for 30 seconds. Requires the Sapphire helper."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "CPU 持续 30 秒超过阈值时通知，需要 Sapphire 辅助服务。"
-          }
-        }
-      }
-    },
     "Notify when the startup disk is nearly full.": {
       "extractionState": "manual",
       "localizations": {
@@ -30291,23 +29713,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "后台扫描发现新更新时通知。"
-          }
-        }
-      }
-    },
-    "Notify you when a verified Sapphire release is ready.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notify you when a verified Sapphire release is ready."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已验证的 Sapphire 新版本就绪时通知。"
           }
         }
       }
@@ -31400,23 +30805,6 @@
         }
       }
     },
-    "Open Sapphire Setting": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open Sapphire Setting"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "打开 Sapphire 设置"
-          }
-        }
-      }
-    },
     "Open Scheduler": {
       "extractionState": "manual",
       "localizations": {
@@ -31702,23 +31090,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "打开手机相机并扫描此二维码，前往下载页面。"
-          }
-        }
-      }
-    },
-    "Open the unified Sapphire picker right where you're typing with a global shortcut. Selecting a clipboard item copies it and pastes it at the cursor; the Emoji tab types emoji directly. (The emoji shortcut opens the same panel on its Emoji tab.)": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open the unified Sapphire picker right where you're typing with a global shortcut. Selecting a clipboard item copies it and pastes it at the cursor; the Emoji tab types emoji directly. (The emoji shortcut opens the same panel on its Emoji tab.)"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "使用全局快捷键，在输入位置打开 Sapphire 统一选择器。选择剪贴板项目后会复制并粘贴到光标处；表情标签页可直接输入表情符号。表情快捷键也会打开同一面板的表情标签页。"
           }
         }
       }
@@ -33525,23 +32896,6 @@
         }
       }
     },
-    "Please log in to Spotify via the Music section in Sapphire's settings to use this feature.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Please log in to Spotify via the Music section in Sapphire's settings to use this feature."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "请先在 Sapphire 设置的“音乐”页面登录 Spotify，再使用此功能。"
-          }
-        }
-      }
-    },
     "Podcast": {
       "extractionState": "manual",
       "localizations": {
@@ -34885,23 +34239,6 @@
         }
       }
     },
-    "Quit Sapphire": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quit Sapphire"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "退出 Sapphire"
-          }
-        }
-      }
-    },
     "Quit on Close": {
       "extractionState": "manual",
       "localizations": {
@@ -35497,23 +34834,6 @@
         }
       }
     },
-    "Reference page listing every keyboard shortcut in Sapphire — global hotkeys, snap zones, and in-app shortcuts.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reference page listing every keyboard shortcut in Sapphire — global hotkeys, snap zones, and in-app shortcuts."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "列出 Sapphire 全部键盘快捷键，包括全局快捷键、窗口布局和应用内快捷键。"
-          }
-        }
-      }
-    },
     "Refresh": {
       "extractionState": "manual",
       "localizations": {
@@ -35748,23 +35068,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "重新启动"
-          }
-        }
-      }
-    },
-    "Relaunch Sapphire": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Relaunch Sapphire"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "重新启动 Sapphire"
           }
         }
       }
@@ -36279,23 +35582,6 @@
         }
       }
     },
-    "Remove the selected screenshots from Sapphire storage. Originals of manually added files are kept.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remove the selected screenshots from Sapphire storage. Originals of manually added files are kept."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "从 Sapphire 存储中移除选中的截图。手动添加文件的原件会保留。"
-          }
-        }
-      }
-    },
     "Remove this immunity day": {
       "extractionState": "manual",
       "localizations": {
@@ -36755,23 +36041,6 @@
         }
       }
     },
-    "Requires administrator access; Sapphire cannot remove this item": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Requires administrator access; Sapphire cannot remove this item"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "需要管理员权限，Sapphire 无法移除此项目"
-          }
-        }
-      }
-    },
     "Requires administrator access; remove manually": {
       "extractionState": "manual",
       "localizations": {
@@ -37210,23 +36479,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "恢复密码管理器默认设置"
-          }
-        }
-      }
-    },
-    "Restore all Sapphire preferences to their defaults.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restore all Sapphire preferences to their defaults."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "将所有 Sapphire 偏好恢复为默认值。"
           }
         }
       }
@@ -38064,40 +37316,6 @@
         }
       }
     },
-    "Sapphire": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire"
-          }
-        }
-      }
-    },
-    "Sapphire Archives": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire Archives"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire 归档"
-          }
-        }
-      }
-    },
     "Sapphire Blip — Mac agent with memory, skills, tools, and computer use.": {
       "extractionState": "manual",
       "localizations": {
@@ -38145,227 +37363,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sapphire 辅助服务需要处理"
-          }
-        }
-      }
-    },
-    "Sapphire Onboarding": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire Onboarding"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire 初始设置"
-          }
-        }
-      }
-    },
-    "Sapphire Timers": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire Timers"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire 计时器"
-          }
-        }
-      }
-    },
-    "Sapphire automatically uses Apple's standard Clock shortcut names (\"Start Timer\", \"Start Stopwatch\", etc.). If iCloud sync is enabled and those Clock shortcuts are present on this Mac, they run automatically during sessions.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire automatically uses Apple's standard Clock shortcut names (\"Start Timer\", \"Start Stopwatch\", etc.). If iCloud sync is enabled and those Clock shortcuts are present on this Mac, they run automatically during sessions."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire 自动使用 Apple 标准时钟快捷指令名称，如“Start Timer”和“Start Stopwatch”。若已启用 iCloud 同步且本机有这些指令，专注期间会自动运行。"
-          }
-        }
-      }
-    },
-    "Sapphire hides items with macOS's own menu bar controls only when it is installed in the Applications folder. This copy runs from elsewhere, so it falls back to stretching the divider up to the app menus.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire hides items with macOS's own menu bar controls only when it is installed in the Applications folder. This copy runs from elsewhere, so it falls back to stretching the divider up to the app menus."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "仅在安装到应用程序文件夹时，Sapphire 才使用 macOS 自带菜单栏控制隐藏项目。当前从其他位置运行，因此改用延伸分隔区的方式隐藏。"
-          }
-        }
-      }
-    },
-    "Sapphire hides its windows, notch, widgets, and overlays on the lock screen. Its interface cannot be opened or interacted with until you unlock your Mac.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire hides its windows, notch, widgets, and overlays on the lock screen. Its interface cannot be opened or interacted with until you unlock your Mac."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "锁屏时，Sapphire 会隐藏窗口、刘海、小组件和浮层。解锁 Mac 前无法打开或操作其界面。"
-          }
-        }
-      }
-    },
-    "Sapphire is a Connect controller only, audio always plays on the Spotify desktop app or another speaker.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire is a Connect controller only, audio always plays on the Spotify desktop app or another speaker."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire 仅作为 Connect 控制器，音频始终在 Spotify 桌面应用或其他扬声器上播放。"
-          }
-        }
-      }
-    },
-    "Sapphire needs a few permissions for its core features.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire needs a few permissions for its core features."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire 的核心功能需要几项权限。"
-          }
-        }
-      }
-    },
-    "Sapphire needs a privileged helper for battery management and system integrations. macOS will ask you to allow it under Login Items → Background Activity.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire needs a privileged helper for battery management and system integrations. macOS will ask you to allow it under Login Items → Background Activity."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "电池管理与系统集成需要特权辅助服务。macOS 会要求你在“登录项 → 后台活动”中允许它。"
-          }
-        }
-      }
-    },
-    "Sapphire never permanently deletes Trash contents; review and empty Trash in Finder when ready": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire never permanently deletes Trash contents; review and empty Trash in Finder when ready"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire 不会永久删除废纸篓内容，请在访达中检查后自行清空"
-          }
-        }
-      }
-    },
-    "Sapphire stays hidden and unavailable while your Mac is locked.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire stays hidden and unavailable while your Mac is locked."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac 锁屏时，Sapphire 保持隐藏且不可操作。"
-          }
-        }
-      }
-    },
-    "Sapphire uses MusicKit for Apple Music artwork, artist details, the queue and your library. No login is needed beyond Apple Music access.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire uses MusicKit for Apple Music artwork, artist details, the queue and your library. No login is needed beyond Apple Music access."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire 通过 MusicKit 读取 Apple Music 封面、艺人信息、队列和资料库。授予 Apple Music 权限后无需额外登录。"
-          }
-        }
-      }
-    },
-    "Sapphire watches your own processes — nothing is read from inside an app, no accessibility permission is used, and nothing leaves the Mac.\n\nTools that only exist while they run (xcodebuild, cargo, gradle, npm run build, a command you typed) are detected the moment they start. Tools that stay resident between turns (Claude, Codex, an editor's built-in agent, a Gradle daemon) are reported only while they are actually working, which is why sensitivity exists.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire watches your own processes — nothing is read from inside an app, no accessibility permission is used, and nothing leaves the Mac.\n\nTools that only exist while they run (xcodebuild, cargo, gradle, npm run build, a command you typed) are detected the moment they start. Tools that stay resident between turns (Claude, Codex, an editor's built-in agent, a Gradle daemon) are reported only while they are actually working, which is why sensitivity exists."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire 仅监测本机进程，不读取应用内部内容、不使用辅助功能权限，也不向外发送数据。\n\n仅在运行时存在的工具（如 xcodebuild、cargo、gradle、npm run build 或你输入的命令）会在启动时被检测。常驻工具（如 Claude、Codex、编辑器内置智能体或 Gradle 守护进程）仅在实际工作时报告，因此提供了灵敏度选项。"
-          }
-        }
-      }
-    },
-    "Sapphire's menu bar icons need Sapphire to be allowed under System Settings → Menu Bar → Allow in the Menu Bar. If the control item never appears, check that switch.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire's menu bar icons need Sapphire to be allowed under System Settings → Menu Bar → Allow in the Menu Bar. If the control item never appears, check that switch."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire 菜单栏图标需要在“系统设置 → 菜单栏 → 允许在菜单栏中显示”中获得允许。控制项目始终不出现时，请检查该开关。"
           }
         }
       }
@@ -38434,23 +37431,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "保存文本"
-          }
-        }
-      }
-    },
-    "Save a portable copy of your Sapphire preferences or restore one you exported earlier.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save a portable copy of your Sapphire preferences or restore one you exported earlier."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保存可迁移的 Sapphire 偏好副本，或恢复之前导出的备份。"
           }
         }
       }
@@ -39917,23 +38897,6 @@
         }
       }
     },
-    "Send anonymous usage events to Google to help improve Sapphire. Disable this to opt out of analytics collection.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Send anonymous usage events to Google to help improve Sapphire. Disable this to opt out of analytics collection."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "向 Google 发送匿名使用事件以改进 Sapphire。关闭后退出分析数据收集。"
-          }
-        }
-      }
-    },
     "Send to %@": {
       "extractionState": "manual",
       "localizations": {
@@ -40155,23 +39118,6 @@
         }
       }
     },
-    "Set RPM at each temperature. Sapphire interpolates between points.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Set RPM at each temperature. Sapphire interpolates between points."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "设置各温度下的转速，Sapphire 会在控制点之间插值。"
-          }
-        }
-      }
-    },
     "Set up Shopify": {
       "extractionState": "manual",
       "localizations": {
@@ -40287,23 +39233,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "分享"
-          }
-        }
-      }
-    },
-    "Share anonymous usage data with Google Analytics to help improve Sapphire. You can change this anytime in Settings > General.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Share anonymous usage data with Google Analytics to help improve Sapphire. You can change this anytime in Settings > General."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "与 Google Analytics 分享匿名使用数据以改进 Sapphire，可随时在“设置 → 通用”中更改。"
           }
         }
       }
@@ -41328,57 +40257,6 @@
         }
       }
     },
-    "Show Sapphire folder": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show Sapphire folder"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "显示 Sapphire 文件夹"
-          }
-        }
-      }
-    },
-    "Show Sapphire storage folder": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show Sapphire storage folder"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "显示 Sapphire 存储文件夹"
-          }
-        }
-      }
-    },
-    "Show Sapphire's notch and features when your Mac is locked.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show Sapphire's notch and features when your Mac is locked."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac 锁屏时显示 Sapphire 刘海与功能。"
-          }
-        }
-      }
-    },
     "Show Section Dividers": {
       "extractionState": "manual",
       "localizations": {
@@ -41715,23 +40593,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "在实时活动的下一首歌曲旁显示专辑封面。"
-          }
-        }
-      }
-    },
-    "Show an alert in the notch when a new Sapphire version is available.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show an alert in the notch when a new Sapphire version is available."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "有 Sapphire 新版本时，在刘海中显示提醒。"
           }
         }
       }
@@ -42620,40 +41481,6 @@
         }
       }
     },
-    "Show your own image or video behind the clock, sign-in controls, and Sapphire widgets on the lock screen.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show your own image or video behind the clock, sign-in controls, and Sapphire widgets on the lock screen."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在锁屏时钟、登录控件与 Sapphire 小组件后显示自定义图片或视频。"
-          }
-        }
-      }
-    },
-    "Show “Hold ⌘Q to quit” or “Press ⌘Q again” on screen while Sapphire waits for you.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show “Hold ⌘Q to quit” or “Press ⌘Q again” on screen while Sapphire waits for you."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "等待确认时，在屏幕上显示“长按 ⌘Q 退出”或“再次按 ⌘Q”。"
-          }
-        }
-      }
-    },
     "Shown": {
       "extractionState": "manual",
       "localizations": {
@@ -43075,23 +41902,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "已跳过已挂载宗卷。如需包含，请直接扫描该宗卷。"
-          }
-        }
-      }
-    },
-    "Skips the macOS floating thumbnail while collection is enabled. Sapphire collects the image as soon as the saved file is complete. Your previous thumbnail setting is restored when collection stops or Sapphire quits.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Skips the macOS floating thumbnail while collection is enabled. Sapphire collects the image as soon as the saved file is complete. Your previous thumbnail setting is restored when collection stops or Sapphire quits."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "开启收集时跳过 macOS 浮动缩略图，文件完整保存后立即收集。停止收集或退出 Sapphire 时，会恢复原来的缩略图设置。"
           }
         }
       }
@@ -44163,40 +42973,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "开始单次放电"
-          }
-        }
-      }
-    },
-    "Start Sapphire automatically when you log in to your Mac.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start Sapphire automatically when you log in to your Mac."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "登录 Mac 时自动启动 Sapphire。"
-          }
-        }
-      }
-    },
-    "Start Sapphire automatically with your Mac.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start Sapphire automatically with your Mac."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "随 Mac 自动启动 Sapphire。"
           }
         }
       }
@@ -46326,23 +45102,6 @@
         }
       }
     },
-    "Take a screenshot with ⇧⌘4 or ⇧⌘3 and let it save.\nSapphire moves it here, ready to select and drag together.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Take a screenshot with ⇧⌘4 or ⇧⌘3 and let it save.\nSapphire moves it here, ready to select and drag together."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "使用 ⇧⌘4 或 ⇧⌘3 截图并保存。\nSapphire 会将截图收集到这里，方便多选后一起拖出。"
-          }
-        }
-      }
-    },
     "Tap 5× quickly to enable debug mode": {
       "extractionState": "manual",
       "localizations": {
@@ -46968,23 +45727,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "绿色窗口按钮填满屏幕但不创建新空间；再次点击可恢复窗口。"
-          }
-        }
-      }
-    },
-    "The helper tool ensures your charging rules are still applied even if the Sapphire app isn't running.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The helper tool ensures your charging rules are still applied even if the Sapphire app isn't running."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "即使 Sapphire 未运行，辅助工具也会确保充电规则继续生效。"
           }
         }
       }
@@ -47716,40 +46458,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "启用面容或蓝牙解锁前，需要先提供 Mac 登录密码。"
-          }
-        }
-      }
-    },
-    "To enable Spotify integration, please add your API credentials in Sapphire's settings.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "To enable Spotify integration, please add your API credentials in Sapphire's settings."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "要启用 Spotify 集成，请先在 Sapphire 设置中添加 API 凭据。"
-          }
-        }
-      }
-    },
-    "To use Gemini Live, please add your Google AI Studio API key in Sapphire's settings.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "To use Gemini Live, please add your Google AI Studio API key in Sapphire's settings."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "要使用 Gemini Live，请先在 Sapphire 设置中添加 Google AI Studio API 密钥。"
           }
         }
       }
@@ -48672,23 +47380,6 @@
         }
       }
     },
-    "Type a short trigger anywhere and it becomes your text. Use \"{{date}}\", \"{{time}}\", \"{{date:MMMM d}}\" or \"{{clipboard}}\" in the replacement. Sapphire never expands while you type inside Sapphire itself.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Type a short trigger anywhere and it becomes your text. Use \"{{date}}\", \"{{time}}\", \"{{date:MMMM d}}\" or \"{{clipboard}}\" in the replacement. Sapphire never expands while you type inside Sapphire itself."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在任意位置输入短触发词，即可展开为文本。替换内容支持 {{date}}、{{time}}、{{date:MMMM d}} 和 {{clipboard}}。在 Sapphire 内输入时不会展开。"
-          }
-        }
-      }
-    },
     "UP NEXT": {
       "extractionState": "manual",
       "localizations": {
@@ -49386,23 +48077,6 @@
         }
       }
     },
-    "Updates are installed from the About page in Sapphire's settings.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Updates are installed from the About page in Sapphire's settings."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "请在 Sapphire 设置的“关于”页面安装更新。"
-          }
-        }
-      }
-    },
     "Updates are managed inside this app": {
       "extractionState": "manual",
       "localizations": {
@@ -49943,23 +48617,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "约多使用 150–180 MB 内存，每次解锁可提前约 0.3 秒开始识别；macOS 清理模型缓存后最多可提前 2 秒。内存严重不足时会自动释放。"
-          }
-        }
-      }
-    },
-    "Uses its own signed updater — Sapphire will open the app.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Uses its own signed updater — Sapphire will open the app."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "使用自身签名的更新器，Sapphire 会打开该应用。"
           }
         }
       }
@@ -50984,23 +49641,6 @@
         }
       }
     },
-    "Welcome to Sapphire": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Welcome to Sapphire"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "欢迎使用 Sapphire"
-          }
-        }
-      }
-    },
     "Welcome, %@": {
       "extractionState": "manual",
       "localizations": {
@@ -51065,40 +49705,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "让滚轮滚动平滑滑行，而非跳动。按住 ⌘、⌥、⌃ 或 ⇧ 滚动时仍立即响应。"
-          }
-        }
-      }
-    },
-    "When Sapphire opens a DMG, mount it, install contained apps, unmount, and clean up automatically.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "When Sapphire opens a DMG, mount it, install contained apps, unmount, and clean up automatically."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "通过 Sapphire 打开 DMG 时，自动挂载、安装其中应用、卸载磁盘并清理。"
-          }
-        }
-      }
-    },
-    "When Sapphire opens an archive, extract it automatically. Disable to hand archives back to macOS Archive Utility.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "When Sapphire opens an archive, extract it automatically. Disable to hand archives back to macOS Archive Utility."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "通过 Sapphire 打开归档时自动解压。关闭后交由 macOS 归档实用工具处理。"
           }
         }
       }
@@ -52395,23 +51001,6 @@
         }
       }
     },
-    "Your usual Sapphire interface becomes available again after you unlock.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your usual Sapphire interface becomes available again after you unlock."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "解锁后可恢复使用通常的 Sapphire 界面。"
-          }
-        }
-      }
-    },
     "Your watchlist": {
       "extractionState": "manual",
       "localizations": {
@@ -53432,23 +52021,6 @@
         }
       }
     },
-    "Download and verify in the background. Restart when ready, or install when you next quit Sapphire.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Download and verify in the background. Restart when ready, or install when you next quit Sapphire."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在后台下载并验证。准备完成后可以立即重启，或在下次退出 Sapphire 时安装。"
-          }
-        }
-      }
-    },
     "Verifying and preparing update…": {
       "extractionState": "manual",
       "localizations": {
@@ -53483,23 +52055,6 @@
         }
       }
     },
-    "Restart now, or the prepared update will install when you quit Sapphire.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restart now, or the prepared update will install when you quit Sapphire."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "现在重启，或在退出 Sapphire 时安装已准备好的更新。"
-          }
-        }
-      }
-    },
     "Cancel Prepared Update": {
       "extractionState": "manual",
       "localizations": {
@@ -53530,23 +52085,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "稍后提醒"
-          }
-        }
-      }
-    },
-    "Sapphire %@ is available": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire %@ is available"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire %@ 已发布"
           }
         }
       }
@@ -53615,23 +52153,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "准备好后可以再次检查 %@ 版本。"
-          }
-        }
-      }
-    },
-    "Check periodically while Sapphire is running.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Check periodically while Sapphire is running."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在 Sapphire 运行时定期检查新版。"
           }
         }
       }
@@ -53789,23 +52310,6 @@
         }
       }
     },
-    "Drop files, images, links, or text onto Sapphire’s AirDrop icon to choose a nearby device.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drop files, images, links, or text onto Sapphire’s AirDrop icon to choose a nearby device."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "将文件、图片、链接或文字拖到 Sapphire 的隔空投送图标上，即可选择附近设备。"
-          }
-        }
-      }
-    },
     "Drop files, images, links, or text onto this icon.": {
       "extractionState": "manual",
       "localizations": {
@@ -53836,40 +52340,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在准备隔空投送…"
-          }
-        }
-      }
-    },
-    "Sapphire AirDrop": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire AirDrop"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire 隔空投送"
-          }
-        }
-      }
-    },
-    "Sapphire AirDrop — drop files, images, links, or text here": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire AirDrop — drop files, images, links, or text here"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire 隔空投送 — 将文件、图片、链接或文字拖到这里"
           }
         }
       }
@@ -53976,40 +52446,6 @@
         }
       }
     },
-    "AirDrop in Sapphire": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AirDrop in Sapphire"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sapphire 内的隔空投送"
-          }
-        }
-      }
-    },
-    "Open File Shelf → AirDrop in Sapphire to drop items, choose files, or share your clipboard. You can also AirDrop selected screenshots from the Screenshots tab.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open File Shelf → AirDrop in Sapphire to drop items, choose files, or share your clipboard. You can also AirDrop selected screenshots from the Screenshots tab."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在 Sapphire 内打开“文件架 → AirDrop”，即可拖入内容、选择文件或分享剪贴板。也可以在“截图”标签多选截图后隔空投送。"
-          }
-        }
-      }
-    },
     "%@ downloaded": {
       "extractionState": "manual",
       "localizations": {
@@ -54040,23 +52476,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ · %@/秒"
-          }
-        }
-      }
-    },
-    "Allow Sapphire in System Settings → Privacy & Security → Accessibility to move and resize windows. If it is already enabled after an update, remove the old entry and add the Sapphire app you are currently using.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow Sapphire in System Settings → Privacy & Security → Accessibility to move and resize windows. If it is already enabled after an update, remove the old entry and add the Sapphire app you are currently using."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "请在“系统设置 → 隐私与安全性 → 辅助功能”中允许 Sapphire 移动和调整窗口。如果更新后开关已经打开但仍无效，请移除旧条目，并重新添加当前使用的 Sapphire 应用。"
           }
         }
       }
@@ -54128,22 +52547,6 @@
         }
       }
     },
-    "Allow Sapphire in System Settings → Privacy & Security → Device Control and Data Access to move and resize windows. If it is already enabled after an update, remove the old entry and add the Sapphire app you are currently using.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow Sapphire in System Settings → Privacy & Security → Device Control and Data Access to move and resize windows. If it is already enabled after an update, remove the old entry and add the Sapphire app you are currently using."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "请在系统设置 → 隐私与安全性 → 设备控制与数据访问中允许 Sapphire 移动和调整窗口。如果更新后开关已开启但仍无效，请移除旧条目，并添加你当前使用的 Sapphire 应用。"
-          }
-        }
-      }
-    },
     "Copy new screenshots to clipboard": {
       "extractionState": "manual",
       "localizations": {
@@ -54195,23 +52598,6 @@
         }
       }
     },
-    "Drag files or images to Sapphire at the top of the screen, then release to choose your iPhone, iPad, or Mac in the system AirDrop window. Turn this off to show the usual file destinations.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drag files or images to Sapphire at the top of the screen, then release to choose your iPhone, iPad, or Mac in the system AirDrop window. Turn this off to show the usual file destinations."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "将文件或图片拖到屏幕顶部的 Sapphire，松手后在系统 AirDrop 窗口选择 iPhone、iPad 或 Mac。关闭此选项可恢复文件投放目标列表。"
-          }
-        }
-      }
-    },
     "Drop to AirDrop": {
       "extractionState": "manual",
       "localizations": {
@@ -54242,6 +52628,1756 @@
           "stringUnit": {
             "state": "translated",
             "value": "松手后选择接收设备"
+          }
+        }
+      }
+    },
+    "Add a symbol to follow its price in TopLet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a symbol to follow its price in TopLet."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加股票代码，在 TopLet 中关注价格。"
+          }
+        }
+      }
+    },
+    "All TopLet settings were reset to defaults.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All TopLet settings were reset to defaults."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有 TopLet 设置已恢复默认。"
+          }
+        }
+      }
+    },
+    "Allow TopLet to adjust scrolling, pointer acceleration, and mouse buttons system-wide.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow TopLet to adjust scrolling, pointer acceleration, and mouse buttons system-wide."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许 TopLet 在全系统调整滚动、指针加速与鼠标按键。"
+          }
+        }
+      }
+    },
+    "Allow TopLet to detect :shortcode: patterns and show emoji suggestions as you type.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow TopLet to detect :shortcode: patterns and show emoji suggestions as you type."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许 TopLet 检测 :shortcode: 格式，并在输入时显示表情建议。"
+          }
+        }
+      }
+    },
+    "Allow TopLet under System Settings → Privacy & Security → Media & Apple Music.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow TopLet under System Settings → Privacy & Security → Media & Apple Music."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在“系统设置 → 隐私与安全性 → 媒体与 Apple Music”中允许 TopLet。"
+          }
+        }
+      }
+    },
+    "Allow any widget to be enabled even when TopLet estimates there is not enough notch space.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow any widget to be enabled even when TopLet estimates there is not enough notch space."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即使 TopLet 判断刘海空间不足，也允许启用任意小组件。"
+          }
+        }
+      }
+    },
+    "App version details, TopLet updates, release channels, credits, links, and project information.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App version details, TopLet updates, release channels, credits, links, and project information."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "应用版本、TopLet 更新、发布渠道、致谢、链接与项目信息。"
+          }
+        }
+      }
+    },
+    "Applies gain to TopLet's live level meter so you can check clipping. Other apps still receive the original microphone signal.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applies gain to TopLet's live level meter so you can check clipping. Other apps still receive the original microphone signal."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "为 TopLet 实时电平表增加增益，便于检查削波。其他应用仍接收原始麦克风信号。"
+          }
+        }
+      }
+    },
+    "Ask TopLet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask TopLet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "询问 TopLet"
+          }
+        }
+      }
+    },
+    "Ask about any setting, get suggestions, or have TopLet change things for you.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask about any setting, get suggestions, or have TopLet change things for you."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "了解各项设置、获取建议，或让 TopLet 帮你调整。"
+          }
+        }
+      }
+    },
+    "Auto-collected screenshots move into TopLet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-collected screenshots move into TopLet."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动收集的截图会移入 TopLet。"
+          }
+        }
+      }
+    },
+    "Choose where each app's items go. Option-click the control item to arrange them in the menu bar instead; TopLet learns the new layout when you click it again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose where each app's items go. Option-click the control item to arrange them in the menu bar instead; TopLet learns the new layout when you click it again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择各应用项目的归属区域。也可按住 Option 点击控制项目，在菜单栏中排列；再次点击后 TopLet 会记住新布局。"
+          }
+        }
+      }
+    },
+    "Choose which system notifications TopLet mirrors or enhances.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose which system notifications TopLet mirrors or enhances."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择由 TopLet 镜像或增强的系统通知。"
+          }
+        }
+      }
+    },
+    "Collect new screenshots into TopLet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collect new screenshots into TopLet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将新截图收集到 TopLet"
+          }
+        }
+      }
+    },
+    "Continuously capture newly copied text and images into TopLet history.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuously capture newly copied text and images into TopLet history."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "持续将新复制的文本和图片收集到 TopLet 历史记录。"
+          }
+        }
+      }
+    },
+    "Due to changes on macOS 27 charge limiting may not work for some users. If a limit is set, TopLet will fallback to adapter mode (which cuts power from the adapter) when the limit is reach in order to enforce it. This method is under beta and may not always work, especially when the device is asleep.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Due to changes on macOS 27 charge limiting may not work for some users. If a limit is set, TopLet will fallback to adapter mode (which cuts power from the adapter) when the limit is reach in order to enforce it. This method is under beta and may not always work, especially when the device is asleep."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "由于 macOS 27 的变化，部分用户的充电限制可能失效。达到已设上限时，TopLet 会尝试适配器模式，通过切断适配器供电执行限制。此方式仍在测试，尤其在设备睡眠时可能不生效。"
+          }
+        }
+      }
+    },
+    "Explore TopLet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explore TopLet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "探索 TopLet"
+          }
+        }
+      }
+    },
+    "Fanless Macs (some MacBook Air models) will show this permanently. Otherwise, ensure the TopLet helper is installed and retry.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fanless Macs (some MacBook Air models) will show this permanently. Otherwise, ensure the TopLet helper is installed and retry."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无风扇 Mac（部分 MacBook Air）会始终显示此状态。其他机型请确认已安装 TopLet 辅助服务，然后重试。"
+          }
+        }
+      }
+    },
+    "Fans return to automatic when TopLet quits.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fans return to automatic when TopLet quits."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出 TopLet 时，风扇会恢复自动控制。"
+          }
+        }
+      }
+    },
+    "Follow football and Formula 1 from TopLet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Follow football and Formula 1 from TopLet."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 TopLet 中关注足球与 F1。"
+          }
+        }
+      }
+    },
+    "Follow your favorite stocks from TopLet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Follow your favorite stocks from TopLet."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 TopLet 中关注喜爱的股票。"
+          }
+        }
+      }
+    },
+    "Free on iPhone and Android. Drop files onto TopLet to send them to the phone; received files land in Downloads. A Continuity Live Activity tracks progress in the notch. Local Wi-Fi is fastest, with Bluetooth fallback up to 32 MB.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Free on iPhone and Android. Drop files onto TopLet to send them to the phone; received files land in Downloads. A Continuity Live Activity tracks progress in the notch. Local Wi-Fi is fastest, with Bluetooth fallback up to 32 MB."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone 与安卓均可免费使用。将文件拖入 TopLet 即可发送到手机，接收文件保存在下载中，刘海实时活动显示进度。优先使用本地 Wi-Fi，蓝牙备用传输最大支持 32 MB。"
+          }
+        }
+      }
+    },
+    "Join your phone's hotspot from the TopLet menu without typing the password.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Join your phone's hotspot from the TopLet menu without typing the password."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从 TopLet 菜单加入手机热点，无需输入密码。"
+          }
+        }
+      }
+    },
+    "Keep the TopLet notch bar visible at the top of the lock screen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep the TopLet notch bar visible at the top of the lock screen."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在锁屏顶部保持显示 TopLet 刘海顶栏。"
+          }
+        }
+      }
+    },
+    "Keep your Mac awake while TopLet's caffeinate mode is active, even with the lid closed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep your Mac awake while TopLet's caffeinate mode is active, even with the lid closed."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet 保持唤醒开启时，即使合盖也不让 Mac 睡眠。"
+          }
+        }
+      }
+    },
+    "Keeps the macOS floating thumbnail available for editing and sharing. TopLet collects the file after the preview finishes and macOS saves it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keeps the macOS floating thumbnail available for editing and sharing. TopLet collects the file after the preview finishes and macOS saves it."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留 macOS 浮动缩略图，方便编辑和分享。预览结束且 macOS 保存文件后，TopLet 再收集截图。"
+          }
+        }
+      }
+    },
+    "Manage quick actions and shortcut surfaces shown in TopLet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage quick actions and shortcut surfaces shown in TopLet."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "管理 TopLet 中显示的快捷操作与入口。"
+          }
+        }
+      }
+    },
+    "Move newly saved screenshots into TopLet's storage folder.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move newly saved screenshots into TopLet's storage folder."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将新保存的截图移入 TopLet 专用文件夹。"
+          }
+        }
+      }
+    },
+    "Multi-audio won't work without Screen Recording permission. TopLet needs it to adjust app volumes, eqs and more.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Multi-audio won't work without Screen Recording permission. TopLet needs it to adjust app volumes, eqs and more."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "多音频需要屏幕录制权限，TopLet 使用该权限调整应用音量、均衡器等。"
+          }
+        }
+      }
+    },
+    "Native drives the phone as a real Bluetooth keyboard and mouse — Android's own pointer, hover, right-click and wheel. TopLet cursor draws an overlay pointer and injects gestures instead.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Native drives the phone as a real Bluetooth keyboard and mouse — Android's own pointer, hover, right-click and wheel. TopLet cursor draws an overlay pointer and injects gestures instead."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "原生模式将手机作为真正的蓝牙键鼠控制，使用安卓自身的指针、悬停、右键与滚轮。TopLet 指针模式则绘制覆盖指针并模拟手势。"
+          }
+        }
+      }
+    },
+    "Never include TopLet in screen sharing, screenshots, or screen recordings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Never include TopLet in screen sharing, screenshots, or screen recordings."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "始终在屏幕共享、截图和屏幕录制中隐藏 TopLet。"
+          }
+        }
+      }
+    },
+    "New system screenshots move from their save folder into TopLet. Manually imported images are copied. The selected retention applies to new items.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New system screenshots move from their save folder into TopLet. Manually imported images are copied. The selected retention applies to new items."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新的系统截图会从保存位置移入 TopLet，手动导入的图片会复制一份。所选保留策略适用于新项目。"
+          }
+        }
+      }
+    },
+    "No Spotify speakers online. Open the Spotify desktop app (or another Connect device) to play audio — TopLet only controls playback.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Spotify speakers online. Open the Spotify desktop app (or another Connect device) to play audio — TopLet only controls playback."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有在线的 Spotify 扬声器。请打开 Spotify 桌面应用或其他 Connect 设备播放音频；TopLet 仅控制播放。"
+          }
+        }
+      }
+    },
+    "Notify when the CPU stays above the threshold for 30 seconds. Requires the TopLet helper.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notify when the CPU stays above the threshold for 30 seconds. Requires the TopLet helper."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 持续 30 秒超过阈值时通知，需要 TopLet 辅助服务。"
+          }
+        }
+      }
+    },
+    "Notify you when a verified TopLet release is ready.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notify you when a verified TopLet release is ready."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已验证的 TopLet 新版本就绪时通知。"
+          }
+        }
+      }
+    },
+    "Open TopLet Setting": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open TopLet Setting"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开 TopLet 设置"
+          }
+        }
+      }
+    },
+    "Open the unified TopLet picker right where you're typing with a global shortcut. Selecting a clipboard item copies it and pastes it at the cursor; the Emoji tab types emoji directly. (The emoji shortcut opens the same panel on its Emoji tab.)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the unified TopLet picker right where you're typing with a global shortcut. Selecting a clipboard item copies it and pastes it at the cursor; the Emoji tab types emoji directly. (The emoji shortcut opens the same panel on its Emoji tab.)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用全局快捷键，在输入位置打开 TopLet 统一选择器。选择剪贴板项目后会复制并粘贴到光标处；表情标签页可直接输入表情符号。表情快捷键也会打开同一面板的表情标签页。"
+          }
+        }
+      }
+    },
+    "Please log in to Spotify via the Music section in TopLet's settings to use this feature.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Please log in to Spotify via the Music section in TopLet's settings to use this feature."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请先在 TopLet 设置的“音乐”页面登录 Spotify，再使用此功能。"
+          }
+        }
+      }
+    },
+    "Quit TopLet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quit TopLet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出 TopLet"
+          }
+        }
+      }
+    },
+    "Reference page listing every keyboard shortcut in TopLet — global hotkeys, snap zones, and in-app shortcuts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reference page listing every keyboard shortcut in TopLet — global hotkeys, snap zones, and in-app shortcuts."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "列出 TopLet 全部键盘快捷键，包括全局快捷键、窗口布局和应用内快捷键。"
+          }
+        }
+      }
+    },
+    "Relaunch TopLet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relaunch TopLet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新启动 TopLet"
+          }
+        }
+      }
+    },
+    "Remove the selected screenshots from TopLet storage. Originals of manually added files are kept.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove the selected screenshots from TopLet storage. Originals of manually added files are kept."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从 TopLet 存储中移除选中的截图。手动添加文件的原件会保留。"
+          }
+        }
+      }
+    },
+    "Requires administrator access; TopLet cannot remove this item": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requires administrator access; TopLet cannot remove this item"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要管理员权限，TopLet 无法移除此项目"
+          }
+        }
+      }
+    },
+    "Restore all TopLet preferences to their defaults.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore all TopLet preferences to their defaults."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将所有 TopLet 偏好恢复为默认值。"
+          }
+        }
+      }
+    },
+    "TopLet Archives": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet Archives"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet 归档"
+          }
+        }
+      }
+    },
+    "TopLet Onboarding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet Onboarding"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet 初始设置"
+          }
+        }
+      }
+    },
+    "TopLet Timers": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet Timers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet 计时器"
+          }
+        }
+      }
+    },
+    "TopLet automatically uses Apple's standard Clock shortcut names (\"Start Timer\", \"Start Stopwatch\", etc.). If iCloud sync is enabled and those Clock shortcuts are present on this Mac, they run automatically during sessions.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet automatically uses Apple's standard Clock shortcut names (\"Start Timer\", \"Start Stopwatch\", etc.). If iCloud sync is enabled and those Clock shortcuts are present on this Mac, they run automatically during sessions."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet 自动使用 Apple 标准时钟快捷指令名称，如“Start Timer”和“Start Stopwatch”。若已启用 iCloud 同步且本机有这些指令，专注期间会自动运行。"
+          }
+        }
+      }
+    },
+    "TopLet hides items with macOS's own menu bar controls only when it is installed in the Applications folder. This copy runs from elsewhere, so it falls back to stretching the divider up to the app menus.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet hides items with macOS's own menu bar controls only when it is installed in the Applications folder. This copy runs from elsewhere, so it falls back to stretching the divider up to the app menus."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅在安装到应用程序文件夹时，TopLet 才使用 macOS 自带菜单栏控制隐藏项目。当前从其他位置运行，因此改用延伸分隔区的方式隐藏。"
+          }
+        }
+      }
+    },
+    "TopLet hides its windows, notch, widgets, and overlays on the lock screen. Its interface cannot be opened or interacted with until you unlock your Mac.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet hides its windows, notch, widgets, and overlays on the lock screen. Its interface cannot be opened or interacted with until you unlock your Mac."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "锁屏时，TopLet 会隐藏窗口、刘海、小组件和浮层。解锁 Mac 前无法打开或操作其界面。"
+          }
+        }
+      }
+    },
+    "TopLet is a Connect controller only, audio always plays on the Spotify desktop app or another speaker.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet is a Connect controller only, audio always plays on the Spotify desktop app or another speaker."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet 仅作为 Connect 控制器，音频始终在 Spotify 桌面应用或其他扬声器上播放。"
+          }
+        }
+      }
+    },
+    "TopLet needs a few permissions for its core features.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet needs a few permissions for its core features."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet 的核心功能需要几项权限。"
+          }
+        }
+      }
+    },
+    "TopLet needs a privileged helper for battery management and system integrations. macOS will ask you to allow it under Login Items → Background Activity.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet needs a privileged helper for battery management and system integrations. macOS will ask you to allow it under Login Items → Background Activity."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电池管理与系统集成需要特权辅助服务。macOS 会要求你在“登录项 → 后台活动”中允许它。"
+          }
+        }
+      }
+    },
+    "TopLet never permanently deletes Trash contents; review and empty Trash in Finder when ready": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet never permanently deletes Trash contents; review and empty Trash in Finder when ready"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet 不会永久删除废纸篓内容，请在访达中检查后自行清空"
+          }
+        }
+      }
+    },
+    "TopLet stays hidden and unavailable while your Mac is locked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet stays hidden and unavailable while your Mac is locked."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 锁屏时，TopLet 保持隐藏且不可操作。"
+          }
+        }
+      }
+    },
+    "TopLet uses MusicKit for Apple Music artwork, artist details, the queue and your library. No login is needed beyond Apple Music access.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet uses MusicKit for Apple Music artwork, artist details, the queue and your library. No login is needed beyond Apple Music access."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet 通过 MusicKit 读取 Apple Music 封面、艺人信息、队列和资料库。授予 Apple Music 权限后无需额外登录。"
+          }
+        }
+      }
+    },
+    "TopLet watches your own processes — nothing is read from inside an app, no accessibility permission is used, and nothing leaves the Mac.\n\nTools that only exist while they run (xcodebuild, cargo, gradle, npm run build, a command you typed) are detected the moment they start. Tools that stay resident between turns (Claude, Codex, an editor's built-in agent, a Gradle daemon) are reported only while they are actually working, which is why sensitivity exists.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet watches your own processes — nothing is read from inside an app, no accessibility permission is used, and nothing leaves the Mac.\n\nTools that only exist while they run (xcodebuild, cargo, gradle, npm run build, a command you typed) are detected the moment they start. Tools that stay resident between turns (Claude, Codex, an editor's built-in agent, a Gradle daemon) are reported only while they are actually working, which is why sensitivity exists."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet 仅监测本机进程，不读取应用内部内容、不使用辅助功能权限，也不向外发送数据。\n\n仅在运行时存在的工具（如 xcodebuild、cargo、gradle、npm run build 或你输入的命令）会在启动时被检测。常驻工具（如 Claude、Codex、编辑器内置智能体或 Gradle 守护进程）仅在实际工作时报告，因此提供了灵敏度选项。"
+          }
+        }
+      }
+    },
+    "TopLet's menu bar icons need TopLet to be allowed under System Settings → Menu Bar → Allow in the Menu Bar. If the control item never appears, check that switch.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet's menu bar icons need TopLet to be allowed under System Settings → Menu Bar → Allow in the Menu Bar. If the control item never appears, check that switch."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet 菜单栏图标需要在“系统设置 → 菜单栏 → 允许在菜单栏中显示”中获得允许。控制项目始终不出现时，请检查该开关。"
+          }
+        }
+      }
+    },
+    "Save a portable copy of your TopLet preferences or restore one you exported earlier.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save a portable copy of your TopLet preferences or restore one you exported earlier."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存可迁移的 TopLet 偏好副本，或恢复之前导出的备份。"
+          }
+        }
+      }
+    },
+    "Send anonymous usage events to Google to help improve TopLet. Disable this to opt out of analytics collection.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send anonymous usage events to Google to help improve TopLet. Disable this to opt out of analytics collection."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "向 Google 发送匿名使用事件以改进 TopLet。关闭后退出分析数据收集。"
+          }
+        }
+      }
+    },
+    "Set RPM at each temperature. TopLet interpolates between points.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set RPM at each temperature. TopLet interpolates between points."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置各温度下的转速，TopLet 会在控制点之间插值。"
+          }
+        }
+      }
+    },
+    "Share anonymous usage data with Google Analytics to help improve TopLet. You can change this anytime in Settings > General.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share anonymous usage data with Google Analytics to help improve TopLet. You can change this anytime in Settings > General."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "与 Google Analytics 分享匿名使用数据以改进 TopLet，可随时在“设置 → 通用”中更改。"
+          }
+        }
+      }
+    },
+    "Show TopLet folder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show TopLet folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示 TopLet 文件夹"
+          }
+        }
+      }
+    },
+    "Show TopLet storage folder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show TopLet storage folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示 TopLet 存储文件夹"
+          }
+        }
+      }
+    },
+    "Show TopLet's notch and features when your Mac is locked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show TopLet's notch and features when your Mac is locked."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 锁屏时显示 TopLet 刘海与功能。"
+          }
+        }
+      }
+    },
+    "Show an alert in the notch when a new TopLet version is available.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show an alert in the notch when a new TopLet version is available."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 TopLet 新版本时，在刘海中显示提醒。"
+          }
+        }
+      }
+    },
+    "Show your own image or video behind the clock, sign-in controls, and TopLet widgets on the lock screen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show your own image or video behind the clock, sign-in controls, and TopLet widgets on the lock screen."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在锁屏时钟、登录控件与 TopLet 小组件后显示自定义图片或视频。"
+          }
+        }
+      }
+    },
+    "Show “Hold ⌘Q to quit” or “Press ⌘Q again” on screen while TopLet waits for you.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show “Hold ⌘Q to quit” or “Press ⌘Q again” on screen while TopLet waits for you."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待确认时，在屏幕上显示“长按 ⌘Q 退出”或“再次按 ⌘Q”。"
+          }
+        }
+      }
+    },
+    "Skips the macOS floating thumbnail while collection is enabled. TopLet collects the image as soon as the saved file is complete. Your previous thumbnail setting is restored when collection stops or TopLet quits.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skips the macOS floating thumbnail while collection is enabled. TopLet collects the image as soon as the saved file is complete. Your previous thumbnail setting is restored when collection stops or TopLet quits."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开启收集时跳过 macOS 浮动缩略图，文件完整保存后立即收集。停止收集或退出 TopLet 时，会恢复原来的缩略图设置。"
+          }
+        }
+      }
+    },
+    "Start TopLet automatically when you log in to your Mac.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start TopLet automatically when you log in to your Mac."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录 Mac 时自动启动 TopLet。"
+          }
+        }
+      }
+    },
+    "Start TopLet automatically with your Mac.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start TopLet automatically with your Mac."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "随 Mac 自动启动 TopLet。"
+          }
+        }
+      }
+    },
+    "Take a screenshot with ⇧⌘4 or ⇧⌘3 and let it save.\nTopLet moves it here, ready to select and drag together.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take a screenshot with ⇧⌘4 or ⇧⌘3 and let it save.\nTopLet moves it here, ready to select and drag together."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 ⇧⌘4 或 ⇧⌘3 截图并保存。\nTopLet 会将截图收集到这里，方便多选后一起拖出。"
+          }
+        }
+      }
+    },
+    "The helper tool ensures your charging rules are still applied even if the TopLet app isn't running.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The helper tool ensures your charging rules are still applied even if the TopLet app isn't running."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即使 TopLet 未运行，辅助工具也会确保充电规则继续生效。"
+          }
+        }
+      }
+    },
+    "To enable Spotify integration, please add your API credentials in TopLet's settings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To enable Spotify integration, please add your API credentials in TopLet's settings."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要启用 Spotify 集成，请先在 TopLet 设置中添加 API 凭据。"
+          }
+        }
+      }
+    },
+    "To use Gemini Live, please add your Google AI Studio API key in TopLet's settings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To use Gemini Live, please add your Google AI Studio API key in TopLet's settings."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要使用 Gemini Live，请先在 TopLet 设置中添加 Google AI Studio API 密钥。"
+          }
+        }
+      }
+    },
+    "Type a short trigger anywhere and it becomes your text. Use \"{{date}}\", \"{{time}}\", \"{{date:MMMM d}}\" or \"{{clipboard}}\" in the replacement. TopLet never expands while you type inside TopLet itself.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type a short trigger anywhere and it becomes your text. Use \"{{date}}\", \"{{time}}\", \"{{date:MMMM d}}\" or \"{{clipboard}}\" in the replacement. TopLet never expands while you type inside TopLet itself."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在任意位置输入短触发词，即可展开为文本。替换内容支持 {{date}}、{{time}}、{{date:MMMM d}} 和 {{clipboard}}。在 TopLet 内输入时不会展开。"
+          }
+        }
+      }
+    },
+    "Updates are installed from the About page in TopLet's settings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updates are installed from the About page in TopLet's settings."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在 TopLet 设置的“关于”页面安装更新。"
+          }
+        }
+      }
+    },
+    "Uses its own signed updater — TopLet will open the app.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uses its own signed updater — TopLet will open the app."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用自身签名的更新器，TopLet 会打开该应用。"
+          }
+        }
+      }
+    },
+    "Welcome to TopLet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welcome to TopLet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "欢迎使用 TopLet"
+          }
+        }
+      }
+    },
+    "When TopLet opens a DMG, mount it, install contained apps, unmount, and clean up automatically.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When TopLet opens a DMG, mount it, install contained apps, unmount, and clean up automatically."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通过 TopLet 打开 DMG 时，自动挂载、安装其中应用、卸载磁盘并清理。"
+          }
+        }
+      }
+    },
+    "When TopLet opens an archive, extract it automatically. Disable to hand archives back to macOS Archive Utility.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When TopLet opens an archive, extract it automatically. Disable to hand archives back to macOS Archive Utility."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通过 TopLet 打开归档时自动解压。关闭后交由 macOS 归档实用工具处理。"
+          }
+        }
+      }
+    },
+    "Your usual TopLet interface becomes available again after you unlock.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your usual TopLet interface becomes available again after you unlock."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解锁后可恢复使用通常的 TopLet 界面。"
+          }
+        }
+      }
+    },
+    "Download and verify in the background. Restart when ready, or install when you next quit TopLet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download and verify in the background. Restart when ready, or install when you next quit TopLet."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在后台下载并验证。准备完成后可以立即重启，或在下次退出 TopLet 时安装。"
+          }
+        }
+      }
+    },
+    "Restart now, or the prepared update will install when you quit TopLet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart now, or the prepared update will install when you quit TopLet."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "现在重启，或在退出 TopLet 时安装已准备好的更新。"
+          }
+        }
+      }
+    },
+    "TopLet %@ is available": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet %@ is available"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet %@ 已发布"
+          }
+        }
+      }
+    },
+    "Check periodically while TopLet is running.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check periodically while TopLet is running."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 TopLet 运行时定期检查新版。"
+          }
+        }
+      }
+    },
+    "Drop files, images, links, or text onto TopLet’s AirDrop icon to choose a nearby device.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drop files, images, links, or text onto TopLet’s AirDrop icon to choose a nearby device."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将文件、图片、链接或文字拖到 TopLet 的隔空投送图标上，即可选择附近设备。"
+          }
+        }
+      }
+    },
+    "TopLet AirDrop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet AirDrop"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet 隔空投送"
+          }
+        }
+      }
+    },
+    "TopLet AirDrop — drop files, images, links, or text here": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet AirDrop — drop files, images, links, or text here"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet 隔空投送 — 将文件、图片、链接或文字拖到这里"
+          }
+        }
+      }
+    },
+    "AirDrop in TopLet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop in TopLet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet 内的隔空投送"
+          }
+        }
+      }
+    },
+    "Open File Shelf → AirDrop in TopLet to drop items, choose files, or share your clipboard. You can also AirDrop selected screenshots from the Screenshots tab.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open File Shelf → AirDrop in TopLet to drop items, choose files, or share your clipboard. You can also AirDrop selected screenshots from the Screenshots tab."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 TopLet 内打开“文件架 → AirDrop”，即可拖入内容、选择文件或分享剪贴板。也可以在“截图”标签多选截图后隔空投送。"
+          }
+        }
+      }
+    },
+    "Allow TopLet in System Settings → Privacy & Security → Accessibility to move and resize windows. If it is already enabled after an update, remove the old entry and add the TopLet app you are currently using.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow TopLet in System Settings → Privacy & Security → Accessibility to move and resize windows. If it is already enabled after an update, remove the old entry and add the TopLet app you are currently using."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在“系统设置 → 隐私与安全性 → 辅助功能”中允许 TopLet 移动和调整窗口。如果更新后开关已经打开但仍无效，请移除旧条目，并重新添加当前使用的 TopLet 应用。"
+          }
+        }
+      }
+    },
+    "Allow TopLet in System Settings → Privacy & Security → Device Control and Data Access to move and resize windows. If it is already enabled after an update, remove the old entry and add the TopLet app you are currently using.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow TopLet in System Settings → Privacy & Security → Device Control and Data Access to move and resize windows. If it is already enabled after an update, remove the old entry and add the TopLet app you are currently using."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在系统设置 → 隐私与安全性 → 设备控制与数据访问中允许 TopLet 移动和调整窗口。如果更新后开关已开启但仍无效，请移除旧条目，并添加你当前使用的 TopLet 应用。"
+          }
+        }
+      }
+    },
+    "Drag files or images to TopLet at the top of the screen, then release to choose your iPhone, iPad, or Mac in the system AirDrop window. Turn this off to show the usual file destinations.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag files or images to TopLet at the top of the screen, then release to choose your iPhone, iPad, or Mac in the system AirDrop window. Turn this off to show the usual file destinations."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将文件或图片拖到屏幕顶部的 TopLet，松手后在系统 AirDrop 窗口选择 iPhone、iPad 或 Mac。关闭此选项可恢复文件投放目标列表。"
+          }
+        }
+      }
+    },
+    "TopLet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet"
+          }
+        }
+      }
+    },
+    "Your Mac, one drop away.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Mac, one drop away."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "常用操作，就在顶部。"
+          }
+        }
+      }
+    },
+    "Maintained by Ho Tim Tsui (timtsui0128).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maintained by Ho Tim Tsui (timtsui0128)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "由 Ho Tim Tsui（timtsui0128）维护。"
+          }
+        }
+      }
+    },
+    "Based on Sapphire by Shariq Charolia and contributors. Licensed under GNU AGPLv3.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Based on Sapphire by Shariq Charolia and contributors. Licensed under GNU AGPLv3."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "基于 Shariq Charolia 及贡献者开发的 Sapphire，遵循 GNU AGPLv3 许可证。"
+          }
+        }
+      }
+    },
+    "TopLet source and releases": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet source and releases"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TopLet 源码与更新"
+          }
+        }
+      }
+    },
+    "Original Sapphire project": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Original Sapphire project"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "原版 Sapphire 项目"
+          }
+        }
+      }
+    },
+    "Open-source licenses": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open-source licenses"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开源许可证"
+          }
+        }
+      }
+    },
+    "Signed Out of TopLet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signed Out of TopLet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已退出 TopLet 账号"
+          }
+        }
+      }
+    },
+    "This screenshot collection was saved by a newer version of TopLet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This screenshot collection was saved by a newer version of TopLet."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这些截图由较新版本的 TopLet 保存。"
           }
         }
       }

@@ -1,8 +1,10 @@
-# Sapphire · 个人分支
+# TopLet
 
 [English](README.md) | **简体中文**
 
-一个基于 [cshariq/Sapphire](https://github.com/cshariq/Sapphire) 的个人 macOS 刘海工具实验项目，由 [Ho Tim Tsui / timtsui0128](https://github.com/timtsui0128) 维护。通过 vibe coding 逐步改进自己每天使用的截图、文件暂存、信息卡片和界面体验。
+**常用操作，就在顶部。**
+
+TopLet 是一个基于 [cshariq/Sapphire](https://github.com/cshariq/Sapphire) 的个人 macOS 刘海工具实验项目，由 [Ho Tim Tsui / timtsui0128](https://github.com/timtsui0128) 维护。通过 vibe coding 逐步改进自己每天使用的截图、文件暂存、信息卡片和界面体验。
 
 **这是独立维护的非官方分支。** Sapphire 的原始应用、基础架构及原有功能由 **Shariq Charolia（[@cshariq](https://github.com/cshariq)）与上游贡献者**开发。本分支保留原作者署名、原有版权声明、第三方致谢和 **GNU AGPLv3** 许可证。
 
@@ -20,7 +22,7 @@ This is an unofficial personal fork of Sapphire, originally created by Shariq Ch
 | 功能 | 本分支的行为 | 使用说明 |
 | --- | --- | --- |
 | 截图暂存架 | 新截图不默认选中，记住手动选择；最新截图自动进入剪贴板供粘贴；收集系统截图，多选后一次拖出多张；可选立即收集或保留系统浮动预览；新截图在下一次点击刘海时优先打开；历史不触发常驻胶囊 | [截图与文件保存](docs/screenshot-shelf.md) |
-| 截图保存策略 | 自动收集后移入 Sapphire 专用目录；可选手动移除、24 小时清理、成功拖出后清理；支持手动导入 | [保存策略与限制](docs/screenshot-shelf.md#保存与收集范围) |
+| 截图保存策略 | 自动收集后移入 TopLet 专用目录；可选手动移除、24 小时清理、成功拖出后清理；支持手动导入 | [保存策略与限制](docs/screenshot-shelf.md#保存与收集范围) |
 | 快速隔空投送 | 文件拖向顶部时自动展开 AirDrop 投放区；文件架内独立 AirDrop 标签，与截图／文件并列；拖入内容、选择文件、分享剪贴板或多张截图一起 AirDrop | [隔空投送入口](docs/quick-airdrop.md) |
 | 足球与 F1 | 足球赛程、比分和关注球队；F1 赛历、赛后结果、排名、圈数、关注车手／车队和刘海状态卡 | [Sports / F1](docs/community-sports.md) |
 | 股票关注列表 | 默认关注 AAPL、MSFT、NVDA，支持搜索增删、报价、历史图表和刘海小组件 | [Stocks / Finance](docs/community-finance-and-appearance.md) |
@@ -38,9 +40,13 @@ This is an unofficial personal fork of Sapphire, originally created by Shariq Ch
 
 截图主入口为 **File Shelf → Screenshots**，保存策略可通过截图页齿轮调整。Sports、Finance 和 Appearance 分别在对应设置页中配置。
 
+## 名称与升级兼容
+
+从 0.1.8 起，应用名为 **TopLet**，新下载包内是 `TopLet.app`。沿用已有仓库地址、应用标识、设置与存储键、链接协议和 Sparkle 更新签名，让 Sapphire Personal 旧版继续更新并保留数据。Sparkle 原地替换旧应用，因此 Finder 的实际文件名可能仍是 `Sapphire.app`，应用内已显示 TopLet；应以“关于”页的版本为准。外部 Sapphire 配套应用及原作者版权声明保留原名。详见[改名与兼容说明](docs/toplet-branding.md)。
+
 ## 当前源码版本与运行范围
 
-- 当前源码的构建标记为 **Capture & Share 17**（版本 **0.1.7**，构建 **17**），已在本机完成完整应用构建和签名复检。
+- 当前源码的构建标记为 **TopLet 18**（版本 **0.1.8**，构建 **18**），已在本机完成完整应用构建和签名复检。
 - 个人开发分支为 **`codex/personal-notched-tools`**。`main` 保留 Fork 时的上游状态；本分支基于上面标注的提交，尚未合并上游后续的 macOS 27 充电限制改动。
 - 最低部署目标为 macOS 14；当前完整构建与本地安装包在 Apple Silicon（arm64）Mac 上验证。Intel 机器和不同 macOS 版本尚未完整验收。
 - 上游未公开的付费模块继续使用公开占位或兼容实现。独立实现的 Sports／Finance 不依赖这些私有模块，也不连接或同步 Apple Sports／Stocks 账户。
@@ -63,7 +69,7 @@ bash Tools/build-sapphire-public.sh
 构建产物：
 
 ```text
-output/public-build/Build/Products/Debug/Sapphire.app
+output/public-build/Build/Products/Debug/TopLet.app
 ```
 
 脚本在 `output/` 中生成兼容当前工具链的隔离 Xcode 工程，保留原始工程，使用仓库中的依赖锁定文件，最后对本机构建做 ad-hoc 签名及签名校验。`output/`、编译缓存和本机配置不提交到 Git。

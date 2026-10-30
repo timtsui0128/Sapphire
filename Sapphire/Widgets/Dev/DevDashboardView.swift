@@ -333,7 +333,7 @@ struct DevTaskDetailPane: View {
     private func outputHint(_ detail: DevTaskDetail) -> String {
         guard let host = detail.host else { return "This task has no terminal window; its processes are on the Processes tab." }
         if host.kind.isScriptable {
-            return "Reading \(host.name)… If nothing appears, allow Sapphire to control \(host.name) in System Settings › Privacy & Security › Automation."
+            return "Reading \(host.name)… If nothing appears, allow TopLet to control \(host.name) in System Settings › Privacy & Security › Automation."
         }
         return "\(host.name) doesn't let other apps read its tabs. Send input below or open it to see the output."
     }

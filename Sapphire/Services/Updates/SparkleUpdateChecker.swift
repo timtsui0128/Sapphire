@@ -170,7 +170,7 @@ final class UpdateChecker: NSObject, ObservableObject, SPUUserDriver, SPUUpdater
         NotificationCenter.default.post(name: .sapphireUpdateAvailable, object: releaseNotesVersion)
         guard SettingsModel.shared.current.updateAvailableNotificationsEnabled,
               SettingsModel.shared.current.automaticUpdateChecksEnabled, !NSApp.isActive else { return }
-        let title = L10n.format("Sapphire %@ is available", releaseNotesVersion ?? version)
+        let title = L10n.format("TopLet %@ is available", releaseNotesVersion ?? version)
         let body = L10n.string("Open Settings → About → Updates to install the new version.")
         let center = UNUserNotificationCenter.current()
         center.getNotificationSettings { settings in

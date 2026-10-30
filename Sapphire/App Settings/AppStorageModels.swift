@@ -4100,7 +4100,7 @@ private struct StoragePresentedScan {
             let size = trashEntries.reduce(Int64(0)) { saturatingAdd($0, $1.size) }
             recommendations.append(CleanupRecommendation(
                 category: .trash,
-                description: "Sapphire never permanently deletes Trash contents; review and empty Trash in Finder when ready",
+                description: "TopLet never permanently deletes Trash contents; review and empty Trash in Finder when ready",
                 potentialSpaceFreed: size,
                 actionDescription: "Review Trash in Finder",
                 isAutomatic: false,

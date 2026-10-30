@@ -99,12 +99,17 @@ enum LanguageChecks {
         UserDefaults.standard.setVolatileDomain([AppLanguage.defaultsKey: "en"], forName: UserDefaults.argumentDomain)
         SapphireStandardMenu.installIfNeeded()
         let menu = NSApp.mainMenu!
+        precondition(menu.items.first?.submenu?.items.first?.title == "Quit TopLet")
+        precondition(L10n.string("TopLet", language: .english) == "TopLet")
+        precondition(L10n.string("TopLet", language: .simplifiedChinese) == "TopLet")
+        precondition(L10n.string("Based on Sapphire by Shariq Charolia and contributors. Licensed under GNU AGPLv3.", language: .english).contains("Sapphire by Shariq Charolia"))
         let editMenu = menu.items.first { $0.submenu?.items.contains(where: { $0.action == Selector("undo:") }) == true }!.submenu!
         let shortcuts = editMenu.items.map(\.keyEquivalent)
         let actions = editMenu.items.map { $0.action.map(NSStringFromSelector) }
         UserDefaults.standard.setVolatileDomain([AppLanguage.defaultsKey: "zh-Hans"], forName: UserDefaults.argumentDomain)
         SapphireStandardMenu.refreshLanguage()
         SapphireStandardMenu.installIfNeeded()
+        precondition(menu.items.first?.submenu?.items.first?.title == "退出 TopLet")
         precondition(NSApp.mainMenu === menu, "Changing menu language replaced the existing menu")
         precondition(editMenu.items.first?.title == "撤销")
         precondition(editMenu.items.map(\.keyEquivalent) == shortcuts)

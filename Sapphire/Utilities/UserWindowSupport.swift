@@ -27,7 +27,7 @@ enum SapphireStandardMenu {
         let appMenu = NSMenu()
         appMenuItem.submenu = appMenu
         appMenu.addItem(
-            withTitle: L10n.string("Quit Sapphire"),
+            withTitle: L10n.string("Quit TopLet"),
             action: #selector(NSApplication.terminate(_:)),
             keyEquivalent: "q"
         )
@@ -55,7 +55,7 @@ enum SapphireStandardMenu {
     }
 
     static func refreshLanguage() {
-        let titles = ["terminate:": "Quit Sapphire", "undo:": "Undo", "redo:": "Redo",
+        let titles = ["terminate:": "Quit TopLet", "undo:": "Undo", "redo:": "Redo",
                       "cut:": "Cut", "copy:": "Copy", "paste:": "Paste", "selectAll:": "Select All"]
         func refresh(_ menu: NSMenu) {
             for item in menu.items {
@@ -307,9 +307,9 @@ enum HelperAlertPresenter {
         presentModal(
             messageText: "Sapphire Helper Needs Attention",
             informativeText: """
-            Sapphire lost connection to its system helper.
+            TopLet lost connection to its system helper.
 
-            Click “Reset Helper” to unregister Sapphire’s own background items, reinstall the helper, and relaunch. Other apps are not affected.
+            Click “Reset Helper” to unregister TopLet’s own background items, reinstall the helper, and relaunch. Other apps are not affected.
             """,
             alertStyle: .warning,
             buttonTitles: ["Reset Helper", "OK"]
@@ -325,7 +325,7 @@ enum HelperAlertPresenter {
         let buttons: [String]
         switch issue {
         case .notFound:
-            buttons = ["Reset Helper", "Relaunch Sapphire", "OK"]
+            buttons = ["Reset Helper", "Relaunch TopLet", "OK"]
         case .needsApproval:
             buttons = ["Open Login Items", "OK"]
         case .spawnFailed:
@@ -425,7 +425,7 @@ enum HelperAlertPresenter {
             backing: .buffered,
             defer: false
         )
-        window.title = L10n.string("Sapphire")
+        window.title = L10n.string("TopLet")
         window.isOpaque = false
         window.backgroundColor = .clear
         window.alphaValue = 0.001

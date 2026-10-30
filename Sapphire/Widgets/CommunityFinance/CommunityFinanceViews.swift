@@ -20,7 +20,7 @@ struct CommunityFinanceBoardView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "chart.line.uptrend.xyaxis").font(.largeTitle).foregroundStyle(.secondary)
                     Text("Your watchlist").font(.headline)
-                    Text("Add a symbol to follow its price in Sapphire.").font(.subheadline).foregroundStyle(.secondary)
+                    Text("Add a symbol to follow its price in TopLet.").font(.subheadline).foregroundStyle(.secondary)
                     Button("Add stock") { showSearch = true }
                 }
                 .frame(maxWidth: .infinity, minHeight: 190)

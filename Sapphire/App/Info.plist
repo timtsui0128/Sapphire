@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleName</key>
+	<string>TopLet</string>
+	<key>CFBundleDisplayName</key>
+	<string>TopLet</string>
 	<key>SUFeedURL</key>
 	<string>https://github.com/timtsui0128/Sapphire/releases/latest/download/appcast.xml</string>
 	<key>SUPublicEDKey</key>
@@ -26,7 +30,7 @@
 	<false/>
 
 	<key>SapphireLocalBuild</key>
-	<string>Capture &amp; Share $(CURRENT_PROJECT_VERSION)</string>
+	<string>TopLet $(CURRENT_PROJECT_VERSION)</string>
 	<key>NSDesktopFolderUsageDescription</key>
 	<string>Collect newly saved screenshots and keep them ready in the file shelf for multi-file dragging.</string>
 	<key>NSDocumentsFolderUsageDescription</key>
@@ -95,7 +99,7 @@
 				<string>sapphiredocklayout</string>
 			</array>
 			<key>CFBundleTypeName</key>
-			<string>Sapphire Dock Layout</string>
+			<string>TopLet Dock Layout</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -131,9 +135,9 @@
 		<true/>
 	</dict>
 	<key>NSAudioCaptureUsageDescription</key>
-	<string>Sapphire listens to your music app's audio on this Mac to time lyrics word by word. The audio never leaves your Mac.</string>
+	<string>TopLet listens to your music app's audio on this Mac to time lyrics word by word. The audio never leaves your Mac.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Sapphire uses Bluetooth to discover and connect to your paired Android device for Continuity (clipboard, notifications, media, hotspot).</string>
+	<string>TopLet uses Bluetooth to discover and connect to your paired Android device for Continuity (clipboard, notifications, media, hotspot).</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_sapphirecont._tcp</string>
@@ -141,11 +145,11 @@
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Sapphire uses the local network to move files, images and screen content between your Mac and your paired Android device.</string>
+	<string>TopLet uses the local network to move files, images and screen content between your Mac and your paired Android device.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Sapphire adds photos synced from your phone so they appear in the Photos app.</string>
+	<string>TopLet adds photos synced from your phone so they appear in the Photos app.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Sapphire adds photos synced from your phone so they appear in the Photos app.</string>
+	<string>TopLet adds photos synced from your phone so they appear in the Photos app.</string>
 	<key>NSScreenCaptureUsageDescription</key>
 	<string>Needed for gemini live activity</string>
 	<key>NSSystemExtensionPointIdentifier</key>
@@ -160,7 +164,7 @@
 				<string>public.json</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>Sapphire Settings Backup</string>
+			<string>TopLet Settings Backup</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.cshariq.sapphire.settings-backup</string>
 			<key>UTTypeTagSpecification</key>
@@ -177,7 +181,7 @@
 				<string>public.json</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>Sapphire Dock Layout</string>
+			<string>TopLet Dock Layout</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.cshariq.sapphire.docklayout</string>
 			<key>UTTypeTagSpecification</key>
@@ -194,7 +198,7 @@
 				<string>public.json</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>Sapphire Launchpad Item</string>
+			<string>TopLet Launchpad Item</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.cshariq.sapphire.launchpaditem</string>
 			<key>UTTypeTagSpecification</key>
@@ -238,7 +242,7 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>Take a Photo with Sapphire</string>
+				<string>Take a Photo with TopLet</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>takePhotoWithSapphire</string>
@@ -253,7 +257,7 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>Scan Documents with Sapphire</string>
+				<string>Scan Documents with TopLet</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>scanDocumentWithSapphire</string>
