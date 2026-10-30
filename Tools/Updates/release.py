@@ -159,7 +159,8 @@ def prepare(args):
                 "SUVerifyUpdateBeforeExtraction": True, "SURequireSignedFeed": True,
                 "SUSignedFeedFailureExpirationInterval": 0,
                 "CFBundleIdentifier": "com.cshariq.sapphire",
-                "CFBundleName": "TopLet", "CFBundleDisplayName": "TopLet"}
+                "CFBundleName": "TopLet", "CFBundleDisplayName": "TopLet",
+                "CFBundleExecutable": "TopLet"}
     if any(info.get(k) != v for k, v in expected.items()):
         raise RuntimeError("Built app metadata does not match the requested signed update channel")
     run(["codesign", "--verify", "--deep", "--strict", app])
@@ -169,7 +170,7 @@ def prepare(args):
                               (ROOT / "docs/licenses/Sparkle-LICENSE.txt", "Sparkle-LICENSE.txt")]:
         if (legal / bundled).read_bytes() != original.read_bytes():
             raise RuntimeError("The app is missing required license/attribution resources")
-    architectures = capture(["lipo", "-archs", app / "Contents/MacOS/Sapphire"])
+    architectures = capture(["lipo", "-archs", app / "Contents/MacOS" / info["CFBundleExecutable"]])
     if architectures != "arm64":
         raise RuntimeError("This personal release channel currently supports arm64 only")
     destination.mkdir(parents=True)
