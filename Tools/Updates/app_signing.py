@@ -57,7 +57,7 @@ def inspect(app):
     with tempfile.TemporaryDirectory(prefix='TopLetPublicCertificate-') as temporary:
         prefix = str(Path(temporary) / 'certificate')
         # Extract the PUBLIC certificate only. The private key stays in Keychain.
-        subprocess.run(['/usr/bin/codesign', '-d', '--extract-certificates', prefix, str(app)],
+        subprocess.run(['/usr/bin/codesign', '-d', '--extract-certificates=' + prefix, str(app)],
                        check=True, capture_output=True)
         fingerprint = hashlib.sha1(Path(prefix + '0').read_bytes()).hexdigest().upper()
     requirement = re.search(r'^designated => (.+)$', details, re.MULTILINE)

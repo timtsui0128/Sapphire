@@ -13,7 +13,7 @@ Install the first update-enabled app once, then open **Settings → About → Up
 - The app only accepts stable, signed personal releases from `timtsui0128/Sapphire`. Original upstream releases are not offered. This is periodic checking while the app runs, not a remote service that wakes a closed app.
 - Session locking blocks checks and user actions, cancels pending downloads/offers and staged update replies, and suppresses update UI. If locking occurs during extraction, the ready-to-install callback cancels the prepared update.
 
-This first channel publishes full Apple Silicon ZIP updates for macOS 14+. Version 0.1.2 (build 12) enables incremental updates between compatible builds; Intel releases are not enabled yet. Builds 10/11 require one full update because their URL policy rejects delta files. Downloads are managed inside the updater; they do not require manually downloading and replacing the app. These personal builds use local ad-hoc code signing, not Apple Developer ID notarization. Update archive signing is separate and is required even for these local builds.
+This first channel publishes full Apple Silicon ZIP updates for macOS 14+. Version 0.1.2 (build 12) enables incremental updates between compatible builds; Intel releases are not enabled yet. Builds 10/11 require one full update because their URL policy rejects delta files. Downloads are managed inside the updater; they do not require manually downloading and replacing the app. Releases through 0.1.9 use local ad-hoc code signing. Version 0.1.10 is a personal test build signed with a persistent Apple Development identity, without Apple notarization. Update archive signing is separate and is required even for these local builds.
 
 ## Security and source
 
@@ -87,4 +87,4 @@ The update tests build disposable native applications using the production user 
 - 当前提供 Apple Silicon / macOS 14+ 的完整包，以及兼容版本之间的增量包；尚未提供 Intel 发布。0.1.0／0.1.1 的更新器不接受增量 URL，需要先完整更新一次到 0.1.2，之后的兼容更新才能下载变化部分；补丁失败时回退完整包。发布工具自动从本地保留的最近两个兼容版本生成补丁，并在发布前实际应用验证。请保留原发布 ZIP 和 receipt，不要通过重新编译旧版代替。下载页显示已下载大小和平均速度，实际速度仍受 GitHub 网络影响。
 - 锁屏时禁止更新界面和操作，并取消可取消的下载／安装准备；不会为了提醒新版而在锁屏上弹出窗口。
 
-维护者以后运行上面的 `prepare` 命令构建并签名，再推送源码并运行 `publish` 发布。仅上传源码不会触发更新。此版本仍为本机 ad-hoc 签名，尚未进行 Apple Developer ID 公证；更新包的签名验证已独立启用。
+维护者以后运行上面的 `prepare` 命令构建并签名，再推送源码并运行 `publish` 发布。仅上传源码不会触发更新。0.1.9 及之前为 ad-hoc 临时签名；0.1.10 个人测试版改用固定 Apple Development 证书，尚未进行 Apple 公证。首次切换可能需要重新授权一次；更新包签名验证仍独立启用。
