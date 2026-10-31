@@ -1,5 +1,15 @@
 import AppKit
 
+@MainActor final class DragStateManager {
+    static let shared = DragStateManager()
+    var isDraggingFromShelf = false
+}
+@MainActor final class SettingsModel {
+    struct Values { var snapActivationDelay = 0.06 }
+    static let shared = SettingsModel()
+    var current = Values()
+}
+
 // Only OS event delivery and AX identity are replaced. Production drag-state
 // methods and frame placement/readback/retry logic are compiled unchanged.
 struct SnapWindowTarget: Equatable { let id: Int }
@@ -24,7 +34,65 @@ private func check(_ value: @autoclosure () -> Bool, _ message: String) throws {
         try geometry()
         try placement()
         try dragState()
-        print("PASS: snap geometry, verified placement/retry, cancellation and release identity")
+        try activation()
+        print("PASS: snap geometry, placement/retry, release identity and bounded dwell activation")
+    }
+
+    @MainActor static func activation() throws {
+        let displays = [CGRect(x: 0, y: 0, width: 1440, height: 900),
+                        CGRect(x: -1920, y: -200, width: 1920, height: 1080),
+                        CGRect(x: 100, y: 900, width: 1920, height: 1080)]
+        for screen in displays {
+            try check(SnapActivationRegion.contains(CGPoint(x: screen.midX, y: screen.maxY), in: screen), "Physical top edge rejected")
+            try check(SnapActivationRegion.contains(CGPoint(x: screen.midX, y: screen.maxY - 30), in: screen), "Top-center target rejected")
+            for point in [CGPoint(x: screen.midX, y: screen.midY),
+                          CGPoint(x: screen.midX + 200, y: screen.maxY - 10),
+                          CGPoint(x: screen.midX, y: screen.maxY - 60),
+                          CGPoint(x: screen.midX, y: screen.maxY + 1)] {
+                try check(!SnapActivationRegion.contains(point, in: screen), "Ordinary window drag entered activation region")
+            }
+        }
+        try check(!SnapActivationRegion.contains(.zero, in: .zero), "Missing display triggered snap")
+
+        var mouseDown = true
+        let manager = GlobalDragManager(isPrimaryButtonPressed: { mouseDown })
+        func wait(_ seconds: TimeInterval = 0.1) {
+            RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+        }
+        manager.startMonitoring()
+        manager.updateDrag(isInsideActivationZone: false)
+        wait()
+        try check(!manager.isDraggingInActivationZone && !manager.isActivationPending, "Ordinary movement opened the panel")
+        manager.updateDrag(isInsideActivationZone: true)
+        try check(!manager.isDraggingInActivationZone && manager.isActivationPending, "Entering skipped the dwell")
+        manager.updateDrag(isInsideActivationZone: false)
+        wait()
+        try check(!manager.isDraggingInActivationZone, "Brief crossing opened the panel after leaving")
+        manager.updateDrag(isInsideActivationZone: true)
+        wait()
+        try check(manager.isDraggingInActivationZone, "Deliberate dwell did not open the panel")
+        manager.updateDrag(isInsideActivationZone: false)
+        try check(manager.isDraggingInActivationZone, "Moving from trigger to a layout dismissed the panel")
+        manager.cancelActivation()
+        manager.updateDrag(isInsideActivationZone: false)
+        wait()
+        try check(!manager.isDraggingInActivationZone, "Cancellation reopened away from the trigger")
+        manager.updateDrag(isInsideActivationZone: true)
+        mouseDown = false
+        wait()
+        try check(!manager.isDraggingInActivationZone, "Released mouse opened the panel")
+        manager.endDrag()
+        mouseDown = true
+        DragStateManager.shared.isDraggingFromShelf = true
+        manager.updateDrag(isInsideActivationZone: true)
+        wait()
+        try check(!manager.isDraggingInActivationZone, "Screenshot/file shelf drag triggered window snapping")
+        manager.endDrag()
+        manager.updateDrag(isInsideActivationZone: true)
+        manager.stopMonitoring()
+        wait()
+        try check(!manager.isDraggingInActivationZone && !manager.isActivationPending, "Display teardown left a pending activation")
+        print("PASS: main/left/stacked display trigger bounds; dwell, exit, release, cancellation and shelf exclusion")
     }
 
     static func geometry() throws {

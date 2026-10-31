@@ -19,12 +19,15 @@ class GlobalDragManager: ObservableObject {
     @MainActor private let dragState = DragStateManager.shared
 
     private var monitoringOwnerCount = 0
+    private let isPrimaryButtonPressed: () -> Bool
 
     var isActivationPending: Bool {
         isInsideActivationRect && !isDraggingInActivationZone
     }
 
-    init() {}
+    init(isPrimaryButtonPressed: @escaping () -> Bool = { NSEvent.pressedMouseButtons & 1 != 0 }) {
+        self.isPrimaryButtonPressed = isPrimaryButtonPressed
+    }
 
     func startMonitoring() {
         monitoringOwnerCount += 1
@@ -56,7 +59,7 @@ class GlobalDragManager: ObservableObject {
             MainActor.assumeIsolated {
                 guard let self,
                       self.isInsideActivationRect,
-                      NSEvent.pressedMouseButtons & 1 != 0,
+                      self.isPrimaryButtonPressed(),
                       !self.dragState.isDraggingFromShelf else { return }
                 self.activationTimer = nil
                 self.isDraggingInActivationZone = true

@@ -72,7 +72,7 @@ Build output:
 output/public-build/Build/Products/Debug/TopLet.app
 ```
 
-The script generates an isolated Xcode project in `output/` for the current toolchain, preserves the original project, uses the repository's dependency lockfile, and ad-hoc signs and verifies the local build. Build output, caches, and local configuration are excluded from Git.
+The script generates an isolated Xcode project in `output/` for the current toolchain, preserves the original project, uses the repository's dependency lockfile, and signs and verifies the local build. Signing defaults to ad-hoc; maintainers can configure a persistent Keychain certificate as described in [application signing](docs/app-updates.md#stable-application-identity-and-macos-permissions). Build output, caches, and local configuration are excluded from Git.
 
 Local ad-hoc signing is not Developer ID signing or Apple notarization; privileged services that require developer signing may be unavailable. Screenshot collection only needs access to the screenshot save folder and does not request screen recording permission. Other app features request their own system permissions as needed.
 

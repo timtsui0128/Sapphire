@@ -18,6 +18,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from urllib.parse import urlsplit
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import app_signing
+
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = json.loads((Path(__file__).parent / "sparkle-tools.json").read_text())
 TOOLS = ROOT / "output/updater-tools"
@@ -164,6 +167,16 @@ def prepare(args):
     if any(info.get(k) != v for k, v in expected.items()):
         raise RuntimeError("Built app metadata does not match the requested signed update channel")
     run(["codesign", "--verify", "--deep", "--strict", app])
+    code_signature = app_signing.inspect(app)
+    previous_receipts = [json.loads(path.read_text()) for path in
+                         (ROOT / "output/releases").glob("personal-v*/release.json")]
+    previous_receipts = [receipt for receipt in previous_receipts
+                         if receipt.get("repository") == CONFIG["repository"]
+                         and str(receipt.get("build", "")).isdigit()
+                         and int(receipt["build"]) < int(args.build)]
+    if previous_receipts:
+        previous = max(previous_receipts, key=lambda receipt: int(receipt["build"]))
+        app_signing.validate_continuity(previous.get("code_signing", {"kind": "adhoc"}), code_signature)
     legal = app / "Contents/Resources/Legal"
     for original, bundled in [(ROOT / "LICENSE", "LICENSE-AGPLv3.txt"),
                               (ROOT / "CREDITS.md", "CREDITS.md"),
@@ -218,13 +231,14 @@ def prepare(args):
     (destination / "release-notes.md").write_text(
         note_text + f"\n\nSource: https://github.com/{CONFIG['repository']}/commit/{commit}\n"
         "\nTopLet is an unofficial personal fork of cshariq/Sapphire by Shariq Charolia. GNU AGPLv3.\n"
-        "Apple Silicon / macOS 14+. Locally ad-hoc signed; not Apple notarized.\n")
+        "Apple Silicon / macOS 14+. " + app_signing.description(code_signature) + "\n")
     checksum = destination / "SHA256SUMS.txt"
     checksum.write_text("".join(f"{sha256(p)}  {p.name}\n" for p in [archive, *deltas, feed]))
     assets = [archive, *deltas, feed, checksum]
     receipt = {"tag": tag, "version": args.version, "build": args.build, "commit": commit,
                "repository": CONFIG["repository"], "public_key": public_key,
                "app_bundle_name": APP_BUNDLE_NAME,
+               "code_signing": code_signature,
                "supports_delta_updates": True, "delta_bases": [base["build"] for base in bases],
                "assets": {p.name: {"sha256": sha256(p), "size": p.stat().st_size} for p in assets}}
     (destination / "release.json").write_text(json.dumps(receipt, indent=2) + "\n")

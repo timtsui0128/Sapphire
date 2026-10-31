@@ -40274,36 +40274,36 @@
         }
       }
     },
-    "Show Snap Zones when dragging a window. Hold Command to temporarily hide them.": {
+    "Drag a window to the top center of the screen and pause to show Snap Zones. Hold Command to bypass them.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Show Snap Zones when dragging a window. Hold Command to temporarily hide them."
+            "value": "Drag a window to the top center of the screen and pause to show Snap Zones. Hold Command to bypass them."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "拖动窗口时显示吸附区域，按住 Command 可暂时隐藏。"
+            "value": "将窗口拖到屏幕顶部正中的小区域并停留后显示分屏选项。按住 Command 可跳过。"
           }
         }
       }
     },
-    "Show Snap Zones when dragging near the notch.": {
+    "Drag to the small area at the top center of the screen and pause to show Snap Zones.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Show Snap Zones when dragging near the notch."
+            "value": "Drag to the small area at the top center of the screen and pause to show Snap Zones."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "拖动到刘海附近时显示吸附区域。"
+            "value": "拖到屏幕顶部正中的小区域并停留后显示分屏选项。"
           }
         }
       }

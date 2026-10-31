@@ -20,6 +20,8 @@ xcrun swiftc -swift-version 5 -parse-as-library \
   -module-cache-path "$REPO_ROOT/output/swift-module-cache" \
   "$REPO_ROOT/Sapphire/Models/SnapZoneModels.swift" \
   "$REPO_ROOT/Sapphire/Services/Zones/SnapWindowPlacement.swift" \
+  "$REPO_ROOT/Sapphire/Services/Zones/SnapActivationRegion.swift" \
+  "$REPO_ROOT/Sapphire/Notch/GlobalDragManager.swift" \
   "$CHECK_ROOT/WindowDragState.swift" \
   "$REPO_ROOT/Tools/SnapZoneTests/SnapChecks.swift" \
   -o "$CHECK_ROOT/snap-checks"

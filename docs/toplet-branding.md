@@ -12,7 +12,8 @@ TopLet remains based on Sapphire by Shariq Charolia and contributors and remains
 - Internal Xcode target, project path and Swift module remain `Sapphire`; `PRODUCT_NAME` is `TopLet`. Existing source build commands continue to work.
 - Release receipts record the bundle filename. Delta validation reads old receipts without this field as `Sapphire.app` and new receipts as `TopLet.app`; patches are applied and signature/metadata checked before publication.
 - Sparkle updates the old installed application **in place**. Its physical filename may remain `Sapphire.app`; this is not an incomplete update. New downloads contain `TopLet.app`. No automatic self-move, system permission reset or second app installation is performed.
-- Application signing remains ad-hoc, separate from Sparkle update signing. Existing macOS permission identity limitations are not solved by a name change.
+- Releases through 0.1.9 use ad-hoc application signing, separate from Sparkle update signing. New build tooling supports a persistent Keychain certificate; see [application signing](app-updates.md#stable-application-identity-and-macos-permissions). Renaming alone does not stabilize macOS permission identity.
+- To normalize an existing installation, quit the app completely first, rename the same `Sapphire.app` to `TopLet.app` in Finder, then reopen it. Do not move or rename a running app: Sparkle may retain the old installer path. Do not overwrite another existing TopLet copy.
 
 ## 简体中文
 

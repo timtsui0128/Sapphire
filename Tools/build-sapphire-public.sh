@@ -17,6 +17,8 @@ if [[ $# -gt 0 ]]; then
   exit 2
 fi
 
+python3 "$REPO_ROOT/Tools/Updates/app_signing.py" preflight
+
 VERSION_ARGS=()
 if [[ -n "${SAPPHIRE_VERSION:-}" ]]; then VERSION_ARGS+=("MARKETING_VERSION=$SAPPHIRE_VERSION"); fi
 if [[ -n "${SAPPHIRE_BUILD_NUMBER:-}" ]]; then VERSION_ARGS+=("CURRENT_PROJECT_VERSION=$SAPPHIRE_BUILD_NUMBER"); fi
@@ -54,7 +56,7 @@ cp "$REPO_ROOT/LICENSE" "$APP_LEGAL/LICENSE-AGPLv3.txt"
 cp "$REPO_ROOT/CREDITS.md" "$APP_LEGAL/CREDITS.md"
 cp "$REPO_ROOT/docs/licenses/Sparkle-LICENSE.txt" "$APP_LEGAL/Sparkle-LICENSE.txt"
 
-# Local ad-hoc signing makes the resulting app launchable without a developer account.
-codesign --force --deep --sign - "$APP_PATH"
-codesign --verify --deep --strict "$APP_PATH"
+# Reuse the configured Keychain identity for every version. Without a configured
+# identity local builds remain ad-hoc; missing configured keys fail closed.
+python3 "$REPO_ROOT/Tools/Updates/app_signing.py" sign "$APP_PATH"
 printf '%s\n' "$APP_PATH"

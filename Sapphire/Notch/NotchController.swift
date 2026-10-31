@@ -413,16 +413,24 @@ struct NotchController: View {
     }
 
     private var isInteractive: Bool {
-        !isManuallyHidden && (notchState == .clickExpanded || isHovered || dragManager.isDraggingInActivationZone || windowDrag.isDragging)
+        !isManuallyHidden && (notchState == .clickExpanded || isHovered || dragManager.isDraggingInActivationZone)
+    }
+
+    private var isWindowSnapPanelActive: Bool {
+        windowDrag.isDragging && notchState == .clickExpanded && navigationStack.last == .snapZones
+    }
+
+    private var isSnapDragActivationEnabled: Bool {
+        settings.settings.snapDragEnabled || (windowDrag.isDragging && settings.settings.snapOnWindowDragEnabled)
     }
 
     private var isPointerInteractionActive: Bool {
-        !isManuallyHidden && (isHovered || dragManager.isDraggingInActivationZone || windowDrag.isDragging)
+        !isManuallyHidden && (isHovered || dragManager.isDraggingInActivationZone || isWindowSnapPanelActive)
     }
 
     private var isPointerCaptureActive: Bool {
         dragManager.isDraggingInActivationZone
-            || windowDrag.isDragging
+            || isWindowSnapPanelActive
             || (isHovered && NSEvent.pressedMouseButtons != 0)
     }
 
@@ -1081,7 +1089,7 @@ struct NotchController: View {
             scheduleWindowDragCleanup()
             reevaluatePointerInteraction()
             guard wasHandlingActiveWindowDrag else { return }
-            handleWindowDragChange(isDragging: false)
+            finishWindowDrag()
             return
         }
 
@@ -1122,12 +1130,12 @@ struct NotchController: View {
                 SnapPreviewManager.shared.hidePreview()
             }
             guard scratch.isHandlingActiveWindowDrag else {
-                if navigationStack.last == .snapZones { handleWindowDragChange(isDragging: false) }
+                if navigationStack.last == .snapZones { finishWindowDrag() }
                 return
             }
             scratch.isHandlingActiveWindowDrag = false
             hoverMonitor?.setExternalMouseDragActive(false)
-            handleWindowDragChange(isDragging: false)
+            finishWindowDrag()
             return
         }
 
@@ -1140,8 +1148,9 @@ struct NotchController: View {
         notchLog.info("handleWindowDragDisplayChange: display=\(displayID.map(String.init) ?? "nil") mouse=\(mouseLocation.x),\(mouseLocation.y) myDisplayID=\(myDisplayID.map(String.init) ?? "nil") notchScreenFrame=\(notchScreenFrame.minX),\(notchScreenFrame.minY)-\(notchScreenFrame.maxX),\(notchScreenFrame.maxY)")
         guard !scratch.isHandlingActiveWindowDrag else { return }
         scratch.isHandlingActiveWindowDrag = true
+        // Observation alone must never expand or capture the screen. The mouse
+        // samples below go through the same bounded dwell trigger as other drags.
         hoverMonitor?.setExternalMouseDragActive(true)
-        handleWindowDragChange(isDragging: true)
     }
 
     private func handleSnapZoneDismissalChange(_ isDismissed: Bool) {
@@ -1166,9 +1175,10 @@ struct NotchController: View {
         guard settings.settings.snapOnWindowDragEnabled,
               !windowDrag.isSnapZoneDismissedForCurrentDrag,
               cursorIsOnMyScreen else { return }
-        scratch.isHandlingActiveWindowDrag = true
-        hoverMonitor?.setExternalMouseDragActive(true)
-        handleWindowDragChange(isDragging: true)
+        handleWindowDragDisplayChange(windowDrag.cursorDisplayID)
+        // A stationary cursor does not generate a new sample when Command is
+        // released. Restart the dwell only if it is still inside the trigger.
+        handleProbeMouseDrag(isInside: false, screenLocation: NSEvent.mouseLocation)
     }
 
     private func updateSpacePlayPauseTap() {
@@ -2577,7 +2587,12 @@ struct NotchController: View {
         scratch.isCollapseTimerActive = false
 
         if isDragging {
-            guard !shouldSuppressSnapZoneActivation else { return }
+            guard dragManager.isDraggingInActivationZone,
+                  NSEvent.pressedMouseButtons & 1 != 0,
+                  !shouldBlockNotchExpansionWhileLocked,
+                  !shouldSuppressSnapZoneActivation else { return }
+            scratch.dragEndCollapseTask?.cancel()
+            scratch.dragEndCollapseTask = nil
             if isPinned {
                 isPinned = false
             }
@@ -2589,7 +2604,7 @@ struct NotchController: View {
                 navigationStack = [.fileShelfLanding]
 
             } else {
-                if settings.settings.snapDragEnabled {
+                if isSnapDragActivationEnabled {
                     self.navigationStack = [.snapZones]
                     notchState = .clickExpanded
                 }
@@ -2598,6 +2613,7 @@ struct NotchController: View {
         } else {
             guard navigationStack.last == .snapZones else { return }
             try? await Task.sleep(for: .milliseconds(50))
+            guard !dragManager.isDraggingInActivationZone else { return }
             (NSApp.delegate as? AppDelegate)?.revertNotchWindowFocus(notchWindow)
 
             if dragState.didJustDrop {
@@ -2617,40 +2633,25 @@ struct NotchController: View {
         }
     }
 
-    private func handleWindowDragChange(isDragging: Bool) {
+    private func finishWindowDrag() {
         scratch.collapseTask?.cancel()
         scratch.isCollapseTimerActive = false
+        (NSApp.delegate as? AppDelegate)?.revertNotchWindowFocus(notchWindow)
 
-        if isDragging {
-            scratch.dragEndCollapseTask?.cancel()
+        guard navigationStack.last == .snapZones else { return }
+        scratch.dragEndCollapseTask?.cancel()
+        scratch.dragEndCollapseTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(100))
+            guard !Task.isCancelled,
+                  !isPinned,
+                  !(isHovered && cursorIsOnMyScreen),
+                  !dragManager.isDraggingInActivationZone,
+                  !isFileDropTargeted,
+                  !isFileDragSessionInProgress,
+                  navigationStack.last == .snapZones else { return }
+            noteCollapseReason("direct in finishWindowDrag")
+            notchState = isLiveActivityActive ? .autoExpanded : .initial
             scratch.dragEndCollapseTask = nil
-            if isPinned {
-                isPinned = false
-            }
-
-            self.navigationStack = [.snapZones]
-            if notchState != .clickExpanded {
-                notchState = .clickExpanded
-            }
-
-        } else {
-            (NSApp.delegate as? AppDelegate)?.revertNotchWindowFocus(notchWindow)
-
-            guard navigationStack.last == .snapZones else { return }
-            scratch.dragEndCollapseTask?.cancel()
-            scratch.dragEndCollapseTask = Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(100))
-                guard !Task.isCancelled,
-                      !isPinned,
-                      !(isHovered && cursorIsOnMyScreen),
-                      !dragManager.isDraggingInActivationZone,
-                      !isFileDropTargeted,
-                      !isFileDragSessionInProgress,
-                      navigationStack.last == .snapZones else { return }
-                noteCollapseReason("direct in handleWindowDragChange")
-                notchState = isLiveActivityActive ? .autoExpanded : .initial
-                scratch.dragEndCollapseTask = nil
-            }
         }
     }
 
@@ -3167,39 +3168,26 @@ struct NotchController: View {
                 handleWindowDragDisplayChange(nil)
             }
         }
-        if windowDrag.isDragging, shouldSuppressSnapZoneActivation {
+        if shouldSuppressSnapZoneActivation {
             dragManager.cancelActivation()
             return
         }
         if isInside || scratch.isHandlingActiveWindowDrag || navigationStack.last == .snapZones {
             updateNotchDragLocation(from: screenLocation)
         }
-        guard settings.settings.snapDragEnabled else {
+        guard isSnapDragActivationEnabled, !shouldBlockNotchExpansionWhileLocked else {
             dragManager.cancelActivation()
             return
         }
         dragManager.updateDrag(
-            isInsideActivationZone: isInside || isNearNotchForSnapActivation(screenLocation)
+            isInsideActivationZone: isInsideSnapActivationRegion(screenLocation)
         )
     }
 
-    private static let snapActivationOutset = CGSize(width: 140, height: 70)
-    private static let snapActivationRetainOutset = CGSize(width: 220, height: 130)
-
-    private func isNearNotchForSnapActivation(_ screenLocation: NSPoint) -> Bool {
-        guard let window = notchWindow, let config else { return false }
-        if let screen = assignedScreen,
-           NotchDisplayTargeting.screen(containing: screenLocation)?.displayID != screen.displayID {
-            return false
-        }
-        let notchFrame = window.convertToScreen(interactiveFrame(for: window, config: config))
-        guard !notchFrame.isEmpty else { return false }
-        let outset = dragManager.isActivationPending
-            ? Self.snapActivationRetainOutset
-            : Self.snapActivationOutset
-        return notchFrame
-            .insetBy(dx: -outset.width, dy: -outset.height)
-            .contains(screenLocation)
+    private func isInsideSnapActivationRegion(_ screenLocation: NSPoint) -> Bool {
+        guard let screen = assignedScreen,
+              NotchDisplayTargeting.screen(containing: screenLocation)?.displayID == screen.displayID else { return false }
+        return SnapActivationRegion.contains(screenLocation, in: screen.frame)
     }
 
     private func handleProbeMouseDragEnded(at screenLocation: NSPoint) {
@@ -3603,7 +3591,7 @@ struct NotchController: View {
     }
 
     private var hostWindowExtent: NotchHostWindowExtent {
-        let isFull = (!isManuallyHidden && (dragManager.isDraggingInActivationZone || windowDrag.isDragging))
+        let isFull = (!isManuallyHidden && dragManager.isDraggingInActivationZone)
             || isFileDragSessionInProgress
             || isFileDropTargeted
             || (notchState == .clickExpanded && navigationStack.last == .snapZones)

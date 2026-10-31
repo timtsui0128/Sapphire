@@ -72,7 +72,7 @@ bash Tools/build-sapphire-public.sh
 output/public-build/Build/Products/Debug/TopLet.app
 ```
 
-脚本在 `output/` 中生成兼容当前工具链的隔离 Xcode 工程，保留原始工程，使用仓库中的依赖锁定文件，最后对本机构建做 ad-hoc 签名及签名校验。`output/`、编译缓存和本机配置不提交到 Git。
+脚本在 `output/` 中生成兼容当前工具链的隔离 Xcode 工程，保留原始工程，使用仓库中的依赖锁定文件，最后进行签名及校验；默认使用 ad-hoc，维护者也可以[配置固定的钥匙串签名证书](docs/app-updates.md#权限与固定签名)。`output/`、编译缓存和本机配置不提交到 Git。
 
 本地 ad-hoc 签名不等同于 Developer ID 签名或 Apple 公证；要求开发者签名的特权服务可能不可用。截图收集本身只需要访问截图保存文件夹，不申请屏幕录制权限。应用其他功能按需使用各自的系统权限。
 

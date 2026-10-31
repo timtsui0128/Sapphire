@@ -116,3 +116,6 @@ Sapphire.xcodeproj/xcuserdata/Shariq.xcuserdatad/xcschemes/xcschememanagement.pl
 
 # Python tool caches
 __pycache__/
+
+# Local choice of Keychain code-signing certificate (never private key material)
+/Tools/Updates/signing.local.json

@@ -27,6 +27,20 @@ This first channel publishes full Apple Silicon ZIP updates for macOS 14+. Versi
 
 Keep the signing Keychain backed up. Losing this key prevents existing installs from accepting new signed feeds; it may require another manual bootstrap installation. Do not generate a replacement key for an existing channel casually. Anyone making a separate fork should create their own key and feed before distributing it.
 
+## Stable application identity and macOS permissions
+
+macOS associates Accessibility/window-control approval with the app's designated code requirement. An ad-hoc build uses a requirement tied to that build's code hash; Sparkle's archive signature does not make that application identity stable. Builds through 0.1.9 use ad-hoc signing.
+
+The public build script now accepts a persistent Keychain certificate. Save a local `Tools/Updates/signing.local.json` containing `{"identity": "YOUR_40_DIGIT_CERTIFICATE_FINGERPRINT"}`, or set `TOPLET_SIGNING_IDENTITY` to that fingerprint. The config is Git-ignored and contains only the public identity reference, never a key or password. With no configured identity the build stays ad-hoc. A configured but unavailable/expired identity fails the build instead of silently falling back.
+
+Use Apple Development only for personal testing; Developer ID Application is the distribution identity. This pipeline does not notarize builds. Switching from ad-hoc to a certificate, or between development and distribution identities, can require one new authorization. Keep the bundle identifier, installed path and designated requirement stable afterwards. The release receipt records the actual signature; preparing a subsequent release rejects a changed requirement or return to ad-hoc signing. Certificate renewal is allowed when its designated requirement stays the same. A real update and user-approved window-control check are still needed to confirm permission retention on the target Mac.
+
+Reference: [Apple TN3127: Inside Code Signing Requirements](https://developer.apple.com/documentation/technotes/tn3127-inside-code-signing-requirements).
+
+### 权限与固定签名
+
+0.1.9 及之前使用 ad-hoc 临时签名，每次构建的系统身份可能改变，导致辅助功能／窗口控制权限需要重新授权。Sparkle 的更新包签名与此不同。构建脚本现支持在上述本机配置中固定选择钥匙串证书；证书缺失时直接停止构建，不会自动退回临时签名。开发证书只用于个人测试，公开分发应使用 Developer ID；本流程尚未实现公证。首次切换身份仍可能需要授权一次，之后是否保留权限需要通过实际更新验证。
+
 ## Maintainer release workflow
 
 Commit all source changes and run the relevant tests. The first release uses `0.1.0` / build `10`; use a larger build number for every subsequent release. Tags are `personal-vVERSION`.
@@ -54,6 +68,7 @@ Each release provides a single current signed feed with a full ZIP fallback. The
 ```sh
 python3 Tools/UpdateTests/run.py
 python3 Tools/UpdateTests/publisher_checks.py
+python3 Tools/UpdateTests/signing_checks.py
 bash Tools/LocalizationTests/run.sh
 bash Tools/build-sapphire-public.sh
 ```

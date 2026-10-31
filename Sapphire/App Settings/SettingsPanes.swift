@@ -4066,12 +4066,12 @@ struct SnapZonesSettingsView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     ToggleRow(
                         title: "Activate on Drag",
-                        description: "Show Snap Zones when dragging near the notch.",
+                        description: "Drag to the small area at the top center of the screen and pause to show Snap Zones.",
                         isOn: $settings.settings.snapDragEnabled
                     )
                     ToggleRow(
                         title: "Activate on Window Drag",
-                        description: "Show Snap Zones when dragging a window. Hold Command to temporarily hide them.",
+                        description: "Drag a window to the top center of the screen and pause to show Snap Zones. Hold Command to bypass them.",
                         isOn: $settings.settings.snapOnWindowDragEnabled
                     )
 
