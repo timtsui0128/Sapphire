@@ -225,6 +225,7 @@ final class NotchHoverMonitor {
     private var isProactiveFileDragTargeted = false
     private var isUsingDragEnvelope = false
     private var isExternalMouseDragActive = false
+    private var isSystemWindowDragSuppressed = false
     private var lastExternalMouseDragLocation: NSPoint?
     private var dropWindow: HoverProbeWindow?
     private var dropArmMouseDownToken: UUID?
@@ -365,12 +366,17 @@ final class NotchHoverMonitor {
         isParked = true
         pointerIsInside = false
         isUsingDragEnvelope = false
+        isSystemWindowDragSuppressed = false
     }
 
     // MARK: Geometry
 
     func update(hoverRect rect: CGRect, pointerIsInside: Bool) {
         guard let window = notchWindow, let probeWindow else { return }
+        guard !isSystemWindowDragSuppressed else {
+            park()
+            return
+        }
 
         self.pointerIsInside = pointerIsInside
         probeWindow.setHoverDetectionEnabled(!pointerIsInside)
@@ -588,9 +594,21 @@ final class NotchHoverMonitor {
         }
     }
 
+    func setSystemWindowDragSuppressed(_ suppressed: Bool) {
+        guard isSystemWindowDragSuppressed != suppressed else { return }
+        isSystemWindowDragSuppressed = suppressed
+        if suppressed {
+            // Global observation may continue, but the transparent probe must
+            // not remain armed over Mission Control or receive the drop.
+            probeWindow?.setArmedForMouseSequence(false)
+            park()
+        }
+    }
+
     // MARK: Drag ownership
 
     private func handleProbeBoundary(isInside: Bool, event: NSEvent) {
+        guard !isSystemWindowDragSuppressed else { return }
         if NSEvent.pressedMouseButtons & 1 != 0 {
             handleMouseDragged(
                 at: screenLocation(for: event),
@@ -603,6 +621,7 @@ final class NotchHoverMonitor {
     }
 
     private func handleProbePointerSample() {
+        guard !isSystemWindowDragSuppressed else { return }
         if NSEvent.pressedMouseButtons & 1 != 0 {
             armForPotentialMouseDrag(at: NSEvent.mouseLocation)
         } else {
@@ -612,7 +631,8 @@ final class NotchHoverMonitor {
     }
 
     private func armForPotentialMouseDrag(at location: NSPoint) {
-        guard NSEvent.pressedMouseButtons & 1 != 0,
+        guard !isSystemWindowDragSuppressed,
+              NSEvent.pressedMouseButtons & 1 != 0,
               let probeWindow else { return }
 
         finishDeferredMouseSequenceBeforeNewPress(in: probeWindow)
@@ -670,7 +690,8 @@ final class NotchHoverMonitor {
         at location: NSPoint,
         knownContainment: Bool? = nil
     ) {
-        guard NSEvent.pressedMouseButtons & 1 != 0,
+        guard !isSystemWindowDragSuppressed,
+              NSEvent.pressedMouseButtons & 1 != 0,
               let probeWindow else { return }
         if mouseDownLocation == nil {
             finishDeferredMouseSequenceBeforeNewPress(in: probeWindow)
@@ -937,6 +958,7 @@ final class NotchHoverMonitor {
     }
 
     private func handleGlobalMouseDragged(_ event: NSEvent) {
+        guard !isSystemWindowDragSuppressed else { return }
         let location = screenLocation(for: event)
         if isExternalMouseDragActive {
             guard location != lastExternalMouseDragLocation else { return }
@@ -994,6 +1016,7 @@ final class NotchHoverMonitor {
     }
 
     private func sampleMouseDragState() {
+        guard !isSystemWindowDragSuppressed else { return }
         if isExternalMouseDragActive {
             let location = NSEvent.mouseLocation
             if location != lastExternalMouseDragLocation {

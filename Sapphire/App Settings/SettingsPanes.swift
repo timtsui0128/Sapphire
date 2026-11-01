@@ -4066,12 +4066,12 @@ struct SnapZonesSettingsView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     ToggleRow(
                         title: "Activate on Drag",
-                        description: "Drag to the small area at the top center of the screen and pause to show Snap Zones.",
+                        description: "Pause just below the menu bar at the center to show Snap Zones. The top edge stays available for Mission Control.",
                         isOn: $settings.settings.snapDragEnabled
                     )
                     ToggleRow(
                         title: "Activate on Window Drag",
-                        description: "Drag a window to the top center of the screen and pause to show Snap Zones. Hold Command to bypass them.",
+                        description: "Pause with a window just below the menu bar at the center to show Snap Zones. Keep dragging to the top edge for Mission Control. Hold Command to bypass snapping.",
                         isOn: $settings.settings.snapOnWindowDragEnabled
                     )
 

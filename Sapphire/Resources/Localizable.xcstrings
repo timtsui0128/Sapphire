@@ -54568,6 +54568,38 @@
           }
         }
       }
+    },
+    "Pause just below the menu bar at the center to show Snap Zones. The top edge stays available for Mission Control.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause just below the menu bar at the center to show Snap Zones. The top edge stays available for Mission Control."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拖到菜单栏下方正中的小区域并停留，即可展开分屏。屏幕最顶边保留给 Mission Control。"
+          }
+        }
+      }
+    },
+    "Pause with a window just below the menu bar at the center to show Snap Zones. Keep dragging to the top edge for Mission Control. Hold Command to bypass snapping.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause with a window just below the menu bar at the center to show Snap Zones. Keep dragging to the top edge for Mission Control. Hold Command to bypass snapping."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拖住窗口，在菜单栏下方正中停留以展开分屏；继续拖到屏幕最顶边进入 Mission Control。按住 Command 可跳过分屏。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

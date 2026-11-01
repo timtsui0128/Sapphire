@@ -17,7 +17,7 @@ class SnapPreviewManager {
     private init() {}
 
     func showPreview(for zone: SnapZone) {
-        guard !SessionPrivacyState.shouldSuppressUI() else {
+        guard !SessionPrivacyState.shouldSuppressUI(), !WindowDragState.shared.shouldIgnoreSnapRelease else {
             previewWindow?.orderOut(nil)
             return
         }
@@ -42,9 +42,9 @@ class SnapPreviewManager {
         }
     }
 
-    func hidePreview() {
+    func hidePreview(immediately: Bool = false) {
         guard let window = previewWindow, window.isVisible else { return }
-        guard !SessionPrivacyState.shouldSuppressUI() else {
+        guard !immediately, !SessionPrivacyState.shouldSuppressUI() else {
             window.orderOut(nil)
             return
         }

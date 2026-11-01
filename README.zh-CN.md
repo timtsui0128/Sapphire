@@ -36,7 +36,7 @@ This is an unofficial personal fork of Sapphire, originally created by Shariq Ch
 | Pin 与点击修复 | 固定后图标点亮，详情页可取消，Esc 可解除固定并收起；修正 SwiftUI hosting 层级下的点击范围查询 | [Pin 与输入](docs/pin-and-input.md) |
 | 音乐封面同步 | 新歌名先到时清除上一首封面；支持稍后到达的封面，拦截旧歌曲迟到的图片下载 | [封面修复](docs/releases/0.1.4.md) |
 | 安全与玻璃可读性 | 音乐凭据迁入钥匙串，密码／OAuth 防护，磨砂面板按钮避开系统菜单栏 | [安全说明](docs/security-hardening.md) · [0.1.5 更新](docs/releases/0.1.5.md) |
-| 窗口分屏 | 仅拖到屏幕顶部正中并停留才展开；保留实际拖动窗口、等待异步缩放／移动完成、核验结果并匹配目标显示器 | [窗口分屏](docs/window-snapping.md) |
+| 窗口分屏 | 拖到菜单栏下方正中并停留才展开，继续拖到最顶边则让给 Mission Control；保留实际拖动窗口、等待异步缩放／移动完成、核验结果并匹配目标显示器 | [窗口分屏](docs/window-snapping.md) |
 
 截图主入口为 **File Shelf → Screenshots**，保存策略可通过截图页齿轮调整。Sports、Finance 和 Appearance 分别在对应设置页中配置。
 
@@ -46,7 +46,7 @@ This is an unofficial personal fork of Sapphire, originally created by Shariq Ch
 
 ## 当前源码版本与运行范围
 
-- 当前源码的构建标记为 **TopLet 21**（版本 **0.1.11**，构建 **21**），此个人测试版使用固定 Apple Development 证书签名，尚未进行 Apple 公证；从临时签名首次切换后可能需要重新授权一次窗口控制。
+- 当前源码的构建标记为 **TopLet 22**（版本 **0.1.12**，构建 **22**），此个人测试版使用固定 Apple Development 证书签名，尚未进行 Apple 公证；从临时签名首次切换后可能需要重新授权一次窗口控制。
 - 个人开发分支为 **`codex/personal-notched-tools`**。`main` 保留 Fork 时的上游状态；本分支基于上面标注的提交，尚未合并上游后续的 macOS 27 充电限制改动。
 - 最低部署目标为 macOS 14；当前完整构建与本地安装包在 Apple Silicon（arm64）Mac 上验证。Intel 机器和不同 macOS 版本尚未完整验收。
 - 上游未公开的付费模块继续使用公开占位或兼容实现。独立实现的 Sports／Finance 不依赖这些私有模块，也不连接或同步 Apple Sports／Stocks 账户。

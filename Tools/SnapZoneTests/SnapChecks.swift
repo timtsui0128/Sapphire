@@ -35,6 +35,7 @@ private func check(_ value: @autoclosure () -> Bool, _ message: String) throws {
         try placement()
         try dragState()
         try activation()
+        try systemDragHandoff()
         try asynchronousPlacement()
         try compatibility()
         print("PASS: snap geometry, placement/retry, release identity and bounded dwell activation")
@@ -45,11 +46,19 @@ private func check(_ value: @autoclosure () -> Bool, _ message: String) throws {
                         CGRect(x: -1920, y: -200, width: 1920, height: 1080),
                         CGRect(x: 100, y: 900, width: 1920, height: 1080)]
         for screen in displays {
-            try check(SnapActivationRegion.contains(CGPoint(x: screen.midX, y: screen.maxY), in: screen), "Physical top edge rejected")
-            try check(SnapActivationRegion.contains(CGPoint(x: screen.midX, y: screen.maxY - 30), in: screen), "Top-center target rejected")
+            try check(SnapActivationRegion.contains(CGPoint(x: screen.midX, y: screen.maxY - 72), in: screen), "Inset top-center target rejected")
+            for x in [screen.minX, screen.midX, screen.maxX] {
+                for depth in [CGFloat(0), 6, 12] {
+                    let point = CGPoint(x: x, y: screen.maxY - depth)
+                    try check(!SnapActivationRegion.contains(point, in: screen), "System top edge entered snap activation")
+                    try check(SnapActivationRegion.isSystemTopEdge(point, in: screen), "System edge rejected on an offset display")
+                }
+            }
+            try check(!SnapActivationRegion.isSystemTopEdge(CGPoint(x: screen.midX, y: screen.maxY - 72), in: screen), "Snap target handed off to system")
             for point in [CGPoint(x: screen.midX, y: screen.midY),
-                          CGPoint(x: screen.midX + 200, y: screen.maxY - 10),
-                          CGPoint(x: screen.midX, y: screen.maxY - 60),
+                          CGPoint(x: screen.midX + 200, y: screen.maxY - 72),
+                          CGPoint(x: screen.midX, y: screen.maxY - 30),
+                          CGPoint(x: screen.midX, y: screen.maxY - 100),
                           CGPoint(x: screen.midX, y: screen.maxY + 1)] {
                 try check(!SnapActivationRegion.contains(point, in: screen), "Ordinary window drag entered activation region")
             }
@@ -85,6 +94,11 @@ private func check(_ value: @autoclosure () -> Bool, _ message: String) throws {
         try check(!manager.isDraggingInActivationZone, "Released mouse opened the panel")
         manager.endDrag()
         mouseDown = true
+        var stillInside = true
+        manager.updateDrag(isInsideActivationZone: true, canActivate: { stillInside })
+        stillInside = false // final motion callback has not arrived yet
+        wait()
+        try check(!manager.isDraggingInActivationZone && !manager.isActivationPending, "Stale dwell fired after cursor left for Mission Control")
         DragStateManager.shared.isDraggingFromShelf = true
         manager.updateDrag(isInsideActivationZone: true)
         wait()
@@ -95,6 +109,45 @@ private func check(_ value: @autoclosure () -> Bool, _ message: String) throws {
         wait()
         try check(!manager.isDraggingInActivationZone && !manager.isActivationPending, "Display teardown left a pending activation")
         print("PASS: main/left/stacked display trigger bounds; dwell, exit, release, cancellation and shelf exclusion")
+    }
+
+    @MainActor static func systemDragHandoff() throws {
+        var mouseDown = true
+        let state = WindowDragState(isPrimaryButtonPressed: { mouseDown })
+        let manager = GlobalDragManager(isPrimaryButtonPressed: { mouseDown })
+        manager.startMonitoring()
+        func wait() { RunLoop.main.run(until: Date().addingTimeInterval(0.1)) }
+        for openFirst in [false, true] {
+            state.beginDrag(target: SnapWindowTarget(id: 1), bypassModifierIsPressed: false)
+            manager.updateDrag(isInsideActivationZone: true, canActivate: { !state.isYieldingToSystemDrag })
+            if openFirst { wait(); try check(manager.isDraggingInActivationZone, "Fixture did not open snap panel") }
+            state.yieldSnapZonesToSystem()
+            manager.cancelActivation()
+            wait()
+            try check(!manager.isDraggingInActivationZone && !manager.isActivationPending, "Handoff retained open or pending snap panel")
+            try check(state.shouldIgnoreSnapRelease, "System drag may apply a stale snap zone")
+            // AX observer replacement must not reset a still-held physical drag.
+            state.endDrag()
+            state.beginDrag(target: SnapWindowTarget(id: 2), bypassModifierIsPressed: false)
+            try check(state.isYieldingToSystemDrag && state.isSnapZoneDismissedForCurrentDrag, "Observer/display change rearmed system drag")
+            manager.updateDrag(isInsideActivationZone: true, canActivate: { !state.isYieldingToSystemDrag })
+            wait()
+            try check(!manager.isDraggingInActivationZone, "Returning through target reopened during system drag")
+            mouseDown = false
+            wait()
+            try check(!state.isYieldingToSystemDrag && !state.isDragging && state.shouldIgnoreSnapRelease, "Mouse-up lost cancellation or retained input handoff")
+            manager.endDrag()
+            mouseDown = true
+            state.beginDrag(bypassModifierIsPressed: false)
+            try check(!state.isSnapZoneDismissedForCurrentDrag && !state.shouldIgnoreSnapRelease, "New drag remained disabled")
+            manager.updateDrag(isInsideActivationZone: true, canActivate: { !state.isYieldingToSystemDrag })
+            wait()
+            try check(manager.isDraggingInActivationZone, "New drag cannot open snap layouts")
+            state.endDrag()
+            manager.endDrag()
+        }
+        manager.stopMonitoring()
+        print("PASS: Mission Control handoff before/after dwell, observer replacement, no reopen until mouse-up, next-drag recovery")
     }
 
     static func geometry() throws {

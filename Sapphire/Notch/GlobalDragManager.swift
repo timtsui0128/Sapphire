@@ -39,7 +39,7 @@ class GlobalDragManager: ObservableObject {
         endDrag()
     }
 
-    func updateDrag(isInsideActivationZone: Bool) {
+    func updateDrag(isInsideActivationZone: Bool, canActivate: @escaping () -> Bool = { true }) {
         guard monitoringOwnerCount > 0 else { return }
         guard !dragState.isDraggingFromShelf else {
             cancelActivation()
@@ -57,11 +57,15 @@ class GlobalDragManager: ObservableObject {
         let delay = max(0.05, SettingsModel.shared.current.snapActivationDelay)
         let timer = Timer(timeInterval: delay, repeats: false) { [weak self] _ in
             MainActor.assumeIsolated {
-                guard let self,
-                      self.isInsideActivationRect,
-                      self.isPrimaryButtonPressed(),
-                      !self.dragState.isDraggingFromShelf else { return }
+                guard let self else { return }
                 self.activationTimer = nil
+                guard self.isInsideActivationRect,
+                      self.isPrimaryButtonPressed(),
+                      !self.dragState.isDraggingFromShelf,
+                      canActivate() else {
+                    self.cancelPendingActivation()
+                    return
+                }
                 self.isDraggingInActivationZone = true
             }
         }

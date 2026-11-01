@@ -24,6 +24,9 @@ final class WindowDragState: ObservableObject {
     @Published private(set) var isSnapZoneDismissedForCurrentDrag = false
     @Published private(set) var isSnapZoneBypassModifierPressed = false
     @Published private(set) var cursorDisplayID: CGDirectDisplayID?
+    @Published private(set) var isYieldingToSystemDrag = false
+    private var systemDragReleaseTimer: Timer?
+    private let isPrimaryButtonPressed: () -> Bool
     private var modifierFlagsMonitorToken: UUID?
     private var dragPollingTimer: Timer?
     private var draggedWindow: SnapWindowTarget?
@@ -35,9 +38,11 @@ final class WindowDragState: ObservableObject {
         isDragging || CACurrentMediaTime() - lastDragEnd < 1 ? draggedWindow : nil
     }
     var shouldIgnoreSnapRelease: Bool {
-        !isDragging && cancelledLastDrag && CACurrentMediaTime() - lastDragEnd < 1
+        isYieldingToSystemDrag || (!isDragging && cancelledLastDrag && CACurrentMediaTime() - lastDragEnd < 1)
     }
-    private init() {}
+    init(isPrimaryButtonPressed: @escaping () -> Bool = { NSEvent.pressedMouseButtons & 1 != 0 }) {
+        self.isPrimaryButtonPressed = isPrimaryButtonPressed
+    }
 
     func beginDrag(
         target: SnapWindowTarget? = nil,
@@ -45,7 +50,7 @@ final class WindowDragState: ObservableObject {
     ) {
         draggedWindow = target
         cancelledLastDrag = false
-        isSnapZoneDismissedForCurrentDrag = false
+        isSnapZoneDismissedForCurrentDrag = isYieldingToSystemDrag
         isDragging = true
         isSnapZoneBypassModifierPressed = bypassModifierIsPressed
         updateCursorDisplay()
@@ -56,6 +61,28 @@ final class WindowDragState: ObservableObject {
     func dismissSnapZonesForCurrentDrag() {
         guard isDragging else { return }
         isSnapZoneDismissedForCurrentDrag = true
+    }
+
+    func yieldSnapZonesToSystem() {
+        guard !isYieldingToSystemDrag else { return }
+        isYieldingToSystemDrag = true
+        dismissSnapZonesForCurrentDrag()
+        // Mission Control can change the AX observer/application before mouse-up.
+        // Keep the handoff across those endDrag/beginDrag calls and all displays.
+        let timer = Timer(timeInterval: 1.0 / 30.0, repeats: true) { [weak self] timer in
+            MainActor.assumeIsolated {
+                guard let self else { timer.invalidate(); return }
+                guard !self.isPrimaryButtonPressed() else { return }
+                self.endDrag()
+                self.lastDragEnd = CACurrentMediaTime()
+                self.cancelledLastDrag = true
+                self.systemDragReleaseTimer?.invalidate()
+                self.systemDragReleaseTimer = nil
+                self.isYieldingToSystemDrag = false
+            }
+        }
+        systemDragReleaseTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
     }
 
     func recordDraggedWindowIfNeeded(_ target: SnapWindowTarget?) {
@@ -71,7 +98,7 @@ final class WindowDragState: ObservableObject {
     func endDrag() {
         guard isDragging else { return }
         lastDragEnd = CACurrentMediaTime()
-        cancelledLastDrag = isSnapZoneDismissedForCurrentDrag || isSnapZoneBypassModifierPressed
+        cancelledLastDrag = isSnapZoneDismissedForCurrentDrag || isSnapZoneBypassModifierPressed || isYieldingToSystemDrag
         stopModifierFlagsMonitoring()
         dragPollingTimer?.invalidate()
         dragPollingTimer = nil
@@ -93,7 +120,7 @@ final class WindowDragState: ObservableObject {
 
     private func pollDragState() {
         guard isDragging else { return }
-        guard NSEvent.pressedMouseButtons & 1 != 0 else {
+        guard isPrimaryButtonPressed() else {
             endDrag()
             return
         }

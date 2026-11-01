@@ -14,6 +14,15 @@ source = (root/'Sapphire/Services/System/ActiveAppMonitor.swift').read_text()
 start = source.index('@MainActor\nfinal class WindowDragState')
 end = source.index('\n@MainActor\nclass ActiveAppMonitor', start)
 (scratch/'WindowDragState.swift').write_text('import AppKit\nimport Combine\nimport QuartzCore\n' + source[start:end])
+source = (root/'Sapphire/Notch/DragStateManager.swift').read_text()
+start = source.index('enum FileDragPasteboard {')
+end = source.index('{', start) + 1
+depth = 1
+while depth:
+    if source[end] == '{': depth += 1
+    elif source[end] == '}': depth -= 1
+    end += 1
+(scratch/'FileDragPasteboard.swift').write_text('import AppKit\n' + source[start:end])
 PY
 xcrun swiftc -swift-version 5 -parse-as-library \
   -target "$(uname -m)-apple-macosx14.0" \
@@ -27,3 +36,12 @@ xcrun swiftc -swift-version 5 -parse-as-library \
   "$REPO_ROOT/Tools/SnapZoneTests/SnapChecks.swift" \
   -o "$CHECK_ROOT/snap-checks"
 "$CHECK_ROOT/snap-checks"
+xcrun swiftc -swift-version 5 -parse-as-library \
+  -target "$(uname -m)-apple-macosx14.0" \
+  -module-cache-path "$REPO_ROOT/output/swift-module-cache" \
+  "$REPO_ROOT/Sapphire/Notch/NotchHoverMonitor.swift" \
+  "$REPO_ROOT/Sapphire/Services/QuickAirDrop/AirDropDragPreferences.swift" \
+  "$CHECK_ROOT/FileDragPasteboard.swift" \
+  "$REPO_ROOT/Tools/SnapZoneTests/HandoffWindowChecks.swift" \
+  -o "$CHECK_ROOT/handoff-window-checks"
+"$CHECK_ROOT/handoff-window-checks"
