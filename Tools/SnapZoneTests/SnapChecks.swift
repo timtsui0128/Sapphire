@@ -35,6 +35,8 @@ private func check(_ value: @autoclosure () -> Bool, _ message: String) throws {
         try placement()
         try dragState()
         try activation()
+        try asynchronousPlacement()
+        try compatibility()
         print("PASS: snap geometry, placement/retry, release identity and bounded dwell activation")
     }
 
@@ -130,35 +132,122 @@ private func check(_ value: @autoclosure () -> Bool, _ message: String) throws {
         let target = CGRect(x: 0, y: 24, width: 720, height: 828)
         var actual = start, writes = 0, pauses = 0
         let recover = SnapWindowPlacement.apply(target, read: { actual },
-            setSize: { actual.size = $0; writes += 1 },
-            setPosition: { actual.origin = $0; writes += 1 }, shouldContinue: { true },
+            setSize: { actual.size = $0; writes += 1; return .accepted },
+            setPosition: { actual.origin = $0; writes += 1; return .accepted }, shouldContinue: { true },
             pause: { _ in pauses += 1; if pauses == 1 { actual = start } })
-        try check(recover == .applied && actual == target && pauses == 2, "Did not recover from source app's final drag reset")
+        try check(recover == .applied && actual == target && pauses >= 2, "Did not recover from source app's final drag reset")
         try check(writes == 8, "Retry count is unbounded or insufficient")
         writes = 0
         let noop = SnapWindowPlacement.apply(target, read: { target },
-            setSize: { _ in writes += 1 }, setPosition: { _ in writes += 1 },
+            setSize: { _ in writes += 1; return .accepted }, setPosition: { _ in writes += 1; return .accepted },
             shouldContinue: { true }, pause: { _ in })
         try check(noop == .applied && writes == 0, "An already arranged window was written again")
         actual = start; writes = 0; pauses = 0
-        let constrained = SnapWindowPlacement.apply(target, read: { actual },
-            setSize: { actual.size = CGSize(width: max(1000, $0.width), height: $0.height); writes += 1 },
-            setPosition: { actual.origin = $0; writes += 1 }, shouldContinue: { true }, pause: { _ in pauses += 1 })
-        try check(constrained == .failed && writes == 12 && pauses == 3, "Minimum-size refusal reported success or retried indefinitely")
+        let constrained = SnapWindowPlacement.apply(target, minimumSize: CGSize(width: 1000, height: 200), read: { actual },
+            setSize: { actual.size = CGSize(width: max(1000, $0.width), height: $0.height); writes += 1; return .accepted },
+            setPosition: { actual.origin = $0; writes += 1; return .accepted }, shouldContinue: { true }, pause: { _ in pauses += 1 })
+        try check(constrained == .sizeLimited && writes <= 12, "Minimum-size refusal reported success or retried indefinitely")
         writes = 0
         let cancelled = SnapWindowPlacement.apply(target, read: { start },
-            setSize: { _ in writes += 1 }, setPosition: { _ in writes += 1 },
+            setSize: { _ in writes += 1; return .accepted }, setPosition: { _ in writes += 1; return .accepted },
             shouldContinue: { false }, pause: { _ in })
         try check(cancelled == .cancelled && writes == 0, "Cancelled snap wrote to a window")
         var keepGoing = true
         let interrupted = SnapWindowPlacement.apply(target, read: { start },
-            setSize: { _ in writes += 1 }, setPosition: { _ in writes += 1 },
+            setSize: { _ in writes += 1; return .accepted }, setPosition: { _ in writes += 1; return .accepted },
             shouldContinue: { keepGoing }, pause: { _ in keepGoing = false })
-        try check(interrupted == .cancelled && writes == 4, "New drag or request failed to stop pending retries")
+        try check(interrupted == .cancelled && writes == 1, "New drag or request failed to stop pending retries")
         try check(SnapWindowPlacement.matches(target.offsetBy(dx: 1, dy: 1), target), "Rounding tolerance too strict")
         try check(!SnapWindowPlacement.matches(target.offsetBy(dx: 10, dy: 0), target), "Incorrect frame accepted")
         try check(!SnapWindowPlacement.matches(nil, target), "Missing AX readback reported success")
         print("PASS: drag reset recovery, minimum sizes, no-op and cancelled/replaced placement")
+    }
+
+    static func asynchronousPlacement() throws {
+        // Model an application that snapshots the other coordinate when an AX
+        // write arrives, then commits the complete frame asynchronously. Sending
+        // size/position back-to-back overwrites the pending resize with stale size.
+        for target in [CGRect(x: 0, y: 38, width: 756, height: 900),
+                       CGRect(x: 756, y: 38, width: 756, height: 900)] {
+            var actual = CGRect(x: 140, y: 100, width: 1100, height: 700)
+            var now = 0.0, writes = 0
+            var pending: (time: Double, frame: CGRect)?
+            let result = SnapWindowPlacement.apply(target, read: { actual },
+                setSize: { size in
+                    writes += 1
+                    pending = (now + 0.16, CGRect(origin: actual.origin, size: size))
+                    return .accepted
+                },
+                setPosition: { point in
+                    writes += 1
+                    pending = (now + 0.16, CGRect(origin: point, size: actual.size))
+                    return .accepted
+                }, shouldContinue: { true }, pause: { interval in
+                    now += interval
+                    if let update = pending, now >= update.time {
+                        actual = update.frame
+                        pending = nil
+                    }
+                })
+            try check(result == .applied && SnapWindowPlacement.matches(actual, target), "Async half-screen writes clobbered each other")
+            try check(writes <= 12 && now < 3, "Async placement exceeded retry/time bounds")
+        }
+
+        let target = CGRect(x: 0, y: 38, width: 756, height: 900)
+        let start = CGRect(x: 140, y: 100, width: 1100, height: 700)
+        for (status, expected) in [(SnapWindowPlacement.WriteResult.denied, SnapWindowPlacement.Result.permissionDenied),
+                                   (.unavailable, .windowUnavailable), (.unsupported, .notSettable)] {
+            var writes = 0
+            let result = SnapWindowPlacement.apply(target, read: { start },
+                setSize: { _ in writes += 1; return status },
+                setPosition: { _ in writes += 1; return .accepted },
+                shouldContinue: { true }, pause: { _ in })
+            try check(result == expected && writes == 1, "Permanent AX error retried or mislabeled as minimum size")
+        }
+        var actual = start, sizeAttempts = 0
+        let recovered = SnapWindowPlacement.apply(target, read: { actual },
+            setSize: { size in
+                sizeAttempts += 1
+                if sizeAttempts == 1 { return .busy }
+                actual.size = size
+                return .accepted
+            }, setPosition: { actual.origin = $0; return .accepted },
+            shouldContinue: { true }, pause: { _ in })
+        try check(recovered == .applied, "Busy AX call did not recover")
+        var writes = 0
+        let ignored = SnapWindowPlacement.apply(target, read: { start },
+            setSize: { _ in writes += 1; return .accepted },
+            setPosition: { _ in writes += 1; return .accepted },
+            shouldContinue: { true }, pause: { _ in })
+        try check(ignored == .failed && writes <= 12, "Ignored AX writes reported success or minimum-size restriction")
+        print("PASS: asynchronous left/right halves, transient busy recovery, permanent errors and ignored writes")
+    }
+
+    static func compatibility() throws {
+        for original: Bool? in [true, false, nil] {
+            for assistiveActive in [true, false] {
+                for outcome in [SnapWindowPlacement.Result.applied, .cancelled, .failed] {
+                    var state = original
+                    var writes: [Bool] = []
+                    let result = SnapResizeCompatibility.perform(
+                        assistiveTechnologyActive: assistiveActive,
+                        readEnhancedUI: { state },
+                        writeEnhancedUI: { writes.append($0); state = $0; return true }
+                    ) { wasEnabled in
+                        precondition(wasEnabled == (original == true))
+                        return outcome
+                    }
+                    try check(result == outcome && state == original, "Enhanced UI state not restored on exit")
+                    try check(writes == (original == true && !assistiveActive ? [false, true] : []), "Assistive technology or unknown Enhanced UI state changed")
+                }
+            }
+        }
+        var writes: [Bool] = []
+        _ = SnapResizeCompatibility.perform(assistiveTechnologyActive: false,
+            readEnhancedUI: { true }, writeEnhancedUI: { writes.append($0); return false },
+            operation: { _ in SnapWindowPlacement.Result.failed })
+        try check(writes == [false], "Restored state even though the compatibility write failed")
+        print("PASS: scoped Enhanced UI compatibility, cancellation/failure restore and assistive-technology preservation")
     }
 
     @MainActor static func dragState() throws {

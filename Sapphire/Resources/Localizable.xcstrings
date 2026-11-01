@@ -54500,6 +54500,74 @@
           }
         }
       }
+    },
+    "This window is in full screen. Exit full screen, then drag it to a layout again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This window is in full screen. Exit full screen, then drag it to a layout again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这个窗口正处于全屏模式。请先退出全屏，再拖到分屏布局。"
+          }
+        }
+      }
+    },
+    "This window does not allow moving or resizing. Close any dialog and try the app’s main window.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This window does not allow moving or resizing. Close any dialog and try the app’s main window."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这个窗口不允许移动或调整大小。请关闭对话框后，尝试应用的主窗口。"
+          }
+        }
+      }
+    },
+    "The app’s minimum window size is larger than this layout. Choose a larger zone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app’s minimum window size is larger than this layout. Choose a larger zone."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这个应用允许的最小窗口尺寸大于所选布局，请选择更大的区域。"
+          }
+        }
+      }
+    },
+    "The app did not finish moving or resizing this window. Close any dialog or wait for its current animation to finish, then try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app did not finish moving or resizing this window. Close any dialog or wait for its current animation to finish, then try again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "应用尚未完成窗口移动或缩放。请关闭对话框，或等待当前动画结束后重试。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

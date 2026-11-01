@@ -17,7 +17,7 @@ Personal features and fixes are developed with AI assistance. This is not an off
 
 ## Features and changes
 
-These personal changes are relative to upstream commit [`2e8085676209cbbb424bc60fd7ea2f11bfd625aa`](https://github.com/cshariq/Sapphire/commit/2e8085676209cbbb424bc60fd7ea2f11bfd625aa), documented on **2026-10-31**. This README is available in English and Chinese; most detailed module notes are in Chinese.
+These personal changes are relative to upstream commit [`2e8085676209cbbb424bc60fd7ea2f11bfd625aa`](https://github.com/cshariq/Sapphire/commit/2e8085676209cbbb424bc60fd7ea2f11bfd625aa), documented on **2026-11-01**. This README is available in English and Chinese; most detailed module notes are in Chinese.
 
 | Feature | Behavior in this fork | Details |
 | --- | --- | --- |
@@ -36,7 +36,7 @@ These personal changes are relative to upstream commit [`2e8085676209cbbb424bc60
 | Pin and click fixes | Highlight the pinned state, allow unpinning from detail views, and use Esc to unpin and collapse; fix click-region lookup through the SwiftUI hosting hierarchy | [Pin and input](docs/pin-and-input.md) |
 | Music artwork synchronization | Clear the previous song's cover when new metadata arrives first; accept delayed cover updates and reject stale image downloads | [Artwork fix](docs/releases/0.1.4.md) |
 | Security and glass readability | Keychain music credentials, password/OAuth protection, and frosted panels with controls below the system menu bar | [Security notes](docs/security-hardening.md) · [0.1.5 changes](docs/releases/0.1.5.md) |
-| Window snapping | Open layouts only after dwelling at the top center of the display; preserve the dragged window, verify placement, and support multiple displays | [Window snapping](docs/window-snapping.md) |
+| Window snapping | Open layouts only after dwelling at the top center of the display; preserve the dragged window, wait for asynchronous size/position changes, verify placement, and support multiple displays | [Window snapping](docs/window-snapping.md) |
 
 Open **File Shelf → Screenshots** for screenshots, and use its gear menu to change retention. Configure Sports, Finance, and Appearance in their respective settings pages.
 
@@ -46,7 +46,7 @@ Version 0.1.8 introduces the **TopLet** name and `TopLet.app` download. The repo
 
 ## Current version and supported scope
 
-- The current source build is labeled **TopLet 20** (version **0.1.10**, build **20**). This personal test release uses a persistent Apple Development signing identity; it is not Apple notarized. The first switch from ad-hoc signing may require one new window-control authorization.
+- The current source build is labeled **TopLet 21** (version **0.1.11**, build **21**). This personal test release uses a persistent Apple Development signing identity; it is not Apple notarized. The first switch from ad-hoc signing may require one new window-control authorization.
 - The default development branch is **`codex/personal-notched-tools`**. `main` retains the upstream state from the fork; this branch is based on the commit above and has not merged the later upstream macOS 27 charging-limit changes.
 - The minimum deployment target is macOS 14. Complete builds and local packages have been verified on Apple Silicon (arm64); Intel hardware and other macOS versions have not been fully validated.
 - Upstream paid modules whose source is not public continue to use public placeholders or compatibility implementations. The independently implemented Sports/Finance features do not require those private modules and do not connect or sync with Apple Sports/Stocks accounts.
@@ -99,6 +99,7 @@ bash Tools/SessionPrivacyTests/run.sh
 bash Tools/SessionPrivacyTests/run-window-routes.sh
 bash Tools/ClipboardPrivacyTests/run.sh
 bash Tools/WindowFitTests/run.sh
+bash Tools/SnapZoneTests/run.sh
 bash Tools/NotchScreenFitTests/run.sh
 bash Tools/NotchPinTests/run.sh
 bash Tools/NotchPinTests/run-click.sh

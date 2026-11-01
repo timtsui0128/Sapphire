@@ -8,6 +8,7 @@
 import AppKit
 import ApplicationServices
 import QuartzCore
+import os
 
 /// Keep the moved AX window, rather than choosing a new frontmost window at drop.
 struct SnapWindowTarget: @unchecked Sendable {
@@ -50,6 +51,7 @@ enum SnapZoneHitTesting {
 
 @MainActor
 final class SnappingManager {
+    private nonisolated static let log = Logger(subsystem: "com.cshariq.sapphire", category: "WindowSnapping")
     private struct Display: Sendable {
         let frame: CGRect
         let visibleFrame: CGRect
@@ -107,6 +109,7 @@ final class SnappingManager {
         let requestedDisplay = screen.map { Display(frame: $0.frame, visibleFrame: $0.visibleFrame) }
         let mainDisplayFrame = self.mainDisplayFrame
         let animation = SettingsModel.shared.current.snapWindowAnimation
+        let assistiveTechnologyActive = NSWorkspace.shared.isVoiceOverEnabled || NSWorkspace.shared.isSwitchControlEnabled
         let pid = app.processIdentifier
         let generation = nextGeneration(for: pid)
 
@@ -114,14 +117,18 @@ final class SnappingManager {
         queue.asyncAfter(deadline: .now() + (afterWindowDrag ? 0.12 : 0)) {
             guard isCurrent(generation, for: pid), !SessionPrivacyState.shouldSuppressUI(),
                   !CGEventSource.buttonState(.combinedSessionState, button: .left) else { return }
-            guard let windowElement = target?.window ?? mostLikelyMainWindow(pid: pid),
-                  let axFrame = AX.windowFrame(of: windowElement),
+            guard let windowElement = target?.window ?? mostLikelyMainWindow(pid: pid) else {
+                reportFailure(.windowUnavailable, pid: pid, generation: generation)
+                return
+            }
+            AX.setMessagingTimeout(0.25, on: windowElement)
+            guard let axFrame = AX.windowFrame(of: windowElement),
                   axFrame.width > 0, axFrame.height > 0 else {
                 reportFailure(.windowUnavailable, pid: pid, generation: generation)
                 return
             }
             guard AX.bool("AXFullScreen", of: windowElement) != true else {
-                reportFailure(.unsupportedWindow, pid: pid, generation: generation)
+                reportFailure(.fullScreen, pid: pid, generation: generation)
                 return
             }
 
@@ -136,26 +143,75 @@ final class SnappingManager {
             let mainDisplayMaxY = mainDisplayFrame?.maxY ?? display.frame.maxY
             let targetAXFrame = SnapWindowPlacement.axFrame(from: targetFrame, primaryDisplayMaxY: mainDisplayMaxY)
 
-            if animation == .smooth {
-                animate(windowElement, from: axFrame, to: targetAXFrame, pid: pid, generation: generation)
-                guard isCurrent(generation, for: pid) else { return }
+            let applicationElement = AX.application(pid: pid)
+            AX.setMessagingTimeout(0.25, on: applicationElement)
+            let result = SnapResizeCompatibility.perform(
+                assistiveTechnologyActive: assistiveTechnologyActive,
+                readEnhancedUI: { AX.bool("AXEnhancedUserInterface", of: applicationElement) },
+                writeEnhancedUI: { enabled in
+                    let changed = AX.set("AXEnhancedUserInterface", to: enabled, on: applicationElement)
+                    if !changed {
+                        log.error("Could not set Enhanced UI to \(enabled) for pid=\(pid)")
+                    }
+                    return changed
+                }
+            ) { enhancedUIWasEnabled -> SnapWindowPlacement.Result in
+                // Avoid stacking our 60 Hz animation on an app's AX animation.
+                if animation == .smooth, !enhancedUIWasEnabled {
+                    animate(windowElement, from: axFrame, to: targetAXFrame, pid: pid, generation: generation)
+                }
+                return SnapWindowPlacement.apply(targetAXFrame,
+                    minimumSize: AX.size("AXMinSize", of: windowElement) ?? AX.size("AXMinimumSize", of: windowElement),
+                    read: { AX.windowFrame(of: windowElement) },
+                    setSize: { size in
+                        var size = size
+                        guard let value = AXValueCreate(.cgSize, &size) else { return .rejected }
+                        return writeWindowAttribute(kAXSizeAttribute as String, value: value, window: windowElement)
+                    },
+                    setPosition: { point in
+                        var point = point
+                        guard let value = AXValueCreate(.cgPoint, &point) else { return .rejected }
+                        return writeWindowAttribute(kAXPositionAttribute as String, value: value, window: windowElement)
+                    },
+                    shouldContinue: { isCurrent(generation, for: pid) && AXIsProcessTrusted()
+                        && !SessionPrivacyState.isSuppressedSnapshot
+                        && !CGEventSource.buttonState(.combinedSessionState, button: .left) },
+                    pause: { Thread.sleep(forTimeInterval: $0) })
             }
-
-            let result = SnapWindowPlacement.apply(targetAXFrame,
-                read: { AX.windowFrame(of: windowElement) },
-                setSize: { _ = AX.set(kAXSizeAttribute as String, toSize: $0, on: windowElement) },
-                setPosition: { _ = AX.set(kAXPositionAttribute as String, toPoint: $0, on: windowElement) },
-                shouldContinue: { isCurrent(generation, for: pid) && AXIsProcessTrusted()
-                    && !SessionPrivacyState.isSuppressedSnapshot
-                    && !CGEventSource.buttonState(.combinedSessionState, button: .left) },
-                pause: { Thread.sleep(forTimeInterval: $0) })
-            if result == .failed {
-                reportFailure(.unsupportedWindow, pid: pid, generation: generation)
+            // Geometry/status only: never log window titles or document URLs.
+            let actual = AX.windowFrame(of: windowElement)
+            if result != .applied && result != .cancelled {
+                log.error("pid=\(pid) result=\(result.rawValue, privacy: .public) target=\(String(describing: targetAXFrame), privacy: .public) actual=\(String(describing: actual), privacy: .public)")
+            }
+            switch result {
+            case .applied, .cancelled: break
+            case .permissionDenied: reportFailure(.permission, pid: pid, generation: generation)
+            case .windowUnavailable: reportFailure(.windowUnavailable, pid: pid, generation: generation)
+            case .notSettable: reportFailure(.notSettable, pid: pid, generation: generation)
+            case .sizeLimited: reportFailure(.sizeLimited, pid: pid, generation: generation)
+            case .failed: reportFailure(.didNotSettle, pid: pid, generation: generation)
             }
         }
     }
 
     // MARK: - Moving the window (snapping queue)
+
+    private nonisolated static func writeWindowAttribute(
+        _ attribute: String, value: AXValue, window: AXUIElement
+    ) -> SnapWindowPlacement.WriteResult {
+        let error = AXUIElementSetAttributeValue(window, attribute as CFString, value)
+        if error != .success {
+            log.error("AX write \(attribute, privacy: .public) returned \(error.rawValue)")
+        }
+        switch error {
+        case .success: return .accepted
+        case .cannotComplete: return .busy
+        case .apiDisabled: return .denied
+        case .invalidUIElement: return .unavailable
+        case .attributeUnsupported, .notImplemented: return .unsupported
+        default: return .rejected
+        }
+    }
 
     private nonisolated static func animate(
         _ window: AXUIElement,
@@ -204,7 +260,7 @@ final class SnappingManager {
 
     // MARK: - Lookup
 
-    private enum Failure { case permission, windowUnavailable, unsupportedWindow }
+    private enum Failure { case permission, windowUnavailable, fullScreen, notSettable, sizeLimited, didNotSettle }
     private static var isPresentingFailure = false
 
     private nonisolated static func reportFailure(_ failure: Failure, pid: pid_t, generation: UInt64) {
@@ -226,8 +282,14 @@ final class SnappingManager {
             }
         case .windowUnavailable:
             message = "The dragged window is no longer available. Drag a normal application window to a layout and try again."
-        case .unsupportedWindow:
-            message = "This window did not accept the selected layout. Exit full screen and try a larger zone; some apps limit how small their windows can be."
+        case .fullScreen:
+            message = "This window is in full screen. Exit full screen, then drag it to a layout again."
+        case .notSettable:
+            message = "This window does not allow moving or resizing. Close any dialog and try the app’s main window."
+        case .sizeLimited:
+            message = "The app’s minimum window size is larger than this layout. Choose a larger zone."
+        case .didNotSettle:
+            message = "The app did not finish moving or resizing this window. Close any dialog or wait for its current animation to finish, then try again."
         }
         isPresentingFailure = true
         HelperAlertPresenter.presentModal(messageText: "Couldn’t arrange this window",
