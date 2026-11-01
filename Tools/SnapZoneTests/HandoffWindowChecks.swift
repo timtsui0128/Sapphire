@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 
 // Keep external event registration inert. The real hover monitor, probe window
 // run against this process's own offscreen NSWindow only.
@@ -20,6 +21,16 @@ import AppKit
     struct Values { var snapActivationDelay = 0.08 }
     static let shared = SettingsModel()
     var current = Values()
+}
+
+@MainActor final class SessionPrivacyState: ObservableObject {
+    static let shared = SessionPrivacyState()
+    @Published var isSuppressed = false
+    static func shouldSuppressUI() -> Bool { shared.isSuppressed }
+}
+enum L10n {
+    static var localize: (String) -> String = { $0 }
+    static func string(_ key: String) -> String { localize(key) }
 }
 
 @main struct HandoffWindowChecks {
@@ -59,6 +70,7 @@ import AppKit
         precondition(monitor.isHoverProbeListeningForPointer, "Restart retained stale handoff state")
         monitor.stop()
         silentWindowDragDelivery(host: host)
+        visibleTarget(host: host)
         host.close()
         print("PASS: native hover probe disarms and parks during handoff, ignores stale geometry, resumes and restarts cleanly")
     }
@@ -155,6 +167,68 @@ import AppKit
         precondition(callbacks == stoppedCallbacks && installations == removals)
         manager.stopMonitoring()
         print("PASS: silent installed event monitor still supports inset dwell, release, system handoff and next-drag recovery without input capture")
+    }
+
+
+    @MainActor static func visibleTarget(host: NSWindow) {
+        let hint = SnapActivationHint()
+        let frame = CGRect(x: -20000, y: -20100, width: 320, height: 64)
+        hint.show(frame: frame, isTargeted: false, relativeTo: host)
+        guard let window = hint.window, let content = window.contentView as? SnapActivationHintView else {
+            fatalError("Missing actual native snap target")
+        }
+        precondition(window.frame == frame && window.isVisible && window.ignoresMouseEvents)
+        precondition(!window.canBecomeKey && !window.isKeyWindow && window.sharingType == .none)
+        precondition(!content.isTargeted)
+        hint.show(frame: frame, isTargeted: true, relativeTo: host)
+        precondition(content.isTargeted && window.ignoresMouseEvents)
+        SessionPrivacyState.shared.isSuppressed = true
+        precondition(!window.isVisible, "Lock notification left the target visible")
+        hint.show(frame: frame, isTargeted: true, relativeTo: host)
+        precondition(!window.isVisible, "Locked session reopened the target")
+        SessionPrivacyState.shared.isSuppressed = false
+        hint.show(frame: frame, isTargeted: false, relativeTo: host)
+        precondition(window.isVisible)
+        hint.hide()
+        precondition(!window.isVisible)
+
+        if CommandLine.arguments.count > 2 {
+            let output = URL(fileURLWithPath: CommandLine.arguments[1], isDirectory: true)
+            let catalog = try! JSONSerialization.jsonObject(with: Data(contentsOf:
+                URL(fileURLWithPath: CommandLine.arguments[2]))) as! [String: Any]
+            let strings = catalog["strings"] as! [String: [String: Any]]
+            try! FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
+            for language in ["en", "zh-Hans"] {
+                L10n.localize = { key in
+                    let locales = strings[key]!["localizations"] as! [String: [String: Any]]
+                    return (locales[language]!["stringUnit"] as! [String: Any])["value"] as! String
+                }
+                for appearance in [NSAppearance.Name.aqua, .darkAqua] {
+                    for targeted in [false, true] {
+                        content.appearance = NSAppearance(named: appearance)
+                        content.update(isTargeted: targeted)
+                        content.layoutSubtreeIfNeeded()
+                        let bitmap = content.bitmapImageRepForCachingDisplay(in: content.bounds)!
+                        content.cacheDisplay(in: content.bounds, to: bitmap)
+                        let name = "target-\(language)-\(appearance.rawValue)-\(targeted).png"
+                        try! bitmap.representation(using: .png, properties: [:])!.write(to: output.appendingPathComponent(name))
+                    }
+                }
+            }
+            L10n.localize = { $0 }
+        }
+        content.appearance = NSAppearance(named: .darkAqua)
+        content.update(isTargeted: true, reduceTransparency: true)
+        if CommandLine.arguments.count > 1 {
+            content.layoutSubtreeIfNeeded()
+            let bitmap = content.bitmapImageRepForCachingDisplay(in: content.bounds)!
+            content.cacheDisplay(in: content.bounds, to: bitmap)
+            let output = URL(fileURLWithPath: CommandLine.arguments[1], isDirectory: true)
+            try! bitmap.representation(using: .png, properties: [:])!.write(to: output.appendingPathComponent("target-reduced-transparency.png"))
+        }
+        hint.stop()
+        precondition(hint.window == nil)
+        print("PASS: visible target matches its frame, highlights, never takes input/focus, hides on lock and cleans up")
     }
 
 }

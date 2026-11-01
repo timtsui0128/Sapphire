@@ -36,7 +36,7 @@ These personal changes are relative to upstream commit [`2e8085676209cbbb424bc60
 | Pin and click fixes | Highlight the pinned state, allow unpinning from detail views, and use Esc to unpin and collapse; fix click-region lookup through the SwiftUI hosting hierarchy | [Pin and input](docs/pin-and-input.md) |
 | Music artwork synchronization | Clear the previous song's cover when new metadata arrives first; accept delayed cover updates and reject stale image downloads | [Artwork fix](docs/releases/0.1.4.md) |
 | Security and glass readability | Keychain music credentials, password/OAuth protection, and frosted panels with controls below the system menu bar | [Security notes](docs/security-hardening.md) · [0.1.5 changes](docs/releases/0.1.5.md) |
-| Window snapping | Pause just below the menu bar to open layouts; continue to the top edge to hand the drag to Mission Control; preserve the dragged window, wait for asynchronous size/position changes, verify placement, and support multiple displays | [Window snapping](docs/window-snapping.md) |
+| Window snapping | Drag toward the visible target below the menu bar and pause inside it to open layouts; continue to the top edge to hand the drag to Mission Control; preserve the dragged window, wait for asynchronous size/position changes, verify placement, and support multiple displays | [Window snapping](docs/window-snapping.md) |
 
 Open **File Shelf → Screenshots** for screenshots, and use its gear menu to change retention. Configure Sports, Finance, and Appearance in their respective settings pages.
 
@@ -46,8 +46,8 @@ Version 0.1.8 introduces the **TopLet** name and `TopLet.app` download. The repo
 
 ## Current version and supported scope
 
-- The current source build is labeled **TopLet 23** (version **0.1.13**, build **23**). This personal test release uses a persistent Apple Development signing identity; it is not Apple notarized. The first switch from ad-hoc signing may require one new window-control authorization.
-- Version 0.1.13 repairs missed window-drag samples that could prevent the inset Snap Zones trigger from opening; see [release notes](docs/releases/0.1.13.md).
+- The current source build is labeled **TopLet 24** (version **0.1.14**, build **24**). This personal test release uses a persistent Apple Development signing identity; it is not Apple notarized. The first switch from ad-hoc signing may require one new window-control authorization.
+- Version 0.1.14 adds a visible, highlighted Snap Zones target below the menu bar, while keeping the physical top edge available for Mission Control; see [release notes](docs/releases/0.1.14.md).
 - The default development branch is **`codex/personal-notched-tools`**. `main` retains the upstream state from the fork; this branch is based on the commit above and has not merged the later upstream macOS 27 charging-limit changes.
 - The minimum deployment target is macOS 14. Complete builds and local packages have been verified on Apple Silicon (arm64); Intel hardware and other macOS versions have not been fully validated.
 - Upstream paid modules whose source is not public continue to use public placeholders or compatibility implementations. The independently implemented Sports/Finance features do not require those private modules and do not connect or sync with Apple Sports/Stocks accounts.

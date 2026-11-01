@@ -54600,6 +54600,86 @@
           }
         }
       }
+    },
+    "Drag here to split the window": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag here to split the window"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拖到这里分屏"
+          }
+        }
+      }
+    },
+    "Hold here to choose a layout": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold here to choose a layout"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停留片刻，选择分屏布局"
+          }
+        }
+      }
+    },
+    "Top edge: Mission Control": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top edge: Mission Control"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拖到最顶边：调度中心"
+          }
+        }
+      }
+    },
+    "Drag toward the top center to reveal the Snap Zones target, then pause inside it. The top edge stays available for Mission Control.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag toward the top center to reveal the Snap Zones target, then pause inside it. The top edge stays available for Mission Control."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将窗口拖向顶部正中，会显示分屏目标区；在目标区停留后展开布局。屏幕最顶边仍用于调度中心。"
+          }
+        }
+      }
+    },
+    "Drag a window toward the top center to reveal a visible target. Pause inside the highlighted target for layouts, or continue to the top edge for Mission Control. Hold Command to bypass snapping.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag a window toward the top center to reveal a visible target. Pause inside the highlighted target for layouts, or continue to the top edge for Mission Control. Hold Command to bypass snapping."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拖动窗口靠近顶部正中时显示目标区；在高亮目标内停留可选择分屏布局，继续拖到最顶边则进入调度中心。按住 Command 可暂时跳过分屏。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -58,12 +58,27 @@ private func check(_ value: @autoclosure () -> Bool, _ message: String) throws {
             for point in [CGPoint(x: screen.midX, y: screen.midY),
                           CGPoint(x: screen.midX + 200, y: screen.maxY - 72),
                           CGPoint(x: screen.midX, y: screen.maxY - 30),
-                          CGPoint(x: screen.midX, y: screen.maxY - 100),
+                          CGPoint(x: screen.midX, y: screen.maxY - 120),
                           CGPoint(x: screen.midX, y: screen.maxY + 1)] {
                 try check(!SnapActivationRegion.contains(point, in: screen), "Ordinary window drag entered activation region")
             }
         }
         try check(!SnapActivationRegion.contains(.zero, in: .zero), "Missing display triggered snap")
+        for screen in displays {
+            for (menuBar, safeTop) in [(CGFloat(24), CGFloat(0)), (37, 37), (0, 0)] {
+                let inset = SnapActivationRegion.inset(menuBarHeight: menuBar, safeAreaTop: safeTop)
+                let target = SnapActivationRegion.frame(in: screen, topInset: inset)
+                try check(target.width == 320 && target.height == 64, "Visible target size is not reachable")
+                try check(target.maxY <= screen.maxY - max(menuBar, safeTop) - 8, "Hint overlaps the menu bar")
+                let center = CGPoint(x: target.midX, y: target.midY)
+                try check(SnapActivationRegion.contains(center, in: screen, topInset: inset), "Hint and activation disagree")
+                let approach = CGPoint(x: target.midX, y: target.minY - 80)
+                try check(SnapActivationRegion.isApproaching(approach, in: screen, topInset: inset), "Hint appears too late")
+                try check(!SnapActivationRegion.contains(approach, in: screen, topInset: inset), "Approaching opened layouts")
+                try check(!SnapActivationRegion.isApproaching(CGPoint(x: screen.midX, y: screen.maxY), in: screen, topInset: inset), "Hint covers Mission Control edge")
+                try check(!SnapActivationRegion.isApproaching(CGPoint(x: screen.midX, y: screen.midY), in: screen, topInset: inset), "Ordinary window movement shows hint")
+            }
+        }
 
         var mouseDown = true
         let manager = GlobalDragManager(isPrimaryButtonPressed: { mouseDown })

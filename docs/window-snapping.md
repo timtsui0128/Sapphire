@@ -1,6 +1,6 @@
 # Window snapping / 窗口分屏
 
-Drag a window's title bar to the **center just below the menu bar**, then pause for the Activation Delay configured in Settings → Snap Zones & Planes (default 0.45 seconds). The trigger is a fixed 260 × 48 point region, 48–96 points below the top edge; it is independent of the expanded panel's width and the invisible hover probe. Moving a window elsewhere or briefly crossing the region does not open the layouts. Once open, move to a layout and release. To enter Mission Control instead, keep dragging to the physical top edge. The topmost 12 points across the display cancel pending or open layouts and hand this entire drag to macOS until mouse-up. Command temporarily bypasses snapping; Escape cancels the current drag.
+Drag a window's title bar toward the **top center**. A visible “Drag here to split the window” target appears below the menu bar before the cursor reaches it. Move into that target and pause for the Activation Delay configured in Settings → Snap Zones & Planes (default 0.45 seconds). It highlights and says “Hold here to choose a layout.” The target and activation region share the same 320 × 64 point frame, positioned 8 points below the menu bar or safe area (at least 32 points below the screen top). It is independent of the expanded panel's width and the invisible hover probe. Moving a window elsewhere or briefly crossing the region does not open the layouts. Once open, move to a layout and release. To enter Mission Control instead, keep dragging to the physical top edge. The topmost 12 points across the display cancel pending or open layouts and hand this entire drag to macOS until mouse-up. Command temporarily bypasses snapping; Escape cancels the current drag.
 
 The window-movement observer only starts position sampling. Both normal entry and releasing Command use the same regional dwell check. An ordinary window drag no longer expands TopLet's host window or enables global pointer capture. Moving to another display cancels the previous display's pending trigger. A system handoff survives display changes and Accessibility observer replacement; the next physical drag can activate layouts again. File drops keep the AirDrop/Clipboard destinations.
 
@@ -20,7 +20,7 @@ Regression coverage includes simulated asynchronous left and right halves, trans
 
 ## 简体中文
 
-拖住窗口标题栏，将鼠标移到**菜单栏下方正中**并停留后才展开分屏选项。触发区域固定为 260 × 48 点，位于距离屏幕顶边 48–96 点的位置，延迟在「设置 → 吸附区域与面板 → 激活延迟」调整，默认 0.45 秒。普通移动或快速经过不会展开；展开后再移动到分屏格子并松手。继续拖到屏幕最顶边会取消分屏并让出鼠标，交给 Mission Control；松手前不会再次弹出。Command 暂时跳过，Escape 取消本次分屏。文件拖放仍显示 AirDrop／复制到剪贴板。
+拖住窗口标题栏靠近**顶部正中**，先看到「拖到这里分屏」目标区。移入后目标高亮并提示「停留片刻，选择分屏布局」，停留后展开布局。可见目标与实际触发区使用同一个 320 × 64 点矩形，放在菜单栏／屏幕安全区下方 8 点处，距离屏幕顶边至少 32 点。延迟在「设置 → 吸附区域与面板 → 激活延迟」调整，默认 0.45 秒。普通移动或快速经过不会展开；展开后再移动到分屏格子并松手。继续拖到屏幕最顶边会取消分屏并让出鼠标，交给 Mission Control；松手前不会再次弹出。Command 暂时跳过，Escape 取消本次分屏。文件拖放仍显示 AirDrop／复制到剪贴板。
 
 自动检查覆盖不同位置的屏幕、停留、离开、松手、取消和截图文件架拖动，不会操作用户的真实窗口。固定签名的权限保留效果还需要安装后通过实际更新确认。
 
@@ -46,3 +46,12 @@ A successfully installed global mouse monitor can remain silent during a native 
 The native fixture reproduces the failure with a non-nil but deliberately silent event-monitor token and an offscreen cursor path outside the probe. It checks actual production hover-monitor delivery into the dwell timer, release without an event, a brief crossing, Mission Control handoff, and the next drag. The pre-fix implementation fails this check. Real-window interaction remains a separate manual acceptance step after installation.
 
 0.1.13 修复「监听器成功创建但没有继续报告窗口拖动」时分屏无法展开的问题。只在已确认拖动窗口期间补充鼠标位置与按键采样；停留位置不重复发布，松手或结束监听后停止采样，不扩大透明鼠标区域。入口仍在菜单栏下方正中，拖到最顶边仍交给 Mission Control。测试复现了旧实现失败、新实现通过的路径；更新后仍需用真实窗口确认使用体验。
+
+
+## Visible target (0.1.14)
+
+The previous invisible, narrow trigger was easy to pass on the way to Mission Control. An input-transparent, nonactivating native panel now shows where to pause when a confirmed window drag approaches the top center. Approach only shows the hint; the configured dwell still requires entering the target. Its frame is computed by the same geometry used by activation. The hint updates to a highlighted state inside the target, then hides as layouts open. It also hides on release, leaving the approach area, display transfer, Command/Escape cancellation, Mission Control handoff, teardown and session lock. File drags keep their AirDrop/Clipboard route. The hint uses system materials, a solid Reduce Transparency fallback, and English/Chinese instructions.
+
+Validation covers target/approach separation, actual menu-bar and safe-area insets across multiple display origins, silent-event sampling into the real dwell timer, native target highlight and frame, mouse/focus pass-through, privacy suppression and resource teardown. Native view renders cover English/Chinese in light/dark appearance. Real window movement and Mission Control remain manual acceptance checks after installation.
+
+0.1.14 用可见、高亮的目标标出分屏入口，避免直接拖到最顶边时只进入调度中心。提示仅在确认拖动窗口且靠近顶部正中时显示；进入目标后才开始停留计时。提示本身不接收鼠标、不获取焦点，锁屏时隐藏，文件投放仍走 AirDrop／剪贴板。自动检查包括显示器坐标、目标与触发区一致性、停留触发、透明输入、隐私关闭，以及中英文／明暗外观渲染；不将这些检查等同于实机拖动验收。
