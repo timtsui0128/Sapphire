@@ -64,7 +64,8 @@ def check(mode):
         with patch.object(release, "git_clean", return_value=commit), \
              patch.object(release, "tools", return_value=Path("/unused/signing-tools")), \
              patch.object(release, "capture", return_value="fixture-public-key"), \
-             patch.object(release, "run"), patch.object(release, "gh", side_effect=gh):
+             patch.object(release, "run"), patch.object(release, "gh", side_effect=gh), \
+             patch.object(release, "cleanup") as cleanup:
             try:
                 with contextlib.redirect_stdout(io.StringIO()):
                     release.publish(SimpleNamespace(directory=directory))
@@ -72,6 +73,7 @@ def check(mode):
                 assert mode in {"wrong-source", "public-tag", "bad-upload"}
             else:
                 assert mode in {"new", "resume"}
+            assert cleanup.called == state["published"], "Cleanup must only follow successful publication"
         assert state["published"] == (mode in {"new", "resume"})
         assert state["created"] == (mode == "new")
         print(f"PASS: publisher {mode}")

@@ -4,6 +4,7 @@
 The private signing key stays in the login Keychain. It is never exported or uploaded.
 """
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
 import os
@@ -20,6 +21,7 @@ from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import app_signing
+import release_retention
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = json.loads((Path(__file__).parent / "sparkle-tools.json").read_text())
@@ -136,6 +138,30 @@ def signed_enclosures(directory, tag, assets):
     return result
 
 
+@contextmanager
+def staged_baselines(bases, destination):
+    """Appcast inputs are temporary; retain only each release's canonical archive."""
+    staged = []
+    try:
+        for base in bases:
+            target = destination / base["archive"].name
+            if target.exists():
+                raise RuntimeError(f"Baseline staging would overwrite an existing file: {target}")
+            staged.append(target)
+            shutil.copy2(base["archive"], target)
+        yield
+    finally:
+        for path in staged:
+            path.unlink(missing_ok=True)
+
+
+def cleanup(args):
+    info = plistlib.loads((ROOT / "Sapphire/App/Info.plist").read_bytes())
+    pages = json.loads(gh(["api", f"repos/{CONFIG['repository']}/releases?per_page=100", "--paginate", "--slurp"]))
+    release_retention.cleanup(ROOT / "output/releases", [r for page in pages for r in page],
+                              CONFIG["repository"], info["SUPublicEDKey"], apply=args.apply)
+
+
 def prepare(args):
     if not re.fullmatch(r"\d+\.\d+\.\d+", args.version) or not re.fullmatch(r"[1-9]\d*", args.build):
         raise RuntimeError("Use a numeric version (0.1.0) and a positive increasing build number (10)")
@@ -192,14 +218,12 @@ def prepare(args):
     # Inline plain-text notes remain covered by the appcast signature.
     archive.with_suffix(".txt").write_text(note_text)
     bases = delta_bases(args.build, public_key)
-    for base in bases:
-        # Old archives are inputs only, excluded from the new release's assets.
-        shutil.copy2(base["archive"], destination / base["archive"].name)
     prefix = f"https://github.com/{CONFIG['repository']}/releases/download/{tag}/"
-    run([binaries / "generate_appcast", "--account", CONFIG["keychain_account"],
-         "--download-url-prefix", prefix, "--link", f"https://github.com/{CONFIG['repository']}",
-         "--embed-release-notes", "--versions", args.build, "--maximum-versions", "1",
-         "--maximum-deltas", str(MAXIMUM_DELTA_BASES), destination])
+    with staged_baselines(bases, destination):
+        run([binaries / "generate_appcast", "--account", CONFIG["keychain_account"],
+             "--download-url-prefix", prefix, "--link", f"https://github.com/{CONFIG['repository']}",
+             "--embed-release-notes", "--versions", args.build, "--maximum-versions", "1",
+             "--maximum-deltas", str(MAXIMUM_DELTA_BASES), destination])
     feed = destination / "appcast.xml"
     item = ET.parse(feed).find("channel/item")
     if item is None or item.findtext("s:version", namespaces=NS) != args.build:
@@ -308,6 +332,11 @@ def publish(args):
         gh(["api", f"repos/{CONFIG['repository']}/releases/{uploaded['id']}",
             "--method", "PATCH", "--input", payload])
     print(f"Published: https://github.com/{CONFIG['repository']}/releases/tag/{receipt['tag']}")
+    try:
+        cleanup(argparse.Namespace(apply=True))
+    except (OSError, RuntimeError, ValueError, subprocess.CalledProcessError) as error:
+        # Publication has succeeded; a cleanup failure must not suggest republishing.
+        print(f"Release is published, but local cleanup needs attention: {error}", file=sys.stderr)
 
 
 def find_prepared_draft(releases, receipt):
@@ -326,8 +355,10 @@ if __name__ == "__main__":
     prep.add_argument("--notes", type=Path, required=True)
     pub = commands.add_parser("publish", help="Verify, upload a draft, then publish the prepared release")
     pub.add_argument("directory", type=Path)
+    clean = commands.add_parser("cleanup", help="Preview old published artifacts; keep the latest two delta baselines")
+    clean.add_argument("--apply", action="store_true", help="Move verified old artifacts to macOS Trash (never empty it)")
     args = parser.parse_args()
     try:
-        prepare(args) if args.command == "prepare" else publish(args)
+        {"prepare": prepare, "publish": publish, "cleanup": cleanup}[args.command](args)
     except (RuntimeError, subprocess.CalledProcessError) as error:
         sys.exit(str(error))
