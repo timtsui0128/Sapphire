@@ -46,7 +46,8 @@ This is an unofficial personal fork of Sapphire, originally created by Shariq Ch
 
 ## 当前源码版本与运行范围
 
-- 当前源码的构建标记为 **TopLet 22**（版本 **0.1.12**，构建 **22**），此个人测试版使用固定 Apple Development 证书签名，尚未进行 Apple 公证；从临时签名首次切换后可能需要重新授权一次窗口控制。
+- 当前源码的构建标记为 **TopLet 23**（版本 **0.1.13**，构建 **23**），此个人测试版使用固定 Apple Development 证书签名，尚未进行 Apple 公证；从临时签名首次切换后可能需要重新授权一次窗口控制。
+- 0.1.13 修复窗口拖动位置漏报导致分屏入口不展开的问题，详见[更新说明](docs/releases/0.1.13.md)。
 - 个人开发分支为 **`codex/personal-notched-tools`**。`main` 保留 Fork 时的上游状态；本分支基于上面标注的提交，尚未合并上游后续的 macOS 27 充电限制改动。
 - 最低部署目标为 macOS 14；当前完整构建与本地安装包在 Apple Silicon（arm64）Mac 上验证。Intel 机器和不同 macOS 版本尚未完整验收。
 - 上游未公开的付费模块继续使用公开占位或兼容实现。独立实现的 Sports／Finance 不依赖这些私有模块，也不连接或同步 Apple Sports／Stocks 账户。

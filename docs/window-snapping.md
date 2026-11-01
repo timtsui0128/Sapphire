@@ -37,3 +37,12 @@ Handoff clears hit regions and previews, disables mouse handling in the host, an
 Validation includes production drag state and timers, inset/system-edge geometry on main/left/stacked displays, handoff before and after activation, observer replacement, release cancellation and next-drag recovery. An offscreen native-window fixture checks actual probe visibility, input disarming and restoration without moving user windows. These tests do not replace a live Mission Control drag across desktops on the user's Mac.
 
 0.1.12 同时取消分屏预览、布局命中区域和透明鼠标区域，收起过程中的尺寸变化不会重新启用它们。让出状态跨显示器和前台应用切换保留，直到实际松手。自动检查覆盖上述状态和离屏原生窗口；实际拖入 Mission Control、把窗口放到另一个桌面的体验仍需更新后确认。
+
+
+## Drag observation recovery (0.1.13)
+
+A successfully installed global mouse monitor can remain silent during a native window move. In 0.1.12, cursor polling only ran when monitor installation failed, so the inset trigger could miss movement after the first Accessibility notification. Confirmed window drags now also sample cursor position and button state at 30 Hz, independent of hover-probe entry. Stationary positions are deduplicated; release and teardown stop this sampling. The sampler does not arm the transparent probe or expand the host window.
+
+The native fixture reproduces the failure with a non-nil but deliberately silent event-monitor token and an offscreen cursor path outside the probe. It checks actual production hover-monitor delivery into the dwell timer, release without an event, a brief crossing, Mission Control handoff, and the next drag. The pre-fix implementation fails this check. Real-window interaction remains a separate manual acceptance step after installation.
+
+0.1.13 修复「监听器成功创建但没有继续报告窗口拖动」时分屏无法展开的问题。只在已确认拖动窗口期间补充鼠标位置与按键采样；停留位置不重复发布，松手或结束监听后停止采样，不扩大透明鼠标区域。入口仍在菜单栏下方正中，拖到最顶边仍交给 Mission Control。测试复现了旧实现失败、新实现通过的路径；更新后仍需用真实窗口确认使用体验。

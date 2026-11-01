@@ -40,6 +40,8 @@ xcrun swiftc -swift-version 5 -parse-as-library \
   -target "$(uname -m)-apple-macosx14.0" \
   -module-cache-path "$REPO_ROOT/output/swift-module-cache" \
   "$REPO_ROOT/Sapphire/Notch/NotchHoverMonitor.swift" \
+  "$REPO_ROOT/Sapphire/Notch/GlobalDragManager.swift" \
+  "$REPO_ROOT/Sapphire/Services/Zones/SnapActivationRegion.swift" \
   "$REPO_ROOT/Sapphire/Services/QuickAirDrop/AirDropDragPreferences.swift" \
   "$CHECK_ROOT/FileDragPasteboard.swift" \
   "$REPO_ROOT/Tools/SnapZoneTests/HandoffWindowChecks.swift" \
