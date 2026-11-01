@@ -1,8 +1,7 @@
-"""Retain delta baselines; trash only byte-verified, already published artifacts."""
+"""Remove local binary caches only after matching the published GitHub assets."""
 import hashlib
 import json
 import re
-import subprocess
 from pathlib import Path
 
 
@@ -14,9 +13,7 @@ def digest(path):
     return result.hexdigest()
 
 
-def plan(root, releases, repository, public_key, keep=2):
-    if keep < 2:
-        raise ValueError("Keep at least the two baselines needed by the next release")
+def plan(root, releases, repository, public_key):
     root = root.resolve()
     published = {r["tag_name"]: r for r in releases if not r["draft"] and not r["prerelease"]}
     records = []
@@ -30,17 +27,10 @@ def plan(root, releases, repository, public_key, keep=2):
                 or not str(receipt.get("build", "")).isdigit()):
             continue
         records.append((path.parent, receipt))
-    compatible = sorted((int(r["build"]) for _, r in records
-                         if r["tag"] in published and r.get("supports_delta_updates") is True), reverse=True)
-    protected = set(compatible[:keep])
-    # Pending/draft releases may still need their original baselines for validation.
-    for _, receipt in records:
-        if receipt["tag"] not in published:
-            protected.update(int(b) for b in receipt.get("delta_bases", []))
     result = []
     for directory, receipt in records:
         remote = published.get(receipt["tag"])
-        if remote is None or int(receipt["build"]) in protected:
+        if remote is None:
             continue
         assets = {a["name"]: a for a in remote["assets"]}
         for name, expected in receipt["assets"].items():
@@ -59,8 +49,9 @@ def plan(root, releases, repository, public_key, keep=2):
     return result
 
 
-def move_to_trash(items, report):
-    # Recheck immediately before mutation. Never empty Trash or follow a symlink.
+def remove_cached_artifacts(items, report):
+    # Only the hash-verified, published copies returned by plan() are disposable.
+    # Recheck the entire batch before removing anything; never follow symlinks.
     for item in items:
         path = Path(item["path"])
         if (path.is_symlink() or path.resolve() != path or not path.is_file()
@@ -68,20 +59,21 @@ def move_to_trash(items, report):
             raise RuntimeError(f"Artifact changed since cleanup was planned: {path}")
     if not items:
         return
-    helper = Path(__file__).with_name("trash-release-artifacts.swift")
-    process = subprocess.run(["/usr/bin/swift", str(helper), *[i["path"] for i in items]],
-                             text=True, capture_output=True)
-    moved = [json.loads(line) for line in process.stdout.splitlines()]
-    report.write_text(json.dumps({"planned": items, "results": moved}, indent=2) + "\n")
-    if process.returncode:
-        raise RuntimeError(f"Cleanup stopped; successful moves are recorded in {report}: {process.stderr}")
+    results = []
+    report.write_text(json.dumps({"planned": items, "results": results}, indent=2) + "\n")
+    try:
+        for item in items:
+            Path(item["path"]).unlink()
+            results.append({"source": item["path"], "release": item["release"], "removed": True})
+    finally:
+        report.write_text(json.dumps({"planned": items, "results": results}, indent=2) + "\n")
 
 
 def cleanup(root, releases, repository, public_key, apply=False):
     items = plan(root, releases, repository, public_key)
     for item in items:
-        print(f"{'Trash' if apply else 'Would trash'}: {item['path']}")
+        print(f"{'Remove published cache' if apply else 'Would remove published cache'}: {item['path']}")
     if apply:
-        move_to_trash(items, root / "last-cleanup.json")
-    print(f"{'Moved' if apply else 'Planned'} {len(items)} published artifacts "
-          f"({sum(i['size'] for i in items) / 1024 ** 2:.1f} MiB); latest two baselines and all metadata retained.")
+        remove_cached_artifacts(items, root / "last-cache-cleanup.json")
+    print(f"{'Removed' if apply else 'Planned'} {len(items)} local published artifacts "
+          f"({sum(i['size'] for i in items) / 1024 ** 2:.1f} MiB); metadata retained, binaries remain on GitHub.")

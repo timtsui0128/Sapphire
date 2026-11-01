@@ -83,10 +83,10 @@ def gh(args):
     return run([binary, *args], env=env, stdout=subprocess.PIPE, text=True).stdout.strip()
 
 
-def delta_bases(build, public_key):
+def delta_bases(build, public_key, download_directory=None):
     """Only opt-in releases understand .delta URLs; builds 10/11 reject them.
 
-    Receipts and unchanged signed assets are retained locally by prepare().
+    Only receipts are retained locally. Fetch missing assets into temporary storage.
     Never rebuild an old baseline: the patch must match the distributed app.
     """
     candidates = []
@@ -108,7 +108,20 @@ def delta_bases(build, public_key):
             raise RuntimeError("A delta baseline feed has the wrong build number")
         name = Path(urlsplit(item.find("enclosure").get("url")).path).name
         archive = directory / name
-        if not name.endswith(".zip") or sha256(archive) != old["assets"][name]["sha256"]:
+        if not name.endswith(".zip") or name not in old["assets"]:
+            raise RuntimeError("A delta baseline has an unrecognized archive")
+        if not archive.exists():
+            if download_directory is None:
+                raise RuntimeError("A missing delta baseline requires temporary download storage")
+            tag = directory.name
+            if not re.fullmatch(r"personal-v\d+\.\d+\.\d+", tag) or old.get("tag") != tag:
+                raise RuntimeError("A missing delta baseline has an invalid release tag")
+            temporary = download_directory / tag
+            temporary.mkdir()
+            gh(["release", "download", tag, "--repo", CONFIG["repository"],
+                "--pattern", name, "--dir", temporary])
+            archive = temporary / name
+        if sha256(archive) != old["assets"][name]["sha256"]:
             raise RuntimeError("A previous distributed archive changed; cannot generate a delta")
         # Before 0.1.8 this channel shipped Sapphire.app. Keep those exact signed
         # archives as baselines; rebuilding or renaming them invalidates deltas.
@@ -118,6 +131,12 @@ def delta_bases(build, public_key):
         bases.append({"build": str(old["build"]), "archive": archive, "directory": directory,
                       "app_bundle_name": bundle_name})
     return bases
+
+
+@contextmanager
+def temporary_delta_bases(build, public_key):
+    with tempfile.TemporaryDirectory(prefix="TopLetDeltaBaselines-") as scratch:
+        yield delta_bases(build, public_key, Path(scratch))
 
 
 def signed_enclosures(directory, tag, assets):
@@ -217,41 +236,41 @@ def prepare(args):
     run(["/usr/bin/ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", app, archive])
     # Inline plain-text notes remain covered by the appcast signature.
     archive.with_suffix(".txt").write_text(note_text)
-    bases = delta_bases(args.build, public_key)
     prefix = f"https://github.com/{CONFIG['repository']}/releases/download/{tag}/"
-    with staged_baselines(bases, destination):
-        run([binaries / "generate_appcast", "--account", CONFIG["keychain_account"],
-             "--download-url-prefix", prefix, "--link", f"https://github.com/{CONFIG['repository']}",
-             "--embed-release-notes", "--versions", args.build, "--maximum-versions", "1",
-             "--maximum-deltas", str(MAXIMUM_DELTA_BASES), destination])
-    feed = destination / "appcast.xml"
-    item = ET.parse(feed).find("channel/item")
-    if item is None or item.findtext("s:version", namespaces=NS) != args.build:
-        raise RuntimeError("Generated appcast has the wrong build number")
-    enclosure = item.find("enclosure")
-    signature_key = f"{{{NS['s']}}}edSignature"
-    if enclosure is None or not enclosure.get(signature_key) or enclosure.get("url") != prefix + archive.name:
-        raise RuntimeError("Generated appcast lacks the expected signed archive")
-    deltas = []
-    for entry in item.findall("s:deltas/enclosure", NS):
-        baseline = next((base for base in bases if base["build"] == entry.get(f"{{{NS['s']}}}deltaFrom")), None)
-        if baseline is None:
-            raise RuntimeError("Generated delta targets a build that does not accept incremental updates")
-        path = destination / Path(urlsplit(entry.get("url")).path).name
-        if not path.name.endswith(".delta") or not entry.get(signature_key) or entry.get("url") != prefix + path.name:
-            raise RuntimeError("Generated delta lacks the expected signed release URL")
-        # Apply every real patch before publishing. Sparkle also checks its hash
-        # and signature on the receiving Mac and falls back to the full ZIP.
-        with tempfile.TemporaryDirectory(prefix="SapphireDeltaCheck-") as scratch:
-            old = Path(scratch) / "old"
-            run(["ditto", "-x", "-k", baseline["archive"], old])
-            patched = Path(scratch) / APP_BUNDLE_NAME
-            run([binaries / "BinaryDelta", "apply", old / baseline["app_bundle_name"], patched, path])
-            run(["codesign", "--verify", "--deep", "--strict", patched])
-            patched_info = plistlib.loads((patched / "Contents/Info.plist").read_bytes())
-            if any(patched_info.get(k) != v for k, v in expected.items()):
-                raise RuntimeError("Applied delta produced the wrong application version")
-        deltas.append(path)
+    with temporary_delta_bases(args.build, public_key) as bases:
+        with staged_baselines(bases, destination):
+            run([binaries / "generate_appcast", "--account", CONFIG["keychain_account"],
+                 "--download-url-prefix", prefix, "--link", f"https://github.com/{CONFIG['repository']}",
+                 "--embed-release-notes", "--versions", args.build, "--maximum-versions", "1",
+                 "--maximum-deltas", str(MAXIMUM_DELTA_BASES), destination])
+        feed = destination / "appcast.xml"
+        item = ET.parse(feed).find("channel/item")
+        if item is None or item.findtext("s:version", namespaces=NS) != args.build:
+            raise RuntimeError("Generated appcast has the wrong build number")
+        enclosure = item.find("enclosure")
+        signature_key = f"{{{NS['s']}}}edSignature"
+        if enclosure is None or not enclosure.get(signature_key) or enclosure.get("url") != prefix + archive.name:
+            raise RuntimeError("Generated appcast lacks the expected signed archive")
+        deltas = []
+        for entry in item.findall("s:deltas/enclosure", NS):
+            baseline = next((base for base in bases if base["build"] == entry.get(f"{{{NS['s']}}}deltaFrom")), None)
+            if baseline is None:
+                raise RuntimeError("Generated delta targets a build that does not accept incremental updates")
+            path = destination / Path(urlsplit(entry.get("url")).path).name
+            if not path.name.endswith(".delta") or not entry.get(signature_key) or entry.get("url") != prefix + path.name:
+                raise RuntimeError("Generated delta lacks the expected signed release URL")
+            # Apply every real patch before publishing. Sparkle also checks its hash
+            # and signature on the receiving Mac and falls back to the full ZIP.
+            with tempfile.TemporaryDirectory(prefix="SapphireDeltaCheck-") as scratch:
+                old = Path(scratch) / "old"
+                run(["ditto", "-x", "-k", baseline["archive"], old])
+                patched = Path(scratch) / APP_BUNDLE_NAME
+                run([binaries / "BinaryDelta", "apply", old / baseline["app_bundle_name"], patched, path])
+                run(["codesign", "--verify", "--deep", "--strict", patched])
+                patched_info = plistlib.loads((patched / "Contents/Info.plist").read_bytes())
+                if any(patched_info.get(k) != v for k, v in expected.items()):
+                    raise RuntimeError("Applied delta produced the wrong application version")
+            deltas.append(path)
     (destination / "release-notes.md").write_text(
         note_text + f"\n\nSource: https://github.com/{CONFIG['repository']}/commit/{commit}\n"
         "\nTopLet is an unofficial personal fork of cshariq/Sapphire by Shariq Charolia. GNU AGPLv3.\n"
@@ -355,8 +374,8 @@ if __name__ == "__main__":
     prep.add_argument("--notes", type=Path, required=True)
     pub = commands.add_parser("publish", help="Verify, upload a draft, then publish the prepared release")
     pub.add_argument("directory", type=Path)
-    clean = commands.add_parser("cleanup", help="Preview old published artifacts; keep the latest two delta baselines")
-    clean.add_argument("--apply", action="store_true", help="Move verified old artifacts to macOS Trash (never empty it)")
+    clean = commands.add_parser("cleanup", help="Preview local binary caches already verified on GitHub")
+    clean.add_argument("--apply", action="store_true", help="Delete verified local binary caches; retain GitHub assets and local receipts")
     args = parser.parse_args()
     try:
         {"prepare": prepare, "publish": publish, "cleanup": cleanup}[args.command](args)

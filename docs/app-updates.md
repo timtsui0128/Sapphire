@@ -51,7 +51,7 @@ python3 Tools/Updates/release.py prepare \
   --version 0.1.3 --build 13 --notes docs/releases/0.1.3.md
 ```
 
-`prepare` downloads checksum-pinned official Sparkle tools, verifies the Keychain public key, builds the app, verifies metadata and its bundle signature, creates a ZIP preserving symlinks, and uses Sparkle's official `generate_appcast` to sign the archive and feed. It only writes under ignored `output/` and does not publish anything. It produces `output/releases/personal-vVERSION/` with the ZIP, signed `appcast.xml`, checksums, release notes, and a local receipt binding the assets to the source commit.
+`prepare` downloads checksum-pinned official Sparkle tools, verifies the Keychain public key, builds the app, verifies metadata and its bundle signature, creates a ZIP preserving symlinks, and uses Sparkle's official `generate_appcast` to sign the archive and feed. Release output goes under ignored `output/`; missing delta baselines are downloaded to temporary storage, verified against their original receipt hashes, and removed on success or failure. Preparation does not publish anything. It produces `output/releases/personal-vVERSION/` with the ZIP, signed `appcast.xml`, checksums, release notes, and a local receipt binding the assets to the source commit.
 
 Push that source commit to this repository using Git, then publish the prepared package:
 
@@ -61,20 +61,20 @@ python3 Tools/Updates/release.py publish output/releases/personal-v0.1.3
 
 `publish` verifies the unchanged source commit, hashes, signatures, remote source availability, and increasing build number. It uploads a draft Release, verifies every full/delta enclosure signature, checks uploaded asset sizes and GitHub SHA-256 digests, and only then publishes it as the latest release. It refuses to overwrite an existing published tag. If a failed upload leaves a draft with the same source commit and identical verified assets, rerun `publish` to resume it. A mismatched or incomplete draft stops publication and must be inspected before deleting/re-preparing it. Publishing a Git commit alone does not release an app update. No separate paid server or background CI signing service is required.
 
-Each release provides a single current signed feed with a full ZIP fallback. The release tool automatically considers the two latest retained, delta-capable release receipts, checks unchanged baseline hashes, generates signed patches, and applies each patch locally before publishing. Keep those two actual distributed archives and all receipts under `output/releases/`; rebuilding an older version is not an equivalent baseline. Builds 10/11 are excluded from delta generation, so their first update still downloads the full ZIP. Future compatible updates can transfer only changed content. If a delta does not apply, Sparkle falls back to the full archive. Download size varies with the actual changes and network speed still depends on GitHub. Rollout groups, beta channels, and OS-specific branches are future work.
+Each release provides a single current signed feed with a full ZIP fallback. The release tool automatically considers the two latest delta-capable release receipts, temporarily retrieves the exact distributed archives from GitHub when absent, checks unchanged baseline hashes, generates signed patches, and applies each patch locally before publishing. Keep the small receipts and feeds under `output/releases/`; published binary archives do not need to be retained locally. Rebuilding an older version is not an equivalent baseline. Builds 10/11 are excluded from delta generation, so their first update still downloads the full ZIP. Future compatible updates can transfer only changed content. If a delta does not apply, Sparkle falls back to the full archive. Download size varies with the actual changes and network speed still depends on GitHub. Rollout groups, beta channels, and OS-specific branches are future work.
 
 ### Local release artifacts
 
 ZIPs in the project's `output/` are maintainer packaging artifacts, created locally for publication. The shipped app delegates downloads and installation to Sparkle; it does not save these project ZIPs or require users to unpack them. A full archive remains available on GitHub for first installs and fallback, even when existing users receive a delta.
 
-After successful publication, the script keeps the latest two compatible release archives for the next release's deltas and moves older published ZIP/delta artifacts to macOS Trash. Cleanup requires matching local receipts, local SHA-256 hashes and sizes, and public GitHub asset digests. It preserves metadata, unpublished/draft packages and their baselines, unknown files, and modified files. Temporary baseline copies are removed even if appcast generation fails. Trash is never emptied automatically; moving files there does not itself free disk space. GitHub releases remain untouched.
+After successful publication, the script deletes local published ZIP/delta caches, including the current version. Cleanup requires matching local receipts, local SHA-256 hashes and sizes, and public GitHub asset digests. The same verified binaries remain available on GitHub. It preserves small metadata files, unpublished/draft packages, unknown files, and modified files. Temporary baseline downloads and staging copies are removed even if appcast generation fails. New cleanup does not accumulate files in Trash. GitHub releases remain untouched.
 
 ```sh
 python3 Tools/Updates/release.py cleanup         # Preview only
-python3 Tools/Updates/release.py cleanup --apply # Move verified old artifacts to Trash
+python3 Tools/Updates/release.py cleanup --apply # Delete verified local published caches
 ```
 
-The latest cleanup records original and Trash paths in `output/releases/last-cleanup.json`. Old release binaries can also be recovered from their GitHub release, using retained receipt hashes to verify them. Do not manually keep another ZIP in Downloads or export a differently named installer for each fix.
+The latest cleanup records removed local paths and release tags in `output/releases/last-cache-cleanup.json`. Release binaries can be retrieved from their GitHub release, using retained receipt hashes to verify them. Earlier cleanup moved old artifacts to Trash; this change does not empty that Trash or remove unrelated files. Do not manually keep another ZIP in Downloads or export a differently named installer for each fix.
 
 ## Validation
 
@@ -98,8 +98,8 @@ The update tests build disposable native applications using the production user 
 - 未开启自动准备时，先点“下载更新”。“取消已准备的更新”可以撤销已准备好的安装。
 - 更新只替换应用，保留已有设置、截图和关注列表。请先退出其他 Sapphire 副本。
 - 更新源只连接自己的 GitHub，原作者的更新不会覆盖这个改装版。更新列表和安装包都需要匹配内置公钥的签名；私钥留在本机钥匙串中。
-- 当前提供 Apple Silicon / macOS 14+ 的完整包，以及兼容版本之间的增量包；尚未提供 Intel 发布。0.1.0／0.1.1 的更新器不接受增量 URL，需要先完整更新一次到 0.1.2，之后的兼容更新才能下载变化部分；补丁失败时回退完整包。发布工具自动从本地保留的最近两个兼容版本生成补丁，并在发布前实际应用验证。只需保留最近两版原发布 ZIP 和所有 receipt，不要通过重新编译旧版代替。下载页显示已下载大小和平均速度，实际速度仍受 GitHub 网络影响。
-- 项目 `output/` 里的 ZIP 是维护者生成的发布产物，不是应用内更新要求用户手动下载的安装包。发布成功后，工具核对 GitHub 上的校验值，把较旧的已发布 ZIP／增量包移到废纸篓；保留最近两版、所有发布记录和未发布包，不自动清空废纸篓。用户日常直接使用应用内更新即可。
+- 当前提供 Apple Silicon / macOS 14+ 的完整包，以及兼容版本之间的增量包；尚未提供 Intel 发布。0.1.0／0.1.1 的更新器不接受增量 URL，需要先完整更新一次到 0.1.2，之后的兼容更新才能下载变化部分；补丁失败时回退完整包。发布工具从最近两个兼容版本生成补丁，并在发布前实际应用验证。原发布 ZIP 需要时从 GitHub 临时下载、按原始哈希核验，用完即清理，本地只需保留小体积的发布记录。下载页显示已下载大小和平均速度，实际速度仍受 GitHub 网络影响。
+- 项目 `output/` 里的 ZIP 是维护者生成的发布产物，不是应用内更新要求用户手动下载的安装包。发布成功后，工具核对 GitHub 上的校验值，直接删除本地已发布 ZIP／增量包，包括最新版；GitHub 上仍有相同文件，不再长期保留两版或向废纸篓继续堆积。保留发布记录和未发布包。用户日常直接使用应用内更新即可。
 - 锁屏时禁止更新界面和操作，并取消可取消的下载／安装准备；不会为了提醒新版而在锁屏上弹出窗口。
 
 维护者以后运行上面的 `prepare` 命令构建并签名，再推送源码并运行 `publish` 发布。仅上传源码不会触发更新。0.1.9 及之前为 ad-hoc 临时签名；0.1.10 个人测试版改用固定 Apple Development 证书，尚未进行 Apple 公证。首次切换可能需要重新授权一次；更新包签名验证仍独立启用。
