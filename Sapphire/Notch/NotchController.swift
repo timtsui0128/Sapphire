@@ -1407,7 +1407,7 @@ struct NotchController: View {
 
     private func expandedToolbarOffset(config: ResolvedNotchConfiguration) -> CGFloat {
         let appearance = activeAppearanceSettings
-        let translucent = appAppearance.expandedPanelSurface == .liquidGlass
+        let translucent = appAppearance.expandedPanelSurface.usesTranslucentGlass
             || (appAppearance.expandedPanelSurface == .matchPanel
                 && (appearance.mode == .liquidGlass || appearance.mode == .blur
                     || (appearance.mode == .custom && appearance.opacity < 1)))

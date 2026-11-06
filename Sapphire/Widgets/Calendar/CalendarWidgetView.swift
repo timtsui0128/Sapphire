@@ -17,6 +17,44 @@ struct ScheduleItem: Identifiable {
     let date: Date
     let color: Color
     let hasTime: Bool
+    let endDate: Date?
+    let calendarTitle: String?
+    let location: String?
+
+    init?(event: EKEvent) {
+        guard let title = event.title, !title.isEmpty, let start = event.startDate else { return nil }
+        let identifier = event.eventIdentifier ?? event.calendarItemIdentifier
+        id = "event:\(identifier):\(start.timeIntervalSinceReferenceDate)"
+        type = .event
+        self.title = title
+        date = start
+        color = (event.calendar?.color).map(Color.init(nsColor:)) ?? .accentColor
+        hasTime = !event.isAllDay
+        endDate = event.endDate
+        calendarTitle = event.calendar?.title
+        location = event.location?.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    init?(reminder: EKReminder) {
+        guard let title = reminder.title, !title.isEmpty,
+              let components = reminder.dueDateComponents,
+              let dueDate = Calendar.current.date(from: components) else { return nil }
+        id = "reminder:\(reminder.calendarItemIdentifier)"
+        type = .reminder
+        self.title = title
+        date = dueDate
+        color = (reminder.calendar?.color).map(Color.init(nsColor:)) ?? .accentColor
+        hasTime = components.hour != nil && components.minute != nil
+        endDate = nil
+        calendarTitle = nil
+        location = nil
+    }
+
+    static func agenda(events: [EKEvent], reminders: [EKReminder], showAllDayEvents: Bool) -> [Self] {
+        (events.filter { showAllDayEvents || !$0.isAllDay }.compactMap(Self.init(event:))
+            + reminders.compactMap(Self.init(reminder:)))
+            .sorted { $0.date < $1.date }
+    }
 }
 
 struct CalendarWidgetView: View {
@@ -29,27 +67,9 @@ struct CalendarWidgetView: View {
     @State private var centeredDate: Date?
 
     private var combinedScheduleItems: [ScheduleItem] {
-        let events = calendarService.eventsForSelectedDate.compactMap { event -> ScheduleItem? in
-            guard let id = event.eventIdentifier as String?, !id.isEmpty,
-                  let title = event.title, !title.isEmpty,
-                  let date = event.startDate else { return nil }
-            let color = event.calendar.color != nil ? Color(nsColor: event.calendar.color) : .accentColor
-            let hasTime = !event.isAllDay
-
-            return ScheduleItem(id: id, type: .event, title: title, date: date, color: color, hasTime: hasTime)
-        }
-
-        let reminders = calendarService.remindersForSelectedDate.compactMap { reminder -> ScheduleItem? in
-            guard let id = reminder.calendarItemIdentifier as String?, !id.isEmpty,
-                  let title = reminder.title, !title.isEmpty,
-                  let components = reminder.dueDateComponents,
-                  let date = components.date else { return nil }
-            let color = reminder.calendar.color != nil ? Color(nsColor: reminder.calendar.color) : .accentColor
-            let hasTime = components.hour != nil && components.minute != nil
-            return ScheduleItem(id: id, type: .reminder, title: title, date: date, color: color, hasTime: hasTime)
-        }
-
-        return (events + reminders).sorted { $0.date < $1.date }
+        ScheduleItem.agenda(events: calendarService.eventsForSelectedDate,
+                            reminders: calendarService.remindersForSelectedDate,
+                            showAllDayEvents: settings.settings.calendarShowAllDayEvents)
     }
 
     init(viewModel: InteractiveCalendarViewModel) {
@@ -86,6 +106,8 @@ struct CalendarWidgetView: View {
         }
         .onAppear {
             viewModel.updateStartOfWeek(settings.settings.calendarStartOfWeek)
+            calendarService.fetchEvents(for: viewModel.selectedDate)
+            calendarService.fetchReminders(for: viewModel.selectedDate)
         }
         .onChange(of: settings.settings.calendarStartOfWeek) { _, startOfWeek in
             viewModel.updateStartOfWeek(startOfWeek)
@@ -146,9 +168,10 @@ struct CalendarWidgetView: View {
 
     @ViewBuilder
     private var scheduleView: some View {
+        let now = Date()
         let upcomingItems = combinedScheduleItems.filter { item in
             if Calendar.current.isDateInToday(viewModel.selectedDate) {
-                return item.hasTime ? item.date > Date() : true
+                return !item.hasTime || (item.endDate ?? item.date) > now
             }
             return true
         }
@@ -158,9 +181,12 @@ struct CalendarWidgetView: View {
                 Image(systemName: "calendar.badge.checkmark")
                     .font(.system(size: 12))
                     .foregroundColor(.gray)
-                Text(Calendar.current.isDateInToday(viewModel.selectedDate) ? "No more items today" : "No items scheduled")
+                Text(LocalizedStringKey(calendarService.calendarAuthorization != .fullAccess ? "Calendar Access Needed"
+                    : calendarService.selectedCalendarIdentifiers?.isEmpty == true ? "No Calendars Selected"
+                    : Calendar.current.isDateInToday(viewModel.selectedDate) ? "No more items today" : "No items scheduled"))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.gray)
+                    .lineLimit(1)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         } else {

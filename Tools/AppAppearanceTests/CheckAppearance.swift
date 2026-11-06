@@ -18,7 +18,7 @@ private struct CheckAppearance {
         let defaults = AppearanceDefaults()
         let appearance = AppAppearance(defaults: defaults)
         precondition(appearance.mode == .system, "New installations should follow the system")
-        precondition(appearance.expandedPanelSurface == .matchPanel, "Existing settings must default to one matching panel surface")
+        precondition(appearance.expandedPanelSurface == .liquidGlass, "Expanded panels should default to Liquid Glass")
         for surface in ExpandedPanelSurface.allCases {
             appearance.expandedPanelSurface = surface
             precondition(AppAppearance(defaults: defaults).expandedPanelSurface == surface, "Panel surface must persist")
@@ -30,7 +30,7 @@ private struct CheckAppearance {
         appearance.mode = .light
         precondition(appearance.expandedPanelColorScheme == .dark && appearance.resolvedColorScheme == .light, "Black panel must use light text without changing Settings theme")
         defaults.set("unknown-future-surface", forKey: AppAppearance.panelSurfaceDefaultsKey)
-        precondition(AppAppearance(defaults: defaults).expandedPanelSurface == .matchPanel, "Invalid stored surface must fall back safely")
+        precondition(AppAppearance(defaults: defaults).expandedPanelSurface == .liquidGlass, "Invalid stored surface must fall back safely")
         appearance.expandedPanelSurface = .matchPanel
         precondition(appearance.panelColorScheme(matchingGlass: .dark) == .dark, "Per-display dark glass must retain readable light text")
         appearance.mode = .light

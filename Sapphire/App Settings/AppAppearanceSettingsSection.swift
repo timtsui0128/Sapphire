@@ -62,7 +62,7 @@ struct AppAppearanceSettingsSection: View {
             }
             .pickerStyle(.segmented)
             .labelsHidden()
-            Text("Use one continuous surface for the expanded top bar and panel. Match Panel follows the Expanded Notch Appearance settings below.")
+            Text("Liquid Glass follows your appearance. Light Glass and Dark Glass keep their tint while letting the background show through. Match Panel uses the settings below.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Text("Changes apply immediately. The physical camera cutout cannot change color.")

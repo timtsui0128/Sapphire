@@ -2040,6 +2040,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
         let root = SettingsView()
             .environmentObject(powerStateController)
+            .environmentObject(calendarService)
 
         let hosting = FocusableHostingView(rootView: root)
         // The window owns its size. A page's intrinsic SwiftUI minimum must

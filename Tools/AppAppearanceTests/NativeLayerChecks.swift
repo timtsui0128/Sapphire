@@ -88,5 +88,28 @@ private final class NativeAppearanceDefaults: UserDefaults {
             try bitmap.representation(using: .png, properties: [:])!.write(to: output.appendingPathComponent("native-controls-\(mode.rawValue).png"))
         }
         print("PASS: expanded content overrides a dark host; unchanged native digits, progress views and native blur follow Light → Dark → Light")
+
+        let glass = LiquidGlassHostView(frame: window.contentLayoutRect, backend: .automatic)
+        window.contentView = glass
+        for tone: LiquidGlassAppearance in [.light, .dark] {
+            glass.configure(material: .clearGlass, cornerRadius: 0, tintColor: nil,
+                            blendingMode: .behindWindow, appearance: tone,
+                            interaction: .normal, contentLensing: nil, scrim: nil, subdued: nil)
+            glass.setShapePath(CGPath(roundedRect: glass.bounds, cornerWidth: 24, cornerHeight: 24, transform: nil))
+            precondition(!window.isOpaque && window.backgroundColor == .clear,
+                         "An opaque backing window would cover the desktop behind the glass")
+            if #available(macOS 26.0, *) {
+                let native = descendants(glass, of: NSGlassEffectView.self).first!
+                precondition(native.style == .clear, "The renderer must install Clear Glass instead of regular tinted glass")
+                precondition((native.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua) == (tone == .dark))
+            }
+        }
+        glass.setBackend(.visualEffect)
+        glass.configure(material: .hud, cornerRadius: 0, tintColor: nil,
+                        blendingMode: .behindWindow, appearance: .light,
+                        interaction: .normal, contentLensing: nil, scrim: nil, subdued: nil)
+        let fallback = descendants(glass, of: NSVisualEffectView.self).first!
+        precondition(fallback.material == .hudWindow && fallback.blendingMode == .behindWindow)
+        print("PASS: real AppKit Clear Glass respects light/dark tone, keeps the backing window transparent, and falls back to behind-window blur")
     }
 }

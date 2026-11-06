@@ -117,24 +117,22 @@ private struct SurfaceStyleChecks {
             for scheme: ColorScheme in [.light, .dark] {
                 input.expandedColorScheme = finish.colorScheme(following: scheme)
                 let style = NotchSurfaceStyle.resolve(input)
-                if finish == .white || finish == .black {
-                    guard case .solid(let color)? = style.fill else { throw NSError(domain: "SurfaceChecks", code: 8) }
-                    try check(finish == .white ? brightness(color) > 0.99 : brightness(color) < 0.01, "Explicit surface must honor White/Black in both app themes")
-                    try check(style.glass == nil, "Solid finish must not stack glass under its fill")
-                }
-                if finish == .liquidGlass {
-                    try check(style.glass?.backend == .visualEffect && style.glass?.material == .menu, "Expanded glass must blur background text using the stable native menu material")
+                if finish.usesTranslucentGlass {
+                    let light = input.expandedColorScheme == .light
+                    try check(style.glass?.backend == .automatic && style.glass?.material == .clearGlass, "All expanded glass finishes must use native Clear Glass")
+                    try check(style.glass?.blendingMode == .behindWindow, "Glass must sample windows or wallpaper behind the notch")
                     guard case .solid(let veil)? = style.fill else { throw NSError(domain: "GlassReadability", code: 1) }
-                    try check(veil.alphaComponent >= 0.30 && veil.alphaComponent < 1, "A translucent veil must separate dense content from the desktop")
-                    try check(style.glass?.appearance == (scheme == .light ? .light : .dark), "Glass appearance must match semantic text")
+                    try check(veil.alphaComponent > 0 && veil.alphaComponent < 0.5 && style.rim != nil, "Tint and rim must define the surface without painting over the glass")
+                    try check(style.glass?.appearance == (light ? .light : .dark), "Glass appearance must match semantic text")
                     input.systemGlassAvailable = false
-                    try check(NotchSurfaceStyle.resolve(input).glass?.backend == .visualEffect, "Older macOS must use a native blur fallback")
+                    let fallback = NotchSurfaceStyle.resolve(input).glass
+                    try check(fallback?.backend == .visualEffect && fallback?.material == .hud, "Older macOS must use a native blur fallback")
                     input.systemGlassAvailable = true
                     input.reduceTransparency = true
                     let opaque = NotchSurfaceStyle.resolve(input)
                     try check(opaque.glass == nil && opaque.fill != nil, "Reduce Transparency must use an opaque surface")
                     if case .solid(let color)? = opaque.fill {
-                        try check(scheme == .light ? brightness(color) > 0.8 : brightness(color) < 0.01, "Opaque accessibility fallback must retain the selected light/dark contrast")
+                        try check(light ? brightness(color) > 0.8 : brightness(color) < 0.01, "Opaque accessibility fallback must retain the selected light/dark contrast")
                     }
                     input.reduceTransparency = false
                     input.increaseContrast = true
@@ -240,13 +238,14 @@ private struct SurfaceStyleChecks {
         try check(NotchSurfaceStyle.resolve(indicatorInput).glass == nil, "External live activities must respect Reduce Transparency")
         indicatorInput.notchState = .clickExpanded
         indicatorInput.expandedPanelSurface = .white
+        indicatorInput.expandedColorScheme = .light
         guard case .solid(let expandedInk)? = NotchSurfaceStyle.resolve(indicatorInput).fill else { throw NSError(domain: "ExternalExpanded", code: 1) }
         try check(brightness(expandedInk) > 0.8, "External expanded panels must still honor the chosen panel surface")
         indicatorInput.expandedPanelSurface = .liquidGlass
         indicatorInput.expandedColorScheme = .light
         indicatorInput.reduceTransparency = false
         let externalGlass = NotchSurfaceStyle.resolve(indicatorInput)
-        try check(externalGlass.glass?.material == .menu && externalGlass.glass?.appearance == .light, "External panels must use light native menu material when matching a pale menu bar")
+        try check(externalGlass.glass?.material == .hud && externalGlass.glass?.appearance == .light, "External panels must use light native blur on older macOS when matching a pale menu bar")
         print("PASS: external live activity material, macOS 15 fallback, Reduce Transparency and expanded surface selection")
         var lightInput = indicatorInput
         lightInput.reduceTransparency = false

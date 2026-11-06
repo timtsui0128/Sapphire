@@ -160,6 +160,7 @@ class PermissionsManager: NSObject, ObservableObject, @MainActor CLLocationManag
         checkAccessibilityStatus()
         checkFullDiskAccessStatus()
         checkScreenRecordingStatus()
+        checkCalendarPermissions()
     }
 
     private func checkAccessibilityStatus() {
@@ -217,21 +218,7 @@ class PermissionsManager: NSObject, ObservableObject, @MainActor CLLocationManag
 
         updateLocationStatus(for: locationManager?.authorizationStatus ?? .notDetermined)
 
-        let calStatus = EKEventStore.authorizationStatus(for: .event)
-        switch calStatus {
-        case .fullAccess, .writeOnly: assign(\.calendarStatus, .granted)
-        case .denied, .restricted: assign(\.calendarStatus, .denied)
-        case .notDetermined: assign(\.calendarStatus, .notRequested)
-        @unknown default: assign(\.calendarStatus, .notRequested)
-        }
-
-        let remStatus = EKEventStore.authorizationStatus(for: .reminder)
-        switch remStatus {
-        case .fullAccess, .writeOnly: assign(\.remindersStatus, .granted)
-        case .denied, .restricted: assign(\.remindersStatus, .denied)
-        case .notDetermined: assign(\.remindersStatus, .notRequested)
-        @unknown default: assign(\.remindersStatus, .notRequested)
-        }
+        checkCalendarPermissions()
 
         updateBluetoothStatus(for: CBManager.authorization)
 
@@ -242,6 +229,19 @@ class PermissionsManager: NSObject, ObservableObject, @MainActor CLLocationManag
         case .notDetermined: assign(\.focusStatusStatus, .notRequested)
         @unknown default: assign(\.focusStatusStatus, .notRequested)
         }
+    }
+
+    private func checkCalendarPermissions() {
+        func readStatus(_ type: EKEntityType) -> PermissionStatus {
+            switch EKEventStore.authorizationStatus(for: type) {
+            case .fullAccess: return .granted
+            case .denied, .restricted: return .denied
+            case .notDetermined, .writeOnly: return .notRequested
+            @unknown default: return .denied
+            }
+        }
+        assign(\.calendarStatus, readStatus(.event))
+        assign(\.remindersStatus, readStatus(.reminder))
     }
 
     func status(for type: PermissionType) -> PermissionStatus {
@@ -291,14 +291,16 @@ class PermissionsManager: NSObject, ObservableObject, @MainActor CLLocationManag
 
         case .calendar:
             Task {
-                do { _ = try await EKEventStore().requestFullAccessToEvents() } catch {}
-                await MainActor.run { self.checkAllPermissions() }
+                _ = try? await SharedEventStore.store.requestFullAccessToEvents()
+                checkCalendarPermissions()
+                (NSApp.delegate as? AppDelegate)?.calendarService.refreshSchedule()
             }
 
         case .reminders:
             Task {
-                do { _ = try await EKEventStore().requestFullAccessToReminders() } catch {}
-                await MainActor.run { self.checkAllPermissions() }
+                _ = try? await SharedEventStore.store.requestFullAccessToReminders()
+                checkCalendarPermissions()
+                (NSApp.delegate as? AppDelegate)?.calendarService.refreshSchedule()
             }
 
         case .bluetooth:

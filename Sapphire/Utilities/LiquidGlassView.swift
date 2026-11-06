@@ -315,12 +315,15 @@ private enum GlassRuntime {
             return
         }
 
-        setLongLong(view, selectorName: "set_variant:", value: Int64(material.variant))
-        setDouble(view, selectorName: "setCornerRadius:", value: Double(max(0, cornerRadius)))
-
-        let tintSel = NSSelectorFromString("setTintColor:")
-        if view.responds(to: tintSel) {
-            view.perform(tintSel, with: tintColor)
+        if #available(macOS 26.0, *), material == .clearGlass, let glass = view as? NSGlassEffectView {
+            glass.style = .clear
+            glass.cornerRadius = max(0, cornerRadius)
+            glass.tintColor = tintColor
+        } else {
+            setLongLong(view, selectorName: "set_variant:", value: Int64(material.variant))
+            setDouble(view, selectorName: "setCornerRadius:", value: Double(max(0, cornerRadius)))
+            let tintSel = NSSelectorFromString("setTintColor:")
+            if view.responds(to: tintSel) { view.perform(tintSel, with: tintColor) }
         }
 
         setLongLong(view, selectorName: "setBlendingMode:", value: Int64(blendingMode.rawValue))

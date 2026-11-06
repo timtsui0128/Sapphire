@@ -9,6 +9,20 @@ import Testing
 @testable import Sapphire
 
 struct CalendarVisibilityFilterTests {
+    @Test func explicitTimetableSelectionOverridesAppleCalendarVisibility() {
+        let preferences: [String: Any] = ["DisabledCalendars": ["MainWindow": ["icloud-timetable"]]]
+        let selection: Set<String> = ["icloud-timetable"]
+        #expect(CalendarVisibilityFilter.isVisible(calendarIdentifier: "icloud-timetable",
+                                                   calendarPreferences: preferences, selectedIdentifiers: selection))
+        #expect(!CalendarVisibilityFilter.isVisible(calendarIdentifier: "personal",
+                                                    calendarPreferences: preferences, selectedIdentifiers: selection))
+    }
+
+    @Test func intentionallyEmptySelectionNeverFallsBackToOtherCalendars() {
+        #expect(!CalendarVisibilityFilter.isVisible(calendarIdentifier: "icloud-timetable",
+                                                    calendarPreferences: nil, selectedIdentifiers: []))
+    }
+
     @Test func excludesCalendarsDisabledInCalendarMainWindow() {
         let preferences: [String: Any] = [
             "DisabledCalendars": [

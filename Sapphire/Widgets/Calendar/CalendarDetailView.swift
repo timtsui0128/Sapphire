@@ -36,28 +36,9 @@ struct CalendarDetailView: View {
     }
 
     private var combinedScheduleItems: [ScheduleItem] {
-        let events = calendarService.eventsForSelectedDate.compactMap { event -> ScheduleItem? in
-            guard let title = event.title, !title.isEmpty, let date = event.startDate else { return nil }
-            let eventIdentity = event.eventIdentifier ?? [
-                event.calendar.calendarIdentifier,
-                title,
-                String(date.timeIntervalSinceReferenceDate),
-                String(event.endDate?.timeIntervalSinceReferenceDate ?? 0)
-            ].joined(separator: "|")
-            let color = event.calendar.color != nil ? Color(nsColor: event.calendar.color) : .accentColor
-            let hasTime = !event.isAllDay
-            return ScheduleItem(id: "event:\(eventIdentity)", type: .event, title: title, date: date, color: color, hasTime: hasTime)
-        }
-
-        let reminders = calendarService.remindersForSelectedDate.compactMap { reminder -> ScheduleItem? in
-            let id = "reminder:\(reminder.calendarItemIdentifier)"
-            guard let title = reminder.title, !title.isEmpty, let components = reminder.dueDateComponents, let date = Calendar.current.date(from: components) else { return nil }
-            let color = reminder.calendar.color != nil ? Color(nsColor: reminder.calendar.color) : .accentColor
-            let hasTime = components.hour != nil && components.minute != nil
-            return ScheduleItem(id: id, type: .reminder, title: title, date: date, color: color, hasTime: hasTime)
-        }
-
-        return (events + reminders).sorted { $0.date < $1.date }
+        ScheduleItem.agenda(events: calendarService.eventsForSelectedDate,
+                            reminders: calendarService.remindersForSelectedDate,
+                            showAllDayEvents: settings.settings.calendarShowAllDayEvents)
     }
 
     var body: some View {
@@ -235,15 +216,31 @@ struct CalendarDetailView: View {
         let scheduleItems = combinedScheduleItems
 
         return VStack {
-            if scheduleItems.isEmpty {
+            if scheduleItems.isEmpty && calendarService.calendarAuthorization != .fullAccess {
+                VStack(spacing: 8) {
+                    Label("Calendar Access Needed", systemImage: "calendar.badge.exclamationmark")
+                        .font(.headline)
+                    if calendarService.calendarAuthorization == .notDetermined || calendarService.calendarAuthorization == .writeOnly {
+                        Button("Allow Calendar Access") { PermissionsManager.shared.requestPermission(.calendar) }
+                    } else {
+                        Button("Open Calendar Privacy Settings") { SystemPreferencesPane.calendars.open() }
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if scheduleItems.isEmpty {
                 VStack(spacing: 10) {
                     Spacer()
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 40, weight: .light))
                         .foregroundColor(.green)
                     VStack {
-                        Text("All Clear").font(.title3.weight(.bold))
-                        Text("You have no events or reminders scheduled.").foregroundColor(.primary.opacity(0.6))
+                        if calendarService.selectedCalendarIdentifiers?.isEmpty == true {
+                            Text("No Calendars Selected").font(.title3.weight(.bold))
+                            Text("Select your timetable in TopLet Settings → Calendar.").foregroundStyle(.secondary)
+                        } else {
+                            Text("All Clear").font(.title3.weight(.bold))
+                            Text("You have no events or reminders scheduled.").foregroundStyle(.secondary)
+                        }
                     }
                     Spacer()
                 }
@@ -274,13 +271,30 @@ struct DetailedScheduleItemRow: View {
                 Text(item.title).font(.system(size: 14, weight: .bold, design: .rounded))
                 HStack(spacing: 5) {
                     Image(systemName: item.type == .event ? "calendar" : "checklist")
-                    Text(item.type == .event ? "Event" : "Reminder")
+                    if let calendarTitle = item.calendarTitle {
+                        Text(calendarTitle)
+                    } else {
+                        Text(item.type == .event ? "Event" : "Reminder")
+                    }
+                    if let location = item.location, !location.isEmpty {
+                        Text(verbatim: "·")
+                        Text(location)
+                    }
                 }.font(.system(size: 11, weight: .medium)).opacity(0.6)
+                    .lineLimit(1)
             }
             Spacer()
             VStack(alignment: .trailing) {
                 if item.hasTime {
-                    Text(item.date, style: .time).font(.system(size: 13, weight: .semibold, design: .rounded))
+                    HStack(spacing: 3) {
+                        Text(item.date, style: .time)
+                        if let end = item.endDate, end > item.date, end.isSameDay(as: item.date) {
+                            Text(verbatim: "–")
+                            Text(end, style: .time)
+                        }
+                    }
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .fixedSize()
                 } else {
                     Text("All-Day").font(.system(size: 13, weight: .semibold, design: .rounded)).opacity(0.8)
                 }

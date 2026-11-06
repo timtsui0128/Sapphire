@@ -8,9 +8,29 @@
 import Foundation
 import EventKit
 import AppKit
+import Combine
+
+struct CalendarSourceGroup: Identifiable, Equatable {
+    struct Entry: Identifiable, Equatable {
+        let id: String
+        let title: String
+        let color: NSColor?
+        let visibleInCalendar: Bool
+    }
+
+    let id: String
+    let title: String
+    let calendars: [Entry]
+}
 
 class CalendarService: ObservableObject {
     private let eventStore = SharedEventStore.store
+    private static let selectionKey = "TopLetSelectedCalendarIdentifiers"
+
+    @Published private(set) var calendarAuthorization = EKEventStore.authorizationStatus(for: .event)
+    @Published private(set) var calendarSources: [CalendarSourceGroup]?
+    @Published private(set) var selectedCalendarIdentifiers: Set<String>? =
+        UserDefaults.standard.stringArray(forKey: CalendarService.selectionKey).map { Set($0) }
 
     @Published var eventsForSelectedDate: [EKEvent] = []
     @Published var remindersForSelectedDate: [EKReminder] = []
@@ -25,6 +45,7 @@ class CalendarService: ObservableObject {
     private var upcomingEventsGeneration = 0
     private var selectedRemindersGeneration = 0
     private var upcomingRemindersGeneration = 0
+    private var sourcesGeneration = 0
     private var eventStoreRefreshWorkItem: DispatchWorkItem?
     private var boundaryTimer: Timer?
     private var workspaceObservers: [NSObjectProtocol] = []
@@ -34,7 +55,7 @@ class CalendarService: ObservableObject {
             self,
             selector: #selector(eventStoreChanged),
             name: .EKEventStoreChanged,
-            object: eventStore
+            object: nil
         )
         NotificationCenter.default.addObserver(
             self,
@@ -57,6 +78,7 @@ class CalendarService: ObservableObject {
         ) { [weak self] _ in
             self?.timeContextChanged()
         })
+        DispatchQueue.main.async { [weak self] in self?.refreshSchedule() }
     }
 
     deinit {
@@ -64,11 +86,6 @@ class CalendarService: ObservableObject {
         boundaryTimer?.invalidate()
         NotificationCenter.default.removeObserver(self)
         workspaceObservers.forEach { NSWorkspace.shared.notificationCenter.removeObserver($0) }
-    }
-
-    private var hasAnyAccess: Bool {
-        EKEventStore.authorizationStatus(for: .event) == .fullAccess
-            || EKEventStore.authorizationStatus(for: .reminder) == .fullAccess
     }
 
     @objc private func timeContextChanged() {
@@ -89,48 +106,62 @@ class CalendarService: ObservableObject {
         boundaryTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
             guard let self else { return }
             self.boundaryTimer = nil
+            self.fetchEvents(for: self.currentlyTrackedDate)
             self.fetchAllUpcomingEvents()
             self.fetchAllUpcomingReminders()
         }
         boundaryTimer?.tolerance = min(5, delay * 0.05)
     }
 
-    func requestAccess() {
-        eventStore.requestFullAccessToEvents { [weak self] (granted, error) in
-            if granted && error == nil {
-                self?.requestRemindersAccess()
-            } else {
-                print("[CalendarService] Calendar access denied or error: \(error?.localizedDescription ?? "Unknown error")")
-            }
+    func setSelectedCalendars(_ identifiers: Set<String>?) {
+        guard selectedCalendarIdentifiers != identifiers else { return }
+        selectedCalendarIdentifiers = identifiers
+        if let identifiers {
+            UserDefaults.standard.set(identifiers.sorted(), forKey: Self.selectionKey)
+        } else {
+            UserDefaults.standard.removeObject(forKey: Self.selectionKey)
         }
+        // Don't keep displaying a just-hidden calendar while its new query runs.
+        eventsForSelectedDate = []
+        upcomingEvents = []
+        fetchEvents(for: currentlyTrackedDate)
+        fetchAllUpcomingEvents()
     }
 
-    private func requestRemindersAccess() {
-        eventStore.requestFullAccessToReminders { [weak self] (granted, error) in
-            if granted && error == nil {
-                DispatchQueue.main.async {
-                    self?.fetchEvents(for: Date())
-                    self?.fetchAllUpcomingEvents()
-                    self?.fetchReminders(for: Date())
-                    self?.fetchAllUpcomingReminders()
-                }
-            } else {
-                 print("[CalendarService] Reminders access denied or error: \(error?.localizedDescription ?? "Unknown error")")
-            }
+    func refreshSchedule(syncSources: Bool = false) {
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { [weak self] in self?.refreshSchedule(syncSources: syncSources) }
+            return
         }
+        let authorization = EKEventStore.authorizationStatus(for: .event)
+        if calendarAuthorization != authorization { calendarAuthorization = authorization }
+        sourcesGeneration &+= 1
+        let generation = sourcesGeneration
+        if authorization == .fullAccess {
+            workQueue.async { [weak self] in
+                guard let self else { return }
+                if syncSources { self.eventStore.refreshSourcesIfNecessary() }
+                let sources = self.readCalendarSources()
+                DispatchQueue.main.async {
+                    guard self.sourcesGeneration == generation else { return }
+                    if self.calendarSources != sources { self.calendarSources = sources }
+                }
+            }
+        } else if calendarSources != nil {
+            calendarSources = nil
+        }
+        fetchEvents(for: currentlyTrackedDate)
+        fetchAllUpcomingEvents()
+        fetchReminders(for: currentlyTrackedDate)
+        fetchAllUpcomingReminders()
     }
 
     @objc private func eventStoreChanged() {
         DispatchQueue.main.async { [weak self] in
-            guard let self, self.hasAnyAccess else { return }
+            guard let self else { return }
             self.eventStoreRefreshWorkItem?.cancel()
             let workItem = DispatchWorkItem { [weak self] in
-                guard let self else { return }
-                let selectedDate = self.currentlyTrackedDate
-                self.fetchEvents(for: selectedDate)
-                self.fetchAllUpcomingEvents()
-                self.fetchReminders(for: selectedDate)
-                self.fetchAllUpcomingReminders()
+                self?.refreshSchedule()
             }
             self.eventStoreRefreshWorkItem = workItem
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: workItem)
@@ -138,20 +169,39 @@ class CalendarService: ObservableObject {
     }
 
     @objc private func applicationDidBecomeActive() {
-        guard hasAnyAccess else { return }
-        fetchEvents(for: currentlyTrackedDate)
-        fetchAllUpcomingEvents()
+        refreshSchedule()
     }
 
-    private func visibleEventCalendars() -> [EKCalendar] {
-        let calendarPreferences = UserDefaults.standard.persistentDomain(
+    private func calendarPreferences() -> [String: Any]? {
+        UserDefaults.standard.persistentDomain(
             forName: CalendarVisibilityFilter.calendarPreferencesDomain
         )
+    }
 
+    private func readCalendarSources() -> [CalendarSourceGroup] {
+        let preferences = calendarPreferences()
+        let groups = Dictionary(grouping: eventStore.calendars(for: .event)) { $0.source.sourceIdentifier }
+        return groups.compactMap { id, calendars -> CalendarSourceGroup? in
+            guard let source = calendars.first?.source else { return nil }
+            let entries = calendars.map { calendar in
+                CalendarSourceGroup.Entry(
+                    id: calendar.calendarIdentifier, title: calendar.title, color: calendar.color,
+                    visibleInCalendar: CalendarVisibilityFilter.isVisible(
+                        calendarIdentifier: calendar.calendarIdentifier, calendarPreferences: preferences
+                    )
+                )
+            }.sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
+            return CalendarSourceGroup(id: id, title: source.title, calendars: entries)
+        }.sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
+    }
+
+    private func visibleEventCalendars(selection: Set<String>?) -> [EKCalendar] {
+        let preferences = calendarPreferences()
         return eventStore.calendars(for: .event).filter {
             CalendarVisibilityFilter.isVisible(
                 calendarIdentifier: $0.calendarIdentifier,
-                calendarPreferences: calendarPreferences
+                calendarPreferences: preferences,
+                selectedIdentifiers: selection
             )
         }
     }
@@ -165,18 +215,21 @@ class CalendarService: ObservableObject {
         self.currentlyTrackedDate = date
         selectedEventsGeneration &+= 1
         let generation = selectedEventsGeneration
+        guard EKEventStore.authorizationStatus(for: .event) == .fullAccess else {
+            if !eventsForSelectedDate.isEmpty { eventsForSelectedDate = [] }
+            return
+        }
+        let selection = selectedCalendarIdentifiers
 
         workQueue.async { [weak self] in
             guard let self = self else { return }
 
-            let calendars = self.visibleEventCalendars()
+            let calendars = self.visibleEventCalendars(selection: selection)
             let calendar = Calendar.current
             let startDate = calendar.startOfDay(for: date)
             guard let endDate = calendar.date(byAdding: .day, value: 1, to: startDate) else { return }
 
-            let predicate = self.eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: calendars)
-
-            let fetchedEvents = self.eventStore.events(matching: predicate)
+            let fetchedEvents = self.events(from: startDate, to: endDate, calendars: calendars)
                 .sorted {
                     if $0.isAllDay && !$1.isAllDay {
                         return true
@@ -202,15 +255,21 @@ class CalendarService: ObservableObject {
 
         upcomingEventsGeneration &+= 1
         let generation = upcomingEventsGeneration
+        guard EKEventStore.authorizationStatus(for: .event) == .fullAccess else {
+            if !upcomingEvents.isEmpty { upcomingEvents = [] }
+            boundaryTimer?.invalidate()
+            boundaryTimer = nil
+            return
+        }
+        let selection = selectedCalendarIdentifiers
         workQueue.async { [weak self] in
             guard let self = self else { return }
 
-            let calendars = self.visibleEventCalendars()
+            let calendars = self.visibleEventCalendars(selection: selection)
             let now = Date()
             guard let twoDaysFromNow = Calendar.current.date(byAdding: .hour, value: 48, to: now) else { return }
 
-            let predicate = self.eventStore.predicateForEvents(withStart: now, end: twoDaysFromNow, calendars: calendars)
-            let fetchedEvents = self.eventStore.events(matching: predicate)
+            let fetchedEvents = self.events(from: now, to: twoDaysFromNow, calendars: calendars)
                 .filter { !$0.isAllDay }
                 .sorted { $0.startDate < $1.startDate }
 
@@ -222,6 +281,11 @@ class CalendarService: ObservableObject {
         }
     }
 
+    private func events(from start: Date, to end: Date, calendars: [EKCalendar]) -> [EKEvent] {
+        guard !calendars.isEmpty, EKEventStore.authorizationStatus(for: .event) == .fullAccess else { return [] }
+        return eventStore.events(matching: eventStore.predicateForEvents(withStart: start, end: end, calendars: calendars))
+    }
+
     func fetchReminders(for date: Date) {
         guard Thread.isMainThread else {
             DispatchQueue.main.async { [weak self] in self?.fetchReminders(for: date) }
@@ -231,6 +295,10 @@ class CalendarService: ObservableObject {
         currentlyTrackedDate = date
         selectedRemindersGeneration &+= 1
         let generation = selectedRemindersGeneration
+        guard EKEventStore.authorizationStatus(for: .reminder) == .fullAccess else {
+            if !remindersForSelectedDate.isEmpty { remindersForSelectedDate = [] }
+            return
+        }
         let calendar = Calendar.current
         let startDate = calendar.startOfDay(for: date)
         guard let endDate = calendar.date(byAdding: .day, value: 1, to: startDate) else { return }
@@ -263,6 +331,10 @@ class CalendarService: ObservableObject {
 
         upcomingRemindersGeneration &+= 1
         let generation = upcomingRemindersGeneration
+        guard EKEventStore.authorizationStatus(for: .reminder) == .fullAccess else {
+            if !upcomingReminders.isEmpty { upcomingReminders = [] }
+            return
+        }
         let now = Date()
         guard let twoDaysFromNow = Calendar.current.date(byAdding: .hour, value: 48, to: now) else { return }
 

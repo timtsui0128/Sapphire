@@ -28,7 +28,8 @@ These personal changes are relative to upstream commit [`2e8085676209cbbb424bc60
 | Stock watchlist | AAPL, MSFT, and NVDA by default, with search, add/remove controls, quotes, historical charts, and notch widgets | [Stocks / Finance](docs/community-finance-and-appearance.md) |
 | In-app updates | Signed GitHub update channel with optional background preparation, byte/speed progress, and incremental updates from compatible builds | [App updates](docs/app-updates.md) |
 | App language | Follow System (default), English, or Simplified Chinese; changes apply immediately and persist across launches | [Language settings](docs/app-language.md) |
-| Appearance and glass | Follow the system or choose light/dark mode; expanded top bar and panel support Match Panel, Liquid Glass, White, and Black; Sports/Stocks show the panel material underneath | [Panel materials](docs/panel-surface.md) |
+| iCloud and school calendars | Choose your timetable from calendars synced to the Mac; see class times and locations in the expanded agenda | [Calendar sources](docs/calendar-sync.md) |
+| Appearance and glass | Follow the system or choose Light Glass and Dark Glass; the expanded toolbar and content share a clear surface | [Panel materials](docs/panel-surface.md) |
 | Silent Bluetooth alerts | TopLet's Bluetooth connect/disconnect sounds are off by default, with a settings toggle | [Bluetooth sounds](docs/community-finance-and-appearance.md#蓝牙连接静音) |
 | Lock screen privacy | Hide the interface, prevent reopening, and pause screenshot/clipboard collection when locked or switching user sessions; do not collect missed locked-session content after unlocking | [Session privacy](docs/session-privacy.md) |
 | Display switching | Keep the settings window and expanded notch within the available screen after switching displays; scroll overflowing content | [Window and notch sizing](docs/window-fit.md) |
@@ -46,8 +47,8 @@ Version 0.1.8 introduces the **TopLet** name and `TopLet.app` download. The repo
 
 ## Current version and supported scope
 
-- The current source build is labeled **TopLet 24** (version **0.1.14**, build **24**). This personal test release uses a persistent Apple Development signing identity; it is not Apple notarized. The first switch from ad-hoc signing may require one new window-control authorization.
-- Version 0.1.14 adds a visible, highlighted Snap Zones target below the menu bar, while keeping the physical top edge available for Mission Control; see [release notes](docs/releases/0.1.14.md).
+- The current source build is labeled **TopLet 25** (version **0.1.15**, build **25**). This personal test release uses a persistent Apple Development signing identity; it is not Apple notarized. The first switch from ad-hoc signing may require one new window-control authorization.
+- Version 0.1.15 adds calendar source selection and clearer glass in both appearances; see [release notes](docs/releases/0.1.15.md).
 - The default development branch is **`codex/personal-notched-tools`**. `main` retains the upstream state from the fork; this branch is based on the commit above and has not merged the later upstream macOS 27 charging-limit changes.
 - The minimum deployment target is macOS 14. Complete builds and local packages have been verified on Apple Silicon (arm64); Intel hardware and other macOS versions have not been fully validated.
 - Upstream paid modules whose source is not public continue to use public placeholders or compatibility implementations. The independently implemented Sports/Finance features do not require those private modules and do not connect or sync with Apple Sports/Stocks accounts.

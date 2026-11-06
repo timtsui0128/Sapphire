@@ -32,10 +32,12 @@ enum ExpandedPanelSurface: String, CaseIterable, Identifiable {
         switch self {
         case .matchPanel: return "Match Panel"
         case .liquidGlass: return "Liquid Glass"
-        case .white: return "White"
-        case .black: return "Black"
+        case .white: return "Light Glass"
+        case .black: return "Dark Glass"
         }
     }
+
+    var usesTranslucentGlass: Bool { self != .matchPanel }
 
     func colorScheme(following scheme: ColorScheme) -> ColorScheme {
         switch self {
@@ -118,7 +120,7 @@ final class AppAppearance: ObservableObject {
         mode = defaults.string(forKey: Self.defaultsKey)
             .flatMap(AppAppearanceMode.init(rawValue:)) ?? .system
         expandedPanelSurface = defaults.string(forKey: Self.panelSurfaceDefaultsKey)
-            .flatMap(ExpandedPanelSurface.init(rawValue:)) ?? .matchPanel
+            .flatMap(ExpandedPanelSurface.init(rawValue:)) ?? .liquidGlass
         externalDisplayStyle = defaults.string(forKey: Self.externalDisplayStyleDefaultsKey)
             .flatMap(ExternalDisplayStyle.init(rawValue:)) ?? .menuBarLine
         externalGlassTone = defaults.string(forKey: Self.externalGlassToneDefaultsKey)

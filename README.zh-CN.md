@@ -28,7 +28,8 @@ This is an unofficial personal fork of Sapphire, originally created by Shariq Ch
 | 股票关注列表 | 默认关注 AAPL、MSFT、NVDA，支持搜索增删、报价、历史图表和刘海小组件 | [Stocks / Finance](docs/community-finance-and-appearance.md) |
 | 应用内更新 | 签名 GitHub 更新渠道，支持后台准备、下载大小／速度显示及兼容版本间的增量更新 | [更新与发布](docs/app-updates.md) |
 | 界面语言 | 默认跟随系统，可选择 English 或简体中文；切换立即生效并在下次启动时保留 | [语言设置](docs/app-language.md) |
-| 主题与玻璃材质 | 应用可跟随系统或选择浅色／深色；展开顶栏和面板支持 Match Panel、Liquid Glass、White、Black；Sports／Stocks 透出面板材质 | [面板材质](docs/panel-surface.md) |
+| iCloud 与学校课表 | 选择 Mac 上已同步的课表，在展开的日程中查看课程时间和地点 | [日历来源](docs/calendar-sync.md) |
+| 主题与玻璃材质 | 应用可跟随系统或使用浅色／深色玻璃；展开顶栏和内容共用一层清透材质 | [面板材质](docs/panel-surface.md) |
 | 蓝牙提示静音 | 默认关闭 Sapphire 的蓝牙连接／断开提示音，并提供设置开关 | [蓝牙声音](docs/community-finance-and-appearance.md#蓝牙连接静音) |
 | 锁屏隐私 | 锁屏和用户会话切换时隐藏界面、阻止重新弹窗并暂停截图／剪贴板收集；解锁后不补收锁屏期间内容 | [锁屏行为](docs/session-privacy.md) |
 | 内外接屏适配 | 切换显示器后约束设置窗口和展开刘海尺寸，支持内容溢出滚动 | [窗口与刘海适配](docs/window-fit.md) |
@@ -46,8 +47,8 @@ This is an unofficial personal fork of Sapphire, originally created by Shariq Ch
 
 ## 当前源码版本与运行范围
 
-- 当前源码的构建标记为 **TopLet 24**（版本 **0.1.14**，构建 **24**），此个人测试版使用固定 Apple Development 证书签名，尚未进行 Apple 公证；从临时签名首次切换后可能需要重新授权一次窗口控制。
-- 0.1.14 在菜单栏下方增加可见、高亮的分屏目标区，同时保留最顶边的调度中心手势，详见[更新说明](docs/releases/0.1.14.md)。
+- 当前源码的构建标记为 **TopLet 25**（版本 **0.1.15**，构建 **25**），此个人测试版使用固定 Apple Development 证书签名，尚未进行 Apple 公证；从临时签名首次切换后可能需要重新授权一次窗口控制。
+- 0.1.15 增加日历来源选择，并改善深浅两种玻璃的透光效果，详见[更新说明](docs/releases/0.1.15.md)。
 - 个人开发分支为 **`codex/personal-notched-tools`**。`main` 保留 Fork 时的上游状态；本分支基于上面标注的提交，尚未合并上游后续的 macOS 27 充电限制改动。
 - 最低部署目标为 macOS 14；当前完整构建与本地安装包在 Apple Silicon（arm64）Mac 上验证。Intel 机器和不同 macOS 版本尚未完整验收。
 - 上游未公开的付费模块继续使用公开占位或兼容实现。独立实现的 Sports／Finance 不依赖这些私有模块，也不连接或同步 Apple Sports／Stocks 账户。

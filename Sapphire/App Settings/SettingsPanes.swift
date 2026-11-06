@@ -9325,6 +9325,8 @@ struct CalendarSettingsView: View {
                     .font(.largeTitle.bold())
                     .padding(.bottom)
 
+                CalendarSourcesSettingsSection()
+
                 VStack(alignment: .leading, spacing: 0) {
                     ToggleRow(
                         title: "Enable Calendar Widget",
@@ -9379,7 +9381,13 @@ struct CalendarSettingsView: View {
                 }
                 .modifier(SettingsContainerModifier())
 
-                RequiredPermissionsView(section: .calendar)
+                if let permission = PermissionsManager.shared.permissionItems(for: [.reminders]).first {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("Optional Reminders").font(.headline).padding([.horizontal, .top])
+                        PermissionStatusRowView(permission: permission)
+                    }
+                    .modifier(SettingsContainerModifier())
+                }
             }
             .padding(25)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)

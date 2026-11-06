@@ -9,7 +9,7 @@ extension NSScreen {
 
 // Minimal dependency types for the unmodified production surface resolver.
 enum LiquidGlassBackend { case automatic, visualEffect }
-enum LiquidGlassMaterial { case frosted, hud, menu }
+enum LiquidGlassMaterial { case frosted, hud, menu, clearGlass }
 enum LiquidGlassBlendingMode { case behindWindow }
 enum LiquidGlassAppearance { case dark, light, auto }
 enum LiquidGlassInteraction { case normal }
