@@ -126,7 +126,27 @@ private struct PanelRoot: View {
         try check(NotchDisplayRefreshPolicy.step(previous: first, current: dock, reads: 2) == .readAgain, "Dock change falsely treated as stable")
         try check(NotchDisplayRefreshPolicy.step(previous: first, current: scale, reads: 2) == .readAgain, "Backing-scale change falsely treated as stable")
         try check(NotchDisplayRefreshPolicy.step(previous: dock, current: dock, reads: 3) == .apply, "Stable geometry never applied")
+        let external = NotchDisplayRefreshPolicy.Snapshot(displays: [.init(id: 22, frame: frame, scale: 1)], targets: [22])
+        try check(NotchDisplayRefreshPolicy.step(previous: first, current: external, reads: 2) == .readAgain, "Changing monitors were treated as stable")
+        for (from, to): (CGDirectDisplayID, CGDirectDisplayID) in [(11, 22), (22, 11)] {
+            let plan = NotchDisplayRefreshPolicy.plan(windowDisplays: [from], targets: [to])
+            try check(plan.moves == [.init(from: from, to: to)], "A monitor swap did not move the existing island")
+        }
+        func presentation(hidden: Bool = false, detached: Bool = false, suppressed: Bool = false,
+                          visible: Bool = true, active: Bool = true, alpha: CGFloat = 1, force: Bool = false) -> NotchDisplayRefreshPolicy.Presentation {
+            NotchDisplayRefreshPolicy.presentation(hidden: hidden, detached: detached, sessionSuppressed: suppressed,
+                                                   visible: visible, onActiveSpace: active, alpha: alpha, force: force)
+        }
+        try check(presentation(visible: false) == .orderFront, "Ordered-out island was not recovered on a connected screen")
+        try check(presentation(active: false) == .orderFront, "Island was stranded on its old Space")
+        try check(presentation(alpha: 0) == .orderFront, "Transparent island was not restored")
+        try check(presentation(force: true) == .orderFront, "A display change did not rejoin the WindowServer space")
+        try check(presentation() == .keep, "Healthy island was unnecessarily raised")
+        try check(presentation(hidden: true, force: true) == .leaveHidden, "Recovery ignored explicit hiding")
+        try check(presentation(detached: true, force: true) == .leaveHidden, "Recovery showed an unplugged-screen window")
+        try check(presentation(suppressed: true, force: true) == .leaveHidden, "Recovery ignored lock-screen privacy")
         print("PASS: display stability includes work area and backing scale")
+        print("PASS: built-in↔external handoff restores ordered-out islands and respects hiding and lock-screen privacy")
     }
 
     @MainActor private static func panelChecks() async throws {

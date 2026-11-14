@@ -180,7 +180,8 @@ enum NotchScreens {
     }
 
     static func defaultScreens(for target: NotchDisplayTarget, among screens: [NSScreen]) -> [NSScreen] {
-        let main = screens.filter { $0.displayID == CGMainDisplayID() }
+        // AppKit's list and Core Graphics' main ID can update on different turns.
+        let main = (screens.first { $0.displayID == CGMainDisplayID() } ?? screens.first).map { [$0] } ?? []
         switch target {
         case .macbookDisplay:
             if let builtIn = screens.first(where: { CGDisplayIsBuiltin($0.displayID) != 0 }) {

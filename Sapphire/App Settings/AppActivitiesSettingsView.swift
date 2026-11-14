@@ -70,7 +70,7 @@ struct AppActivitiesSettingsView: View {
                             AppActivityIcon(app: app, size: 28)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(app.displayName)
-                                Text(app.detectionDetail).font(.caption).foregroundStyle(.secondary)
+                                Text(LocalizedStringKey(app.detectionDetail)).font(.caption).foregroundStyle(.secondary)
                             }
                             Spacer()
                             Toggle("", isOn: appBinding(app)).labelsHidden().toggleStyle(.switch)

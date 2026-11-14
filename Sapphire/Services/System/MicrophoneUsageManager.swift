@@ -97,6 +97,12 @@ final class MicrophoneUsageManager: ObservableObject {
         refreshMonitoredInputDevices()
     }
 
+    // An existing audio client can start using input while another app already
+    // holds the device open. The device-running notification won't fire again.
+    func refreshCallInput() {
+        updateMicUsageState()
+    }
+
     private func refreshMonitoredInputDevices() {
         deviceScanGeneration += 1
         let generation = deviceScanGeneration
@@ -342,7 +348,7 @@ enum MicrophoneUsageFilter {
         guard let bundleID, !bundleID.isEmpty else { return false }
         if bundleID == ownBundleID { return false }
         if ignoredBundleIDPrefixes.contains(where: bundleID.hasPrefix) { return false }
-        if bundleID.hasPrefix("com.apple."),
+        if bundleID.hasPrefix("com.apple."), !CallAudioAttribution.isSystemCallProcess(bundleID),
            !appleUserFacingMicPrefixes.contains(where: bundleID.hasPrefix) {
             return false
         }

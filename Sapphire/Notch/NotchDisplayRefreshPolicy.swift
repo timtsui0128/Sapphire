@@ -30,8 +30,22 @@ enum NotchDisplayRefreshPolicy {
 
     static let debounce: TimeInterval = 0.5
     static let stabilityInterval: TimeInterval = 0.3
-    static let settleDelay: TimeInterval = 0.5
+    static let settleDelays: [TimeInterval] = [0.35, 0.7, 1.4]
     static let maxStabilityReads = 6
+
+    enum Presentation: Equatable {
+        case leaveHidden
+        case keep
+        case orderFront
+    }
+
+    static func presentation(
+        hidden: Bool, detached: Bool, sessionSuppressed: Bool,
+        visible: Bool, onActiveSpace: Bool, alpha: CGFloat, force: Bool
+    ) -> Presentation {
+        if hidden || detached || sessionSuppressed { return .leaveHidden }
+        return force || !visible || !onActiveSpace || alpha < 1 ? .orderFront : .keep
+    }
 
     enum Step: Equatable {
         case apply

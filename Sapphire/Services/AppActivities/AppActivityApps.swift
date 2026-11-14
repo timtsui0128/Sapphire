@@ -33,7 +33,7 @@ enum AppActivityAction {
 }
 
 enum AppActivityApp: String, CaseIterable, Identifiable, Codable {
-    case zoom, googleMeet, teams, slack, discord, faceTime, webex, voiceMemos, quickTime, screenSharing
+    case zoom, googleMeet, teams, slack, discord, faceTime, whatsApp, webex, voiceMemos, quickTime, screenSharing
 
     var id: String { rawValue }
 
@@ -45,6 +45,7 @@ enum AppActivityApp: String, CaseIterable, Identifiable, Codable {
         case .slack: "Slack huddles"
         case .discord: "Discord voice"
         case .faceTime: "FaceTime"
+        case .whatsApp: "WhatsApp"
         case .webex: "Webex"
         case .voiceMemos: "Voice Memos"
         case .quickTime: "QuickTime recordings"
@@ -55,7 +56,7 @@ enum AppActivityApp: String, CaseIterable, Identifiable, Codable {
     var kind: AppActivityKind {
         switch self {
         case .zoom, .googleMeet, .teams, .webex: .meeting
-        case .slack, .discord, .faceTime: .call
+        case .slack, .discord, .faceTime, .whatsApp: .call
         case .voiceMemos, .quickTime: .recording
         case .screenSharing: .remoteSession
         }
@@ -69,10 +70,26 @@ enum AppActivityApp: String, CaseIterable, Identifiable, Codable {
         case .slack: ["com.tinyspeck.slackmacgap"]
         case .discord: ["com.hnc.Discord", "com.hnc.DiscordPTB", "com.hnc.DiscordCanary"]
         case .faceTime: ["com.apple.FaceTime"]
+        case .whatsApp: ["net.whatsapp.WhatsApp", "desktop.WhatsApp"]
         case .webex: ["Cisco-Systems.Spark", "com.webex.meetingmanager"]
         case .voiceMemos: ["com.apple.VoiceMemos"]
         case .quickTime: ["com.apple.QuickTimePlayerX"]
         case .screenSharing: ["com.apple.ScreenSharing"]
+        }
+    }
+
+    var usesCallInputRefresh: Bool { self == .faceTime || self == .whatsApp }
+
+    func hasActiveMicrophone(_ inputs: Set<String>, forBundleID bundleID: String? = nil) -> Bool {
+        if !usesCallInputRefresh {
+            return microphonePrefixes.contains { prefix in inputs.contains { $0.hasPrefix(prefix) } }
+        }
+        return (bundleID.map { [$0] } ?? microphonePrefixes).contains { prefix in
+            let prefix = prefix.lowercased()
+            return inputs.contains { input in
+                let input = input.lowercased()
+                return input == prefix || input.hasPrefix(prefix + ".")
+            }
         }
     }
 
@@ -106,6 +123,7 @@ enum AppActivityApp: String, CaseIterable, Identifiable, Codable {
         case .slack: [.mute, .leave, .show]
         case .discord: [.mute, .deafen, .show]
         case .faceTime: [.mute, .video, .leave, .show]
+        case .whatsApp: [.show]
         case .webex: [.mute, .video, .show]
         case .voiceMemos: [.stop, .show]
         case .quickTime: [.stop, .show]
@@ -180,6 +198,7 @@ enum AppActivityApp: String, CaseIterable, Identifiable, Codable {
         case .slack: "While you're in a huddle."
         case .discord: "While you're in a voice channel."
         case .faceTime: "While you're on a FaceTime call."
+        case .whatsApp: "While a call in the WhatsApp Mac app is using the microphone."
         case .webex: "While a Webex meeting is using the microphone."
         case .voiceMemos: "While Voice Memos is recording."
         case .quickTime: "While QuickTime is recording the screen, a movie or audio."

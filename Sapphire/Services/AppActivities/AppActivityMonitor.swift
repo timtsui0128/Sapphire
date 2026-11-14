@@ -33,6 +33,7 @@ final class AppActivityMonitor: ObservableObject {
     private var isRunning = false
     private var isEvaluating = false
     private var needsAnotherPass = false
+    private var monitoringGeneration = 0
     private var meetTabCache: [String: (tab: MeetTab?, at: Date)] = [:]
 
     struct MeetTab: Equatable { let browserBundleID: String; let title: String; let url: String }
@@ -46,6 +47,7 @@ final class AppActivityMonitor: ObservableObject {
         settingCancellable = SettingsModel.shared.$settings
             .map(\.appActivitiesEnabled)
             .removeDuplicates()
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] enabled in
                 if enabled { self?.start() } else { self?.stop() }
             }
@@ -54,6 +56,7 @@ final class AppActivityMonitor: ObservableObject {
     func start() {
         guard !isRunning else { return }
         isRunning = true
+        monitoringGeneration += 1
         MicrophoneUsageManager.shared.$inputBundleIDs
             .removeDuplicates()
             .sink { [weak self] _ in self?.evaluate() }
@@ -61,6 +64,7 @@ final class AppActivityMonitor: ObservableObject {
         let center = NSWorkspace.shared.notificationCenter
         for name in [NSWorkspace.didLaunchApplicationNotification, NSWorkspace.didTerminateApplicationNotification] {
             center.publisher(for: name)
+                .receive(on: DispatchQueue.main)
                 .sink { [weak self] _ in self?.evaluate() }
                 .store(in: &cancellables)
         }
@@ -68,6 +72,7 @@ final class AppActivityMonitor: ObservableObject {
             .map(\.appActivitiesDisabled)
             .removeDuplicates()
             .dropFirst()
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.evaluate() }
             .store(in: &cancellables)
         evaluate()
@@ -75,6 +80,9 @@ final class AppActivityMonitor: ObservableObject {
 
     func stop() {
         isRunning = false
+        monitoringGeneration += 1
+        isEvaluating = false
+        needsAnotherPass = false
         cancellables.removeAll()
         refreshTimer?.invalidate()
         refreshTimer = nil
@@ -95,20 +103,29 @@ final class AppActivityMonitor: ObservableObject {
         guard isRunning else { return }
         if isEvaluating { needsAnotherPass = true; return }
         isEvaluating = true
+        let generation = monitoringGeneration
 
         let mic = MicrophoneUsageManager.shared.inputBundleIDs
         let apps = enabledApps()
+        let frontmost = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+        let faceTimeUsesSystemInput = CallAudioAttribution.faceTimeHasSystemInput(
+            inputs: mic, frontmostBundleID: frontmost,
+            isRunning: { !NSRunningApplication.runningApplications(withBundleIdentifier: $0).isEmpty }
+        )
         var candidates: [(AppActivityApp, pid_t, String, Bool)] = []
         for app in apps {
-            let micActive = app.microphonePrefixes.contains { prefix in mic.contains { $0.hasPrefix(prefix) } }
-            for bundleID in app.bundleIDs {
-                guard let running = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).first else { continue }
-                if app == .googleMeet {
-                    guard Self.browserIsRecording(bundleID, mic: mic) else { continue }
-                }
-                candidates.append((app, running.processIdentifier, bundleID, micActive))
-                break
+            let running = app.bundleIDs.compactMap { bundleID in
+                NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).first.map { ($0, bundleID) }
             }
+            let active = running.first { _, bundleID in
+                if app == .googleMeet {
+                    return Self.browserIsRecording(bundleID, mic: mic) && app.hasActiveMicrophone(mic)
+                }
+                return app.hasActiveMicrophone(mic, forBundleID: bundleID)
+            }
+            guard let (application, bundleID) = active ?? (app == .googleMeet ? nil : running.first) else { continue }
+            let micActive = active != nil || (app == .faceTime && faceTimeUsesSystemInput)
+            candidates.append((app, application.processIdentifier, bundleID, micActive))
         }
         let previous = Dictionary(uniqueKeysWithValues: activities.map { ($0.app, $0) })
         let meetCache = meetTabCache
@@ -178,9 +195,12 @@ final class AppActivityMonitor: ObservableObject {
             }
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
-                    guard let self else { return }
+                    guard let self, self.isRunning, self.monitoringGeneration == generation else { return }
                     for (key, value) in newMeetCache { self.meetTabCache[key] = value }
-                    let ordered = found.sorted { $0.startedAt < $1.startedAt }
+                    let ordered = found.sorted { lhs, rhs in
+                        if lhs.app.usesCallInputRefresh != rhs.app.usesCallInputRefresh { return lhs.app.usesCallInputRefresh }
+                        return lhs.startedAt < rhs.startedAt
+                    }
                     if ordered != self.activities { self.activities = ordered }
                     self.updateRefreshTimer()
                     self.isEvaluating = false
@@ -218,7 +238,8 @@ final class AppActivityMonitor: ObservableObject {
     }
 
     private func updateRefreshTimer() {
-        let windowApps = enabledApps().filter { !$0.windowHints.isEmpty || $0 == .screenSharing }
+        let enabled = enabledApps()
+        let windowApps = enabled.filter { !$0.windowHints.isEmpty || $0 == .screenSharing }
         var watchedPIDs = Set<pid_t>()
         for app in windowApps {
             for bundleID in app.bundleIDs {
@@ -230,12 +251,19 @@ final class AppActivityMonitor: ObservableObject {
         let isLive = !activities.isEmpty
         syncWindowObservers(isLive ? [] : watchedPIDs)
 
-        let interval: TimeInterval? = isLive ? 2 : (watchedPIDs.isEmpty ? nil : Self.watchFallbackInterval)
+        let watchesCallInput = enabled.filter(\.usesCallInputRefresh).contains { app in
+            app.bundleIDs.contains { !NSRunningApplication.runningApplications(withBundleIdentifier: $0).isEmpty }
+        }
+        let interval: TimeInterval? = isLive || watchesCallInput ? 2 : (watchedPIDs.isEmpty ? nil : Self.watchFallbackInterval)
         if let interval {
-            guard refreshTimer?.timeInterval != interval else { return }
+            guard refreshTimer?.timeInterval != interval || refreshesCallInput != watchesCallInput else { return }
+            refreshesCallInput = watchesCallInput
             refreshTimer?.invalidate()
             let timer = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
-                MainActor.assumeIsolated { self?.evaluate() }
+                MainActor.assumeIsolated {
+                    if watchesCallInput { MicrophoneUsageManager.shared.refreshCallInput() }
+                    self?.evaluate()
+                }
             }
             timer.tolerance = interval * 0.25
             RunLoop.main.add(timer, forMode: .common)
@@ -247,6 +275,7 @@ final class AppActivityMonitor: ObservableObject {
     }
 
     private static let watchFallbackInterval: TimeInterval = 30
+    private var refreshesCallInput = false
 
     private var windowObservers: [pid_t: AXObserverHandle] = [:]
     private var pendingWindowEvaluation: DispatchWorkItem?

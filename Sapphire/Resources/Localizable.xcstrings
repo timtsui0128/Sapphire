@@ -54986,6 +54986,40 @@
           }
         }
       }
+    },
+    "While a call in the WhatsApp Mac app is using the microphone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "While a call in the WhatsApp Mac app is using the microphone."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WhatsApp Mac 版通话使用麦克风时显示。"
+          }
+        }
+      }
+    },
+    "On a call": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On a call"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通话中"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -120,10 +120,18 @@ final class DynamicFocusWindow: NSPanel, NSWindowDelegate {
     }
 
     private func showIfAllowed() {
-        guard !isNotchHidden, !isDisplayDetached else { return }
-        (NSApp.delegate as? AppDelegate)?.reassertNotchSpaceMembership(self)
+        restoreDisplayPresentation(force: true)
+    }
+
+    func restoreDisplayPresentation(force: Bool = false) {
+        guard NotchDisplayRefreshPolicy.presentation(
+            hidden: isNotchHidden, detached: isDisplayDetached,
+            sessionSuppressed: SessionPrivacyState.shouldSuppressUI(),
+            visible: isVisible, onActiveSpace: isOnActiveSpace, alpha: alphaValue, force: force
+        ) == .orderFront else { return }
         alphaValue = 1
         orderFrontRegardless()
+        (NSApp.delegate as? AppDelegate)?.reassertNotchSpaceMembership(self)
     }
 
     var onDisplayConfigurationChange: (() -> Void)?
@@ -900,6 +908,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
         NotificationCenter.default.addObserver(self, selector: #selector(screenParametersChanged), name: NSApplication.didChangeScreenParametersNotification, object: nil)
         createNotchWindow()
+        scheduleNotchDisplayRefresh()
         archiveExtractor.reconcileDefaultHandlerIfNeeded()
         dmgInstallerManager.reconcileDefaultHandlerIfNeeded()
         _ = circleToSearchManager
@@ -1112,6 +1121,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 LiveWallpaperManager.shared.setSessionSuppressed(false)
                 interactionManager?.startMonitoring()
                 createNotchWindow()
+                notchDisplaysDidWake()
                 startNearbyShareIfNeeded()
             } else if hasDeferredLaunchRoute || onboardingWindow != nil || betaBlockerWindow != nil {
                 routeAfterLaunch()
@@ -1150,6 +1160,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             self,
             selector: #selector(displayDidWake),
             name: NSWorkspace.screensDidWakeNotification,
+            object: nil
+        )
+
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self,
+            selector: #selector(notchActiveSpaceDidChange),
+            name: NSWorkspace.activeSpaceDidChangeNotification,
             object: nil
         )
 
@@ -1213,9 +1230,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
     @objc private func displayDidWake(notification: NSNotification) {
         SessionPrivacyState.shared.refreshFromSystem()
+        notchDisplaysDidWake()
         guard !SessionPrivacyState.shouldSuppressUI() else { return }
         AuthenticationManager.shared.handleDisplayDidWake()
-        notchDisplaysDidWake()
         onDisplayWake()
         if isScreenLocked {
             showLockScreenWidgets()
@@ -1735,7 +1752,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             if let existing {
                 existing.sharingType = settingsModel.current.hideFromScreenSharing ? .none : .readOnly
                 syncNotchWindowFrame(existing, to: screen)
-                (existing as? DynamicFocusWindow)?.setDisplayDetached(false)
+                if let window = existing as? DynamicFocusWindow {
+                    window.setDisplayDetached(false)
+                    window.restoreDisplayPresentation()
+                }
                 continue
             }
 
@@ -1745,6 +1765,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         for move in plan.moves {
             let moved = notchWindows.first { ($0 as? DynamicFocusWindow)?.displayID == move.to } as? DynamicFocusWindow
             moved?.onDisplayConfigurationChange?()
+            moved?.restoreDisplayPresentation(force: true)
         }
 
         scheduleLiveActivityStart()
@@ -1849,9 +1870,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             stageSize: stageSize
         )
         window.contentView?.layoutSubtreeIfNeeded()
-        if !window.isNotchHidden, !window.isDisplayDetached { window.orderFrontRegardless() }
-
         notchWindows.append(window)
+        window.restoreDisplayPresentation(force: true)
     }
 
     private func destroyNotchWindow(_ window: NSWindow) {
@@ -2212,8 +2232,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         scheduleNotchDisplayRefresh()
     }
 
+    @objc private func notchActiveSpaceDidChange(_ notification: Notification) {
+        guard isMainAppRunning, !areNotchDisplaysAsleep, !SessionPrivacyState.shouldSuppressUI() else { return }
+        // A native full-screen space can also leave the panel ordered out.
+        // Let WindowServer finish switching spaces before checking its visibility.
+        if screenParametersDebounceTimer == nil, notchScreenRefreshRetryWorkItem == nil {
+            scheduleNotchDisplayRefresh(rejoinSpace: false)
+        }
+    }
+
     private func resyncNotchWindowsToDisplays() {
-        guard isMainAppRunning else { return }
+        guard isMainAppRunning, !areNotchDisplaysAsleep, !SessionPrivacyState.shouldSuppressUI() else { return }
         let screens = NSScreen.screens
         for case let window as DynamicFocusWindow in notchWindows where window.displayID != 0 {
             if let screen = screens.first(where: { $0.displayID == window.displayID }) {
@@ -2247,20 +2276,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         notchScreenRefreshGeneration += 1
     }
 
-    private func scheduleNotchDisplayRefresh() {
+    private func scheduleNotchDisplayRefresh(rejoinSpace: Bool = true) {
         cancelNotchDisplayRefresh()
         guard !SessionPrivacyState.shouldSuppressUI(), isMainAppRunning, !areNotchDisplaysAsleep else { return }
         let generation = notchScreenRefreshGeneration
-        screenParametersDebounceTimer = Timer.scheduledTimer(
-            withTimeInterval: NotchDisplayRefreshPolicy.debounce,
+        let timer = Timer(
+            timeInterval: NotchDisplayRefreshPolicy.debounce,
             repeats: false
         ) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self else { return }
                 self.screenParametersDebounceTimer = nil
-                self.readNotchDisplaysUntilStable(generation: generation, previous: nil, reads: 0)
+                self.readNotchDisplaysUntilStable(generation: generation, previous: nil, reads: 0, rejoinSpace: rejoinSpace)
             }
         }
+        screenParametersDebounceTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
     }
 
     private func scheduleNotchRefreshStep(after delay: TimeInterval, _ step: @escaping @MainActor () -> Void) {
@@ -2288,41 +2319,43 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     private func readNotchDisplaysUntilStable(
         generation: Int,
         previous: NotchDisplayRefreshPolicy.Snapshot?,
-        reads: Int
+        reads: Int,
+        rejoinSpace: Bool
     ) {
         guard isCurrentNotchRefresh(generation) else { return }
         let current = currentNotchDisplaySnapshot()
         switch NotchDisplayRefreshPolicy.step(previous: previous, current: current, reads: reads + 1) {
         case .apply:
-            refreshNotchScreens(generation: generation, attempt: 0, isSettlePass: false)
+            refreshNotchScreens(generation: generation, pass: 0, rejoinSpace: rejoinSpace)
         case .readAgain:
             scheduleNotchRefreshStep(after: NotchDisplayRefreshPolicy.stabilityInterval) { [weak self] in
-                self?.readNotchDisplaysUntilStable(generation: generation, previous: current, reads: reads + 1)
+                self?.readNotchDisplaysUntilStable(generation: generation, previous: current, reads: reads + 1, rejoinSpace: rejoinSpace)
             }
         case .skip:
-            notchScreenRefreshRetryWorkItem = nil
+            if rejoinSpace {
+                refreshNotchScreens(generation: generation, pass: 0, rejoinSpace: true)
+            } else {
+                notchScreenRefreshRetryWorkItem = nil
+            }
         }
     }
 
-    private func refreshNotchScreens(generation: Int, attempt: Int, isSettlePass: Bool) {
+    private func refreshNotchScreens(generation: Int, pass: Int, rejoinSpace: Bool) {
         guard isCurrentNotchRefresh(generation) else { return }
-        guard !NSScreen.screens.isEmpty else { return }
-
-        createNotchWindow()
-        notifyNotchDisplayConfigurationChanged()
-
-        if targetNotchScreens().isEmpty, attempt < 12 {
-            scheduleNotchRefreshStep(after: 0.5) { [weak self] in
-                self?.refreshNotchScreens(generation: generation, attempt: attempt + 1, isSettlePass: isSettlePass)
+        if !NSScreen.screens.isEmpty {
+            createNotchWindow()
+            notifyNotchDisplayConfigurationChanged()
+            for case let window as DynamicFocusWindow in notchWindows {
+                window.restoreDisplayPresentation(force: rejoinSpace && pass < 2)
             }
-            return
         }
-        guard !isSettlePass else {
+        let delays = NotchDisplayRefreshPolicy.settleDelays
+        guard pass < delays.count, rejoinSpace || pass == 0 else {
             notchScreenRefreshRetryWorkItem = nil
             return
         }
-        scheduleNotchRefreshStep(after: NotchDisplayRefreshPolicy.settleDelay) { [weak self] in
-            self?.refreshNotchScreens(generation: generation, attempt: 0, isSettlePass: true)
+        scheduleNotchRefreshStep(after: delays[pass]) { [weak self] in
+            self?.refreshNotchScreens(generation: generation, pass: pass + 1, rejoinSpace: rejoinSpace)
         }
     }
 

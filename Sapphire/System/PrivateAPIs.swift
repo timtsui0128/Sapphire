@@ -239,11 +239,13 @@ public final class CGSSpace {
     }
 
     public func reassert(_ window: NSWindow) {
+        guard connectionID != 0, identifier != 0, window.windowNumber > 0 else { return }
+        // WindowServer can stop showing our space when the display set changes.
+        CGSShowSpaces(connectionID, [identifier] as NSArray)
         if !windows.contains(window) {
             windows.insert(window)
             return
         }
-        guard connectionID != 0, window.windowNumber > 0 else { return }
         CGSAddWindowsToSpaces(connectionID, [window.windowNumber] as NSArray, [self.identifier] as NSArray)
     }
 

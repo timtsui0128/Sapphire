@@ -1106,7 +1106,8 @@ class LiveActivityManager {
         .audioSwitch,
         .bluetooth,
         .intelligenceAgent,
-        .updateAvailable
+        .updateAvailable,
+        .appActivity
     ]
 
     private var highPriorityActivities: [ActivityType] {

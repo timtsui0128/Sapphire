@@ -121,7 +121,10 @@ private struct AppActivityCard: View {
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(.white)
                         .lineLimit(1)
-                    Text(activity.subtitle ?? activity.app.kind.verb)
+                    Group {
+                        if let subtitle = activity.subtitle { Text(verbatim: subtitle) }
+                        else { Text(LocalizedStringKey(activity.app.kind.verb)) }
+                    }
                         .font(.system(size: 12))
                         .foregroundStyle(.white.opacity(0.6))
                         .lineLimit(1)

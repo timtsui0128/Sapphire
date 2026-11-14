@@ -727,6 +727,19 @@ enum CallAudioAttribution {
     ]
     static let callingAppBundleIDs = ["com.apple.FaceTime", "com.apple.mobilephone"]
 
+    static func isSystemCallProcess(_ bundleID: String) -> Bool {
+        callAudioDaemonBundleIDs.contains { $0.caseInsensitiveCompare(bundleID) == .orderedSame }
+    }
+
+    static func faceTimeHasSystemInput(
+        inputs: Set<String>, frontmostBundleID: String?, isRunning: (String) -> Bool
+    ) -> Bool {
+        let faceTime = "com.apple.FaceTime", phone = "com.apple.mobilephone"
+        guard inputs.contains(where: isSystemCallProcess), isRunning(faceTime) else { return false }
+        if frontmostBundleID == faceTime { return true }
+        return frontmostBundleID != phone && !isRunning(phone)
+    }
+
     static func callingApp(
         forDaemonBundleID daemonBundleID: String?,
         frontmostBundleID: String?,
