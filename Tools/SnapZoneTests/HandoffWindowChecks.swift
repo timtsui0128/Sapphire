@@ -69,10 +69,40 @@ enum L10n {
         monitor.update(hoverRect: rect, pointerIsInside: false)
         precondition(monitor.isHoverProbeListeningForPointer, "Restart retained stale handoff state")
         monitor.stop()
+        missedFileDragEnd(host: host)
         silentWindowDragDelivery(host: host)
         visibleTarget(host: host)
         host.close()
         print("PASS: native hover probe disarms and parks during handoff, ignores stale geometry, resumes and restarts cleanly")
+    }
+
+    @MainActor static func missedFileDragEnd(host: NSWindow) {
+        var pressed = true
+        var endings: [Bool] = []
+        let monitor = NotchHoverMonitor(isPrimaryButtonPressed: { pressed },
+                                       installGlobalDragMonitor: { _ in nil })
+        monitor.start(window: host, handlers: NotchHoverMonitorHandlers(
+            onPointerEvent: {}, onMouseDrag: { _, _ in }, onMouseDragEnded: { _ in },
+            onFileDrag: { _, _ in }, onFileDragEnded: { _, accepted in endings.append(accepted) },
+            onFileDrop: { _, _, _ in true }))
+        defer { monitor.stop() }
+        let target = NSApp.windows.compactMap { $0 as? HoverProbeWindow }.first { $0.onFileDrop != nil }!
+        let board = NSPasteboard.withUniqueName()
+        defer { board.releaseGlobally() }
+        board.writeObjects([URL(fileURLWithPath: "/tmp/TopLet-drag-test.pdf") as NSURL])
+        let drag = TestDrag(board: board)
+        precondition(target.draggingEntered(drag) == .copy)
+        target.draggingExited(drag)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.4))
+        precondition(endings.isEmpty, "Holding the drag must preserve re-entry")
+        pressed = false
+        RunLoop.main.run(until: Date().addingTimeInterval(0.6))
+        precondition(endings == [false] && target.ignoresMouseEvents, "A missing native end must release the destination")
+        pressed = true
+        drag.draggingSequenceNumber += 1
+        precondition(target.draggingEntered(drag) == .copy && target.performDragOperation(drag))
+        precondition(endings == [false, true] && target.ignoresMouseEvents)
+        print("PASS: lost end after leaving the AirDrop target releases input and the next file can drop immediately")
     }
 
     // A successfully installed global monitor is intentionally silent. Native

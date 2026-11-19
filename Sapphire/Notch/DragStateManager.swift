@@ -36,13 +36,9 @@ enum FileDragPasteboard {
     }
 
     static func containsFiles(_ pasteboard: NSPasteboard) -> Bool {
-        if pasteboard.canReadObject(
-            forClasses: [NSURL.self],
-            options: [.urlReadingFileURLsOnly: true]
-        ) {
-            return true
-        }
-        return !(legacyFilePaths(from: pasteboard)?.isEmpty ?? true)
+        // A drag source may provide data lazily. Inspect its types while hovering
+        // and request file paths only when a destination actually takes the drop.
+        pasteboard.availableType(from: [.fileURL, legacyFilenamesType]) != nil
     }
 
     static func droppedURLs(from pasteboard: NSPasteboard) -> [URL] {

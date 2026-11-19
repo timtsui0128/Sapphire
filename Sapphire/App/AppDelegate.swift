@@ -398,6 +398,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     private var isLaunchpadSetupPending = false
     private lazy var launchpadGestureMonitor: LaunchpadGestureMonitor = .shared
 
+    private var isFirstLaunchAtLoginCheck = true
     private var statusItem: NSStatusItem?
     private var networkMonitor: NWPathMonitor?
     private var previouslyFrontmostApp: NSRunningApplication?
@@ -599,8 +600,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         settingsModel.$settings
             .map(\.launchAtLogin)
             .removeDuplicates()
-            .sink { isOn in
-                DispatchQueue.global(qos: .utility).async { Self.toggleLaunchAtLogin(isOn: isOn) }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isOn in
+                guard let self else { return }
+                let isUserChange = !self.isFirstLaunchAtLoginCheck
+                self.isFirstLaunchAtLoginCheck = false
+                LaunchAtLoginReconciler.reconcile(wanted: isOn, isUserChange: isUserChange) { adopted in
+                    guard self.settingsModel.current.launchAtLogin == isOn else { return }
+                    Self.adoptLaunchAtLogin(adopted)
+                }
             }
             .store(in: &cancellables)
 
@@ -2360,18 +2368,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     }
 
     // MARK: - Launch at Login
-
-    private nonisolated static let launchAtLoginFirstCheck = OSAllocatedUnfairLock(initialState: true)
-
-    private nonisolated static func toggleLaunchAtLogin(isOn: Bool) {
-        let isLaunchCheck = launchAtLoginFirstCheck.withLock { first in
-            defer { first = false }
-            return first
-        }
-        LaunchAtLoginReconciler.reconcile(wanted: isOn, isUserChange: !isLaunchCheck) { adopted in
-            adoptLaunchAtLogin(adopted)
-        }
-    }
 
     @MainActor
     private static func adoptLaunchAtLogin(_ isOn: Bool) {

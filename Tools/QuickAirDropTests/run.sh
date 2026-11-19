@@ -44,6 +44,7 @@ xcrun swiftc -swift-version 5 -parse-as-library \
   "$REPO_ROOT/Tools/QuickAirDropTests/AlertFixture.swift" \
   "$CHECK_ROOT/ProductionTopDrop.swift" \
   "$CHECK_ROOT/ProductionDropCard.swift" \
+  "$REPO_ROOT/Tools/QuickAirDropTests/TestDrag.swift" \
   "$REPO_ROOT/Tools/QuickAirDropTests/TopDropChecks.swift" \
   "$REPO_ROOT/Tools/QuickAirDropTests/ClipboardDropChecks.swift" \
   "$REPO_ROOT/Tools/QuickAirDropTests/QuickAirDropChecks.swift" \

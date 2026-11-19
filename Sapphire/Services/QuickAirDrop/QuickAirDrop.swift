@@ -20,7 +20,13 @@ private final class SystemAirDropSession: NSObject, AirDropSharingSession, NSSha
     func canShare(_ items: [Any]) -> Bool { service.canPerform(withItems: items) }
     func present(_ items: [Any], completion: @escaping (Bool, Error?) -> Void) {
         self.completion = completion
-        service.perform(withItems: items)
+        // Let the native drag tracking loop unwind before opening the device chooser.
+        RunLoop.main.perform(inModes: [.default]) { [self] in
+            MainActor.assumeIsolated {
+                guard !SessionPrivacyState.shouldSuppressUI() else { finish(false, nil); return }
+                service.perform(withItems: items)
+            }
+        }
     }
     func sharingService(_ sharingService: NSSharingService, didShareItems items: [Any]) { finish(true, nil) }
     func sharingService(_ sharingService: NSSharingService, didFailToShareItems items: [Any], error: Error) { finish(false, error) }

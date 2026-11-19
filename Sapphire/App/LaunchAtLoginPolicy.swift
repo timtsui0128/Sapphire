@@ -4,6 +4,7 @@
 //
 //  Created by Shariq Charolia on 2026-10-08
 
+import Combine
 import Foundation
 import ServiceManagement
 
@@ -53,11 +54,25 @@ enum LaunchAtLoginPolicy {
     }
 }
 
+@MainActor
+final class LaunchAtLoginStatus: ObservableObject {
+    static let shared = LaunchAtLoginStatus()
+    @Published private(set) var state = LaunchAtLoginPolicy.ServiceState(SMAppService.mainApp.status)
+    @Published var errorMessage: String?
+
+    func refresh() {
+        state = .init(SMAppService.mainApp.status)
+    }
+}
+
 enum LaunchAtLoginReconciler {
+    @MainActor private static var generation: UInt64 = 0
     private static let lastAppliedKey = "launchAtLoginLastApplied"
     private static let queue = DispatchQueue(label: "com.sapphire.launch-at-login", qos: .utility)
 
-    static func reconcile(wanted: Bool, isUserChange: Bool, adopt: @escaping @MainActor (Bool) -> Void) {
+    @MainActor static func reconcile(wanted: Bool, isUserChange: Bool, adopt: @escaping @MainActor (Bool) -> Void) {
+        generation &+= 1
+        let request = generation
         let onboardingComplete = !OnboardingLaunchPolicy.shouldShowOnboarding
         queue.async {
             let service = SMAppService.mainApp
@@ -70,6 +85,8 @@ enum LaunchAtLoginReconciler {
                 isUserChange: isUserChange,
                 onboardingComplete: onboardingComplete
             )
+            var adopted: Bool?
+            var failure: String?
             do {
                 switch action {
                 case .none:
@@ -82,10 +99,20 @@ enum LaunchAtLoginReconciler {
                     defaults.set(false, forKey: lastAppliedKey)
                 case .adoptSystemState(let isOn):
                     defaults.set(isOn, forKey: lastAppliedKey)
-                    DispatchQueue.main.async { MainActor.assumeIsolated { adopt(isOn) } }
+                    adopted = isOn
                 }
             } catch {
-                print("[LaunchAtLogin] Failed to update launch at login status: \(error)")
+                failure = error.localizedDescription
+                adopted = LaunchAtLoginPolicy.ServiceState(service.status).isOn
+            }
+            DispatchQueue.main.async { [adopted, failure] in
+                guard generation == request else { return }
+                let status = LaunchAtLoginStatus.shared
+                status.refresh()
+                if failure != nil || action == .register || action == .unregister {
+                    status.errorMessage = failure
+                }
+                if let adopted { adopt(adopted) }
             }
         }
     }

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import ServiceManagement
 import Charts
 import CoreBluetooth
 import UniformTypeIdentifiers
@@ -1600,6 +1601,34 @@ private struct PieSlicePath: Shape {
     }
 }
 
+private struct LaunchAtLoginSettingsCard: View {
+    @EditingSettings private var settings: SettingsEditingSession
+    @ObservedObject private var status = LaunchAtLoginStatus.shared
+
+    var body: some View {
+        SettingsCard(title: "Startup") {
+            ToggleRow(title: "Launch at Login", description: "Start TopLet automatically when you log in to your Mac.", isOn: $settings.settings.launchAtLogin)
+            if status.state == .requiresApproval || status.errorMessage != nil {
+                HStack {
+                    if status.state == .requiresApproval {
+                        Text("Login Items approval required")
+                    } else if let message = status.errorMessage {
+                        Text(verbatim: message)
+                    }
+                    Spacer()
+                    Button("Open Login Items") { SMAppService.openSystemSettingsLoginItems() }
+                }
+                .font(.callout)
+                .padding([.horizontal, .bottom])
+            }
+        }
+        .onAppear { status.refresh() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            status.refresh()
+        }
+    }
+}
+
 struct GeneralSettingsView: View {
     @EditingSettings var settings: SettingsEditingSession
     @State private var showingCustomConfig = false
@@ -1611,6 +1640,8 @@ struct GeneralSettingsView: View {
                 Text("General")
                     .font(.largeTitle.bold())
                     .padding(.bottom)
+
+                LaunchAtLoginSettingsCard()
 
                 AppLanguageSettingsSection()
 
@@ -1651,9 +1682,6 @@ struct GeneralSettingsView: View {
             }.modifier(SettingsContainerModifier())
 
                 SettingsCard(title: "System") {
-
-                    ToggleRow(title: "Launch at Login", description: "Start TopLet automatically when you log in to your Mac.", isOn: $settings.settings.launchAtLogin)
-                    Divider().padding(.leading, 20)
 
                     ToggleRow(title: "Enable Haptic Feedback", description: "Provide tactile feedback for certain interactions.", isOn: $settings.settings.hapticFeedbackEnabled)
                     Divider().padding(.leading, 20)

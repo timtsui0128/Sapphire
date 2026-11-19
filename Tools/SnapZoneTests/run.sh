@@ -45,6 +45,7 @@ xcrun swiftc -swift-version 5 -parse-as-library \
   "$REPO_ROOT/Sapphire/Services/Zones/SnapActivationRegion.swift" \
   "$REPO_ROOT/Sapphire/Services/QuickAirDrop/AirDropDragPreferences.swift" \
   "$CHECK_ROOT/FileDragPasteboard.swift" \
+  "$REPO_ROOT/Tools/QuickAirDropTests/TestDrag.swift" \
   "$REPO_ROOT/Tools/SnapZoneTests/HandoffWindowChecks.swift" \
   -o "$CHECK_ROOT/handoff-window-checks"
 "$CHECK_ROOT/handoff-window-checks" "$REPO_ROOT/output/snap-visible-target/renders" "$REPO_ROOT/Sapphire/Resources/Localizable.xcstrings"

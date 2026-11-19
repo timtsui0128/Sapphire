@@ -1,26 +1,5 @@
 import AppKit
 
-@MainActor private final class TestDrag: NSObject, NSDraggingInfo {
-    var draggingDestinationWindow: NSWindow?
-    var draggingSourceOperationMask: NSDragOperation = .copy
-    var draggingLocation = NSPoint(x: 40, y: 40)
-    var draggedImageLocation = NSPoint.zero
-    nonisolated var draggedImage: NSImage? { nil }
-    let draggingPasteboard: NSPasteboard
-    var draggingSource: Any? { nil }
-    var draggingSequenceNumber = 73
-    var draggingFormation: NSDraggingFormation = .none
-    var animatesToDestination = false
-    var numberOfValidItemsForDrop = 1
-    var springLoadingHighlight: NSSpringLoadingHighlight = .none
-    init(board: NSPasteboard) { draggingPasteboard = board }
-    func slideDraggedImage(to screenPoint: NSPoint) {}
-    nonisolated override func namesOfPromisedFilesDropped(atDestination dropDestination: URL) -> [String]? { nil }
-    func resetSpringLoading() {}
-    func enumerateDraggingItems(options: NSDraggingItemEnumerationOptions, for view: NSView?, classes classArray: [AnyClass],
-                                searchOptions: [NSPasteboard.ReadingOptionKey: Any], using block: (NSDraggingItem, Int, UnsafeMutablePointer<ObjCBool>) -> Void) {}
-}
-
 @MainActor func checkTopDrop() throws {
     func check(_ condition: Bool, _ message: String) throws {
         if !condition { throw NSError(domain: "TopDrop", code: 1, userInfo: [NSLocalizedDescriptionKey: message]) }
@@ -64,6 +43,8 @@ import AppKit
     try check(probe.draggingEntered(drag) == .copy, "PDF and image files must activate the top destination")
     try check(entered == 1 && drops == 0, "Hover must reveal the destination without sharing")
     try check(probe.prepareForDragOperation(drag) && probe.performDragOperation(drag), "Native release must pass the full payload and sequence")
+    try check(finished == [true] && probe.ignoresMouseEvents, "A successful drop must release input before the picker and without a final callback")
+    try check(!probe.performDragOperation(drag), "A completed drop must not be submitted twice")
     probe.draggingEnded(drag)
     probe.concludeDragOperation(drag)
     try check(drops == 1 && finished == [true] && probe.ignoresMouseEvents, "Drop completion must run once and release mouse interception")
@@ -72,6 +53,13 @@ import AppKit
     probe.draggingExited(drag)
     probe.draggingEnded(drag)
     try check(drops == 1 && finished == [true, false], "Canceling a drag must never share")
+    let nextDrag = TestDrag(board: board)
+    nextDrag.draggingSequenceNumber = 74
+    try check(probe.draggingEntered(nextDrag) == .copy, "The next drag should acquire the destination")
+    probe.draggingEnded(drag)
+    probe.concludeDragOperation(nil)
+    try check(probe.prepareForDragOperation(nextDrag), "Late callbacks from the old sequence must not cancel the next drag")
+    try check(!probe.performDragOperation(nextDrag) && probe.ignoresMouseEvents, "A rejected drop must also release input immediately")
     drag.draggingSourceOperationMask = .move
     try check(probe.draggingEntered(drag).isEmpty, "Move-only drag must not be accepted as a transfer")
     print("PASS: top drag preferences, native PDF/image payload and sequence, hover-only feedback, cancellation and mouse pass-through")

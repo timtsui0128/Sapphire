@@ -53805,6 +53805,23 @@
         }
       }
     },
+    "Startup": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Startup"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启动"
+          }
+        }
+      }
+    },
     "Start TopLet automatically when you log in to your Mac.": {
       "extractionState": "manual",
       "localizations": {
