@@ -47,8 +47,8 @@ Version 0.1.8 introduces the **TopLet** name and `TopLet.app` download. The repo
 
 ## Current version and supported scope
 
-- The current source build is labeled **TopLet 28** (version **0.1.18**, build **28**). This personal test release uses a persistent Apple Development signing identity; it is not Apple notarized. The first switch from ad-hoc signing may require one new window-control authorization.
-- Version 0.1.18 introduces TopLet’s monochrome overlapping-window app icon. [Release notes](docs/releases/0.1.18.md).
+- The current source build is labeled **TopLet 29** (version **0.1.19**, build **29**). This personal test release uses a persistent Apple Development signing identity; it is not Apple notarized. The first switch from ad-hoc signing may require one new window-control authorization.
+- Version 0.1.19 fixes title-bar dragging after switching from TopLet to another app. [Release notes](docs/releases/0.1.19.md).
 - The default development branch is **`codex/personal-notched-tools`**. `main` retains the upstream state from the fork; this branch is based on the commit above and has not merged the later upstream macOS 27 charging-limit changes.
 - The minimum deployment target is macOS 14. Complete builds and local packages have been verified on Apple Silicon (arm64); Intel hardware and other macOS versions have not been fully validated.
 - Upstream paid modules whose source is not public continue to use public placeholders or compatibility implementations. The independently implemented Sports/Finance features do not require those private modules and do not connect or sync with Apple Sports/Stocks accounts.

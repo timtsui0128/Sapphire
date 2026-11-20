@@ -1969,11 +1969,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             previous.isFocusable = false
         }
         focusedNotchWindow = window
-        if previouslyFrontmostApp == nil {
-            let currentFrontmost = NSWorkspace.shared.frontmostApplication
-            if currentFrontmost?.bundleIdentifier != Bundle.main.bundleIdentifier {
-                previouslyFrontmostApp = currentFrontmost
-            }
+        if let current = NSWorkspace.shared.frontmostApplication,
+           current.processIdentifier != ProcessInfo.processInfo.processIdentifier {
+            previouslyFrontmostApp = current
         }
         window.isFocusable = true
         if !NSApp.isActive { didActivateForNotchFocus = true }
@@ -1995,7 +1993,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         if NSApp.activationPolicy() != .accessory {
             NSApp.setActivationPolicy(.accessory)
         }
-        if restorePreviousApplication {
+        // A delayed collapse must respect a user's switch to another app.
+        if restorePreviousApplication, NSApp.isActive,
+           NSWorkspace.shared.frontmostApplication?.processIdentifier == ProcessInfo.processInfo.processIdentifier {
             let handedBack = previouslyFrontmostApp?.activate(options: [.activateIgnoringOtherApps]) ?? false
             if didActivateForNotchFocus, !handedBack, NSApp.isActive {
                 NSApp.deactivate()

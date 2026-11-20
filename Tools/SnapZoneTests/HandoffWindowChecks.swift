@@ -53,7 +53,7 @@ enum L10n {
             fatalError("Missing production hover probe")
         }
         probe.setArmedForMouseSequence(true)
-        precondition(!probe.ignoresMouseEvents)
+        precondition(probe.ignoresMouseEvents)
         monitor.setSystemWindowDragSuppressed(true)
         precondition(!probe.isVisible && probe.ignoresMouseEvents && !probe.isArmedForMouseSequence)
         // SwiftUI can continue publishing animated geometry during collapse.
@@ -69,11 +69,61 @@ enum L10n {
         monitor.update(hoverRect: rect, pointerIsInside: false)
         precondition(monitor.isHoverProbeListeningForPointer, "Restart retained stale handoff state")
         monitor.stop()
+        titleBarAfterSwitch(host: host)
         missedFileDragEnd(host: host)
         silentWindowDragDelivery(host: host)
         visibleTarget(host: host)
         host.close()
         print("PASS: native hover probe disarms and parks during handoff, ignores stale geometry, resumes and restarts cleanly")
+    }
+
+    @MainActor static func titleBarAfterSwitch(host: NSWindow) {
+        let rect = CGRect(x: 270, y: 250, width: 260, height: 28)
+        let island = host.convertToScreen(rect)
+        let titleBar = CGPoint(x: island.midX, y: island.minY - 22)
+        var point = titleBar
+        var pressed = false
+        var inside = false
+        var crossings: [Bool] = []
+        var dragCallback: ((NSEvent) -> Void)?
+        var releases = 0
+        let monitor = NotchHoverMonitor(mouseLocation: { point }, isPrimaryButtonPressed: { pressed },
+            installGlobalDragMonitor: { dragCallback = $0; return NSObject() },
+            removeGlobalDragMonitor: { _ in dragCallback = nil })
+        monitor.start(window: host, handlers: NotchHoverMonitorHandlers(onPointerEvent: {
+            let current = island.contains(point)
+            if inside != current { crossings.append(current) }
+            inside = current
+            monitor.update(hoverRect: rect, pointerIsInside: inside)
+        }, onMouseDrag: { _, _ in }, onMouseDragEnded: { _ in releases += 1 },
+            onFileDrag: { _, _ in }, onFileDragEnded: { _, _ in }, onFileDrop: { _, _, _ in false }))
+        defer { monitor.stop() }
+        monitor.update(hoverRect: rect, pointerIsInside: false)
+        let probe = host.childWindows!.compactMap { $0 as? HoverProbeWindow }.first!
+        for expectedReleases in 1...3 {
+            // Enter with the button held in another app. Deliver motion but omit
+            // the mouse-up, as can happen when switching the foreground app.
+            pressed = true
+            point = CGPoint(x: island.midX, y: island.midY)
+            RunLoop.main.run(until: Date().addingTimeInterval(0.15))
+            precondition(inside && dragCallback != nil && probe.ignoresMouseEvents)
+            let drag = NSEvent.mouseEvent(with: .leftMouseDragged, location: host.convertPoint(fromScreen: point),
+                                          modifierFlags: [], timestamp: 0, windowNumber: host.windowNumber,
+                                          context: nil, eventNumber: 1, clickCount: 1, pressure: 1)!
+            dragCallback!(drag)
+            precondition(probe.isArmedForMouseSequence && probe.ignoresMouseEvents)
+            precondition(probe.frame == island && !probe.frame.contains(titleBar))
+            // On the final pass AX takes over a drag already seen by the probe.
+            // Both observers must agree on one release.
+            if expectedReleases == 3 { monitor.setExternalMouseDragActive(true) }
+            point = titleBar
+            pressed = false
+            RunLoop.main.run(until: Date().addingTimeInterval(0.25))
+            precondition(!inside && !probe.isArmedForMouseSequence && probe.ignoresMouseEvents)
+            precondition(dragCallback == nil && !monitor.hasActiveMouseEventMonitors && releases == expectedReleases)
+        }
+        precondition(crossings == [true, false, true, false, true, false])
+        print("PASS: title bars remain click-through across missing releases, repeated drags and AX takeover")
     }
 
     @MainActor static func missedFileDragEnd(host: NSWindow) {
@@ -92,6 +142,7 @@ enum L10n {
         board.writeObjects([URL(fileURLWithPath: "/tmp/TopLet-drag-test.pdf") as NSURL])
         let drag = TestDrag(board: board)
         precondition(target.draggingEntered(drag) == .copy)
+        precondition(!target.ignoresMouseEvents, "Native file drops must receive the session")
         target.draggingExited(drag)
         RunLoop.main.run(until: Date().addingTimeInterval(0.4))
         precondition(endings.isEmpty, "Holding the drag must preserve re-entry")
